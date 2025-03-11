@@ -345,10 +345,10 @@
 .bottomSlide {
   width: 40%;
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   background-color: #fff;
   mix-blend-mode: difference;
-  height: 2px;
+  height: 4px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 2px;
@@ -718,4 +718,11 @@
   position: relative;
   transition: 0.3s;
   font-weight: 400;
+}
+.menuSection{
+  position: absolute;
+  bottom: 0;
+  width: 80%;
+  height: 100px;
+  background-color: #000;
 }
