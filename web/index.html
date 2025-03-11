@@ -1,0 +1,215 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="mobile" >
+      <div class="frame">
+        <div class="subDiv" id="subDiv">
+          <div class="notch">
+            <p id="clock"></p>
+            <img src="/web/images/notch.png" alt="" />
+            <div>
+              <div id="battery-container">
+                <div id="battery-level"></div>
+                <div id="charging-icon">⚡</div>
+              </div>
+            </div>
+          </div>
+          <div class="apps">
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+            <button>hi</button>
+          </div>
+          <div class="iphone-lock-screen">
+            <div class="time" >12:45</div>
+            <div class="date">Friday, March 8</div>
+            <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
+          </div>
+          <div class="bottom-nav" id="b-nav">
+            <button><img src="./images/phone-icon.png" alt="" width="40px"></button>
+            <button><img src="./images/safari.png" alt="" width="40px"></button>
+            <button><img src="./images/message.png" alt="" width="40px"></button>
+            <button><img src="./images/music.png" alt="" width="40px"></button>
+            
+          </div>
+          <div class="bottomSlide"></div>
+        </div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iPhone Simulation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="mobile">
+      <div class="frame">
+        <div class="subDiv" id="subDiv">
+          <div class="notch">
+            <p id="clock"></p>
+            <img src="/web/images/notch.png" alt="" />
+            <div>
+              <div class="mobile-signal">
+                <div class="signal-bars">
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </div>
+                <span class="carrier">5G</span>
+              </div>
+              <div id="battery-container">
+                <div id="battery-level"></div>
+                <div id="charging-icon">⚡</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Startup Screen -->
+          <div class="startup-screen" id="startup-screen">
+            <div class="apple-logo">
+              <img src="/web/images/logoo.png" alt="Apple Logo" />
+            </div>
+            <div class="loader-container">
+              <div class="loader"></div>
+            </div>
+          </div>
+
+          <!-- Language Selection Screen -->
+          <div class="language-selection" id="language-selection">
+            <h1>Welcome</h1>
+            <p>Choose your language</p>
+            <div class="language-options">
+              <button class="language-btn" data-lang="en">English</button>
+              <button class="language-btn" data-lang="es">Español</button>
+              <button class="language-btn" data-lang="fr">Français</button>
+              <button class="language-btn" data-lang="de">Deutsch</button>
+              <button class="language-btn" data-lang="zh">中文</button>
+            </div>
+            <button class="continue-btn">Continue</button>
+          </div>
+          <div class="language-selection" id="greeting">
+            <h1 id="greetText">Hello !</h1>
+          </div>
+
+          <div class="apps">
+            <div class="apps-wrapper">
+              <div class="app-screen">
+                <div class="app-ic" draggable="true" data-app="phone">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/phone-icon.png" alt="Phone" />
+                  </button>
+                  <p>Phone</p>
+                </div>
+
+                <div class="app-ic" draggable="true" data-app="safari">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/safari.png" alt="Safari" />
+                  </button>
+                  <p>Safari</p>
+                </div>
+
+                <div class="app-ic" draggable="true" data-app="messages">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/message.png" alt="Messages" />
+                  </button>
+                  <p>Messages</p>
+                </div>
+
+                <div class="app-ic" draggable="true" data-app="music">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/music.png" alt="Music" />
+                  </button>
+                  <p>Music</p>
+                </div>
+
+                <div class="app-ic" draggable="true" data-app="maps">
+                  <span class="delete-icon">×</span>
+                  <button><img src="/web/images/maps.png" alt="Maps" /></button>
+                  <p>Maps</p>
+                </div>
+                <div class="app-ic" draggable="true" data-app="snapchat">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/snapchat.png" alt="Maps" />
+                  </button>
+                  <p>Snapchat</p>
+                </div>
+                <div class="app-ic" draggable="true" data-app="instagram">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/instagram.png" alt="Maps" />
+                  </button>
+                  <p>Instagram</p>
+                </div>
+              </div>
+
+              <div class="app-screen">
+                <!-- Second screen for dragged apps -->
+              </div>
+            </div>
+
+            <div class="screen-indicators">
+              <div class="screen-indicator active"></div>
+              <div class="screen-indicator"></div>
+            </div>
+          </div>
+
+          <!-- App Container -->
+          <div class="app-container">
+            <div class="app-header">
+              <button class="app-back-button">←</button>
+              <h1 class="app-title">App Name</h1>
+            </div>
+            <div class="app-content">
+              <!-- App specific content will be loaded here -->
+            </div>
+          </div>
+
+          <div class="iphone-lock-screen">
+            <div class="time">12:45</div>
+            <div class="date">Friday, March 8</div>
+            <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
+          </div>
+          <div class="bottom-nav" id="b-nav">
+            <button>
+              <img src="./images/phone-icon.png" alt="" width="40px" />
+            </button>
+            <button>
+              <img src="./images/safari.png" alt="" width="40px" />
+            </button>
+            <button>
+              <img src="./images/message.png" alt="" width="40px" />
+            </button>
+            <button>
+              <img src="./images/music.png" alt="" width="40px" />
+            </button>
+          </div>
+          <div class="bottomSlide"></div>
+        </div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

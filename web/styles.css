@@ -1,0 +1,721 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+*::selection {
+  background-color: transparent;
+}
+@font-face {
+  font-family: p-r;
+  src: url("/web/fonts/Roboto-Regular.ttf");
+}
+@font-face {
+  font-family: p-s;
+  src: url("/web/fonts/Roboto-Regular.ttf");
+}
+@font-face {
+  font-family: p-b;
+  src: url("/web/fonts/Roboto-Regular.ttf");
+}
+
+.mobile {
+  z-index: 11111;
+  position: fixed;
+  bottom: 70px;
+  right: 40px;
+}
+
+.frame {
+  height: 810px;
+  position: relative;
+  overflow: hidden;
+  width: 300px;
+  height: 605px;
+  padding: 2px 7px;
+  background-color: transparent;
+}
+.frame::before {
+  content: "";
+  background-image: url("./images/iphone16pro.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 99%;
+  height: 100%;
+}
+.subDiv {
+  border-radius: 40px;
+  height: 601px;
+  background-color: rgb(255, 255, 255);
+  background-image: url("/web/images/iphone-wall-paper.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow: hidden;
+  position: relative;
+  transition: 0.3s;
+  width: 99%;
+}
+
+.subDiv.active::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(195, 195, 195, 0.24); /* Transparent overlay */
+  backdrop-filter: blur(10px); /* Ensures blur doesn't affect child elements */
+  z-index: 0;
+  border-radius: 40px;
+  transition: 0.3s;
+}
+
+.subDiv * {
+  position: relative;
+  z-index: 1; /* Ensure child elements stay above the blurred overlay */
+}
+
+/* Startup Screen Styles */
+.startup-screen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 1s ease;
+}
+
+.apple-logo {
+  margin-bottom: 50px;
+}
+
+.apple-logo img {
+  width: 60px;
+  height: auto;
+}
+
+.loader-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.loader {
+  width: 60%;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loader::after {
+  content: "";
+  position: absolute;
+  width: 30%;
+  height: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+  animation: loading 1.5s infinite ease-in-out;
+}
+
+@keyframes loading {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Language Selection Screen */
+.language-selection {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.language-selection h1 {
+  font-family: p-b;
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.language-selection p {
+  font-family: p-r;
+  font-size: 16px;
+  margin-bottom: 30px;
+  color: #666;
+}
+
+.language-options {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.language-btn {
+  padding: 12px;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  font-family: p-r;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.language-btn:hover,
+.language-btn.selected {
+  background-color: #e1e1e1;
+}
+
+.continue-btn {
+  padding: 12px 30px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: p-r;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.continue-btn:hover {
+  background-color: #005bbf;
+}
+
+#clock {
+  font-family: "p-b", sans-serif; /* Ensure the font is properly defined */
+  font-weight: 800;
+  font-size: 12px;
+  mix-blend-mode: difference;
+  position: relative;
+  top: 0;
+}
+.notch {
+  padding: 5px 19px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  width: 90%;
+  margin-top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11111111;
+  color: #fff;
+}
+
+.notch img {
+  width: 80px;
+  position: fixed;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Mobile Signal Styles */
+.mobile-signal {
+  position: absolute;
+  top: -4px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.signal-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 10px;
+}
+
+.signal-bars .bar {
+  width: 3px;
+  background-color: #fff;
+  border-radius: 1px;
+  mix-blend-mode: difference;
+}
+
+.signal-bars .bar:nth-child(1) {
+  height: 25%;
+}
+.signal-bars .bar:nth-child(2) {
+  height: 50%;
+}
+.signal-bars .bar:nth-child(3) {
+  height: 75%;
+}
+.signal-bars .bar:nth-child(4) {
+  height: 100%;
+}
+
+.carrier {
+  font-family: p-b;
+  font-size: 10px;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+/* Battery Container (updated position) */
+#battery-container {
+  width: 30px;
+  height: 12px;
+  border: 1px solid #c3c3c3;
+  border-radius: 5px;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: black;
+  padding: 2px;
+  box-shadow: inset 0px 0px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Battery Level (Green Charging Effect) */
+#battery-level {
+  height: 100%;
+  width: 50%;
+  background: #fcff63; /* Apple-style Green */
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+/* Charging Icon ⚡ (Blinking Animation) */
+#charging-icon {
+  display: none;
+  color: yellow;
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: charging-blink 1s infinite alternate;
+}
+
+/* Charging Animation */
+@keyframes charging-blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* Battery Tip (iPhone Style Small End Tip) */
+#battery-tip {
+  width: 4px;
+  height: 8px;
+  background: white;
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+
+.bottomSlide {
+  width: 40%;
+  position: absolute;
+  bottom: 10px;
+  background-color: #fff;
+  mix-blend-mode: difference;
+  height: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+.iphone-lock-screen {
+  height: 100%;
+  border-radius: 40px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px;
+  align-items: center;
+  color: white;
+  font-family: Arial, sans-serif;
+  z-index: 998;
+  transition: 0.5s;
+  background-color: transparent;
+  display: none; /* Initially hidden */
+}
+
+.time {
+  font-size: 60px;
+  font-weight: bold;
+  font-family: p-b;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.date {
+  font-size: 20px;
+  margin-top: 5px;
+  font-family: p-s;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.swipe-up {
+  font-size: 18px;
+  position: absolute;
+  bottom: 20px;
+  opacity: 0.7;
+  color: #fff;
+  mix-blend-mode: difference;
+  font-family: p-r;
+  cursor: pointer;
+}
+.bottom-nav {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  width: 90%;
+  background: #242424;
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 30px;
+  display: none;
+}
+
+.bottom-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+.apps {
+  margin-top: 70px;
+  position: absolute;
+  width: 100%;
+  height: 400px;
+  left: 0;
+  display: none;
+  overflow: hidden;
+  z-index: 111;
+  touch-action: none;
+}
+
+.apps-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  position: relative;
+}
+
+.apps-wrapper.sliding {
+  transition: none;
+}
+
+.app-screen {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 15px;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.app-screen.active {
+  opacity: 1;
+}
+
+.app-ic {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease-out;
+  touch-action: none;
+  cursor: grab;
+  z-index: 1;
+  width: 60px; /* Slightly reduced size */
+  height: 80px; /* Slightly reduced size */
+}
+
+.app-ic.dragging {
+  opacity: 0.9;
+  transform: scale(1.1) rotate(4deg);
+  z-index: 1000;
+  cursor: grabbing;
+  transition: none;
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.app-ic button {
+  width: 50px; /* Slightly reduced size */
+  height: 50px; /* Slightly reduced size */
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  background: none;
+  transition: transform 0.2s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.app-ic button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-ic p {
+  font-size: 12px;
+  color: white;
+  font-family: p-r;
+  text-align: center;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* Edit Mode Styles */
+.edit-mode .app-ic {
+  animation: wiggle 0.15s infinite alternate ease-in-out;
+}
+
+.edit-mode .app-ic.dragging {
+  animation: none;
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Delete Icon */
+.delete-icon {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 20px;
+  height: 20px;
+  background: #ff3b30;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.edit-mode .delete-icon {
+  display: flex;
+}
+
+/* Delete Animation */
+.delete-animation {
+  animation: delete-app 0.3s ease-out forwards;
+}
+
+@keyframes delete-app {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* Screen Indicators */
+.screen-indicators {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 1000;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.screen-indicators.hidden {
+  opacity: 0;
+}
+
+.screen-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.screen-indicator:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.screen-indicator.active {
+  background: rgba(255, 255, 255, 1);
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* App Opening Animation and Container */
+.app-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: 2000;
+  display: none;
+  flex-direction: column;
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+.app-container.opening {
+  display: flex;
+  animation: openApp 0.3s ease-out forwards;
+}
+
+.app-container.closing {
+  animation: closeApp 0.3s ease-out forwards;
+}
+
+@keyframes openApp {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes closeApp {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+.app-header {
+  height: 70px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  padding-top: 30px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.app-back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #007aff;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.app-title {
+  font-family: p-b;
+  font-size: 17px;
+  color: #000;
+  margin-left: 10px;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f2f2f7;
+}
+
+/* Ensure other elements don't overlap */
+.app-container {
+  z-index: 2000;
+}
+
+.apps {
+  z-index: 111;
+}
+
+.startup-screen {
+  z-index: 1000;
+}
+
+#greeting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#greetText {
+  font-size: 25px;
+  font-family: p-r;
+  color: #000;
+  position: relative;
+  transition: 0.3s;
+  font-weight: 400;
+}
