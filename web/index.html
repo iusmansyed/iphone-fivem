@@ -1,55 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="mobile" >
-      <div class="frame">
-        <div class="subDiv" id="subDiv">
-          <div class="notch">
-            <p id="clock"></p>
-            <img src="/web/images/notch.png" alt="" />
-            <div>
-              <div id="battery-container">
-                <div id="battery-level"></div>
-                <div id="charging-icon">⚡</div>
-              </div>
-            </div>
-          </div>
-          <div class="apps">
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-            <button>hi</button>
-          </div>
-          <div class="iphone-lock-screen">
-            <div class="time" >12:45</div>
-            <div class="date">Friday, March 8</div>
-            <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
-          </div>
-          <div class="bottom-nav" id="b-nav">
-            <button><img src="./images/phone-icon.png" alt="" width="40px"></button>
-            <button><img src="./images/safari.png" alt="" width="40px"></button>
-            <button><img src="./images/message.png" alt="" width="40px"></button>
-            <button><img src="./images/music.png" alt="" width="40px"></button>
-            
-          </div>
-          <div class="bottomSlide"></div>
-        </div>
-      </div>
-    </div>
-    <script src="app.js"></script>
-  </body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -57,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iPhone Simulation</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="./css/all.min.css">
   </head>
   <body>
     <div class="mobile">
@@ -65,8 +14,8 @@
           <div class="notch">
             <p id="clock"></p>
             <img src="/web/images/notch.png" alt="" />
-            <div>
-              <div class="mobile-signal">
+            <div id="mobile-signal">
+              <div class="mobile-signal" >
                 <div class="signal-bars">
                   <span class="bar"></span>
                   <span class="bar"></span>
@@ -81,8 +30,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Startup Screen -->
           <div class="startup-screen" id="startup-screen">
             <div class="apple-logo">
               <img src="/web/images/logoo.png" alt="Apple Logo" />
@@ -91,8 +38,6 @@
               <div class="loader"></div>
             </div>
           </div>
-
-          <!-- Language Selection Screen -->
           <div class="language-selection" id="language-selection">
             <h1>Welcome</h1>
             <p>Choose your language</p>
@@ -143,7 +88,7 @@
                   </button>
                   <p>Music</p>
                 </div>
-
+            
                 <div class="app-ic" draggable="true" data-app="maps">
                   <span class="delete-icon">×</span>
                   <button><img src="/web/images/maps.png" alt="Maps" /></button>
@@ -163,8 +108,15 @@
                   </button>
                   <p>Instagram</p>
                 </div>
+                <div class="app-ic" draggable="true" data-app="whatsapp">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/whatsapp.png" alt="Maps" />
+                  </button>
+                  <p>Whatsapp</p>
+                </div>
               </div>
-
+            
               <div class="app-screen">
                 <!-- Second screen for dragged apps -->
               </div>
@@ -178,12 +130,336 @@
 
           <!-- App Container -->
           <div class="app-container">
-            <div class="app-header">
+            <div class="app-header" id="hder">
               <button class="app-back-button">←</button>
               <h1 class="app-title">App Name</h1>
             </div>
             <div class="app-content">
-              <!-- App specific content will be loaded here -->
+              <div style="padding: 20px; display: none;" class="phones">
+                <div class="phone-section active-section" id="favSection">
+                  <div class="phone-tab">
+                      <ul>
+                          <li class="contact-item">⭐ John Doe</li>
+                          <li class="contact-item">⭐ Jane Smith</li>
+                      </ul>
+                  </div>
+              </div>
+          
+              <!-- Recents Page -->
+              <div class="phone-section" id="recentsSection">
+                  <div class="phone-tab">
+                      <ul>
+                          <li class="contact-item">📞 Alex - 5 min ago</li>
+                          <li class="contact-item">📞 Michael - 20 min ago</li>
+                      </ul>
+                  </div>
+              </div>
+          
+              <!-- Dial Pad Page -->
+              <div class="phone-section" id="dialSection">
+                <div class="num-type">
+                  <div class="display" id="dialDisplay">Enter Number</div>
+                  <span class="clear-btn" id="clearNumberBtn">X</span>
+                </div>
+                <div id="contactDropdown" class="dropdown hidden"></div> <!-- Dropdown for matches -->
+                <button id="saveNumberBtn" class="hidden">Save Number</button>
+                
+                <div class="dial-grid">
+                  <div class="dial-btn">1</div>
+                  <div class="dial-btn">2</div>
+                  <div class="dial-btn">3</div>
+                  <div class="dial-btn">4</div>
+                  <div class="dial-btn">5</div>
+                  <div class="dial-btn">6</div>
+                  <div class="dial-btn">7</div>
+                  <div class="dial-btn">8</div>
+                  <div class="dial-btn">9</div>
+                  <div class="dial-btn">*</div>
+                  <div class="dial-btn">0</div>
+                  <div class="dial-btn">#</div>
+                </div>
+                <div class="dial-btn call-button">
+                  <img src="/web/images/cl-btn.png" alt="" width="30px">
+                </div>
+              </div>
+              
+          
+              <!-- Bottom Navigation -->
+              <div class="bottom-menu">
+                  <div class="menu-item active-menu" onclick="switchTab('favSection', this)">Favorites</div>
+                  <div class="menu-item" onclick="switchTab('recentsSection', this)">Recents</div>
+                  <div class="menu-item" onclick="switchTab('dialSection', this)">Dial</div>
+              </div>
+              </div>
+              <div style="display: none;" class="safari">
+                <div class="safari-search-container">
+                  <div class="search-bar">
+                      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      <input type="text" id="searchInput" placeholder="Search">
+                      <svg id="clearIcon" class="clear-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                  </div>
+                  <div class="suggested-searches">
+                      <div class="suggested-searches-header">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="3" y1="9" x2="21" y2="9"></line>
+                              <line x1="9" y1="21" x2="9" y2="9"></line>
+                          </svg>
+                          <span>Suggested Searches</span>
+                      </div>
+                      <div class="suggested-search-items" id="suggestedSearches">
+                          <div class="suggested-search-item">Apple</div>
+                          <div class="suggested-search-item">MacBook Pro</div>
+                          <div class="suggested-search-item">iPhone 15</div>
+                          <div class="suggested-search-item">Safari Browser</div>
+                          <div class="suggested-search-item">WWDC 2024</div>
+                      </div>
+                  </div>
+              </div>
+              </div>
+              <div style="display: none;" class="messages">
+               <div id="messageList" class="chat-box">
+    <!-- Chat items will be inserted here dynamically -->
+</div>
+
+          
+              <!-- Chat Screen -->
+              <div id="chatScreen" class="chat-screen">
+                  <div class="chat-header">
+                      <button class="back-btn" onclick="closeChat()">⬅ <span id="chatName"></span></button>
+                      
+                  </div>
+                  <div class="chat-messages" id="phoneMessageList">
+                      <p class="chat-text">Hello! How can I help you?</p>
+                  </div>
+                  <div class="chat-input">
+                      <input type="text" id="messageInputPhone" placeholder="Type a message..." />
+                      <button id="sendMessageButton" onclick="sendMessageToServer()"><img src="./images/send.png" alt="" width="20px"></button>
+                  </div>
+              </div>
+                
+              </div>
+              <div style="display: none;" class="musics">
+                <div class="music-container-iphone">
+                  <div class="music-header">
+                      
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="1"></circle>
+                          <circle cx="12" cy="5" r="1"></circle>
+                          <circle cx="12" cy="19" r="1"></circle>
+                      </svg>
+                  </div>
+          
+                  <div class="music-album-art">
+                      <img id="albumArtwork" src="/api/placeholder/300/300" alt="Album Artwork">
+                  </div>
+          
+                  <div class="music-track-info">
+                      <div class="music-track-title" id="trackTitle">Bohemian Rhapsody</div>
+                      <div class="music-track-artist" id="trackArtist">Queen</div>
+                  </div>
+          
+                  <div class="music-progress">
+                      <div class="music-progress-bar">
+                          <div class="music-progress-filled"></div>
+                      </div>
+                      <div class="music-time">
+                          <span id="currentTime">2:35</span>
+                          <span id="totalTime">-1:24</span>
+                      </div>
+                  </div>
+          
+                  <div class="music-controls">
+                      <button class="music-btn" id="shuffleBtn">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4z"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                          </svg>
+                      </button>
+                      <button class="music-btn" id="prevBtn">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                              <line x1="5" y1="19" x2="5" y2="5"></line>
+                          </svg>
+                      </button>
+                      <button class="music-btn-play" id="playPauseBtn">
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                      </button>
+                      <button class="music-btn" id="nextBtn">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                              <line x1="19" y1="5" x2="19" y2="19"></line>
+                          </svg>
+                      </button>
+                      <button class="music-btn" id="repeatBtn">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M13 2v7h7"></path>
+                          </svg>
+                      </button>
+                  </div>
+              </div>
+              </div>
+              <div style=" display: none;" class="maps">
+                <div class="map-container-iphone">
+                  <div class="map-view" id="mapContainer">
+                      <div class="map-search-bar">
+                          <svg class="map-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="11" cy="11" r="8"></circle>
+                              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                          </svg>
+                          <input type="text" placeholder="Search for a location">
+                      </div>
+                      <div class="map-location-buttons">
+                          <button class="map-location-btn" id="currentLocationBtn">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                          </button>
+                          <button class="map-location-btn" id="directionsBtn">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 22l10-10-10-10"></path>
+                                  <path d="M2 12l10-10 10 10"></path>
+                              </svg>
+                          </button>
+                      </div>
+                      <div class="map-overlay"></div>
+                  </div>
+              </div>
+              </div>
+              <div style="display: none;" class="instagram">
+                <div class="insta-notch">
+                  <div class="notch-bk-btn">
+                    <button class="insta-back-button" >←</button>
+                  <h1 class="app-title">Instagram</h1>
+                  </div>
+                  <div onclick="switchInstaTab('chat-section', this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M4 2h16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2zm0 2v16l3-3h13V4H4zm3 6h10v2H7v-2zm0-4h10v2H7V6zm0 8h7v2H7v-2z"/>
+                    </svg>
+                </div>
+                </div>
+                <div class="instagram-story-section" id="story-section">
+                  <!-- Stories will be loaded here dynamically -->
+              </div>
+              
+              <div class="feed-section" id="feed-section">
+                  <!-- Feed posts will be loaded here dynamically -->
+              </div>
+              <div class="users-list-section" id="users-list" style="display: none;">
+                <h2 onclick="switchInstaTab('feed-section')">← Chats</h2>
+                <ul>
+                  <li onclick="openChatUser('Ali')">Ali</li>
+                  <li onclick="openChatUser('Ahmed')">Ahmed</li>
+                  <li onclick="openChatUser('Sara')">Sara</li>
+                </ul>
+              </div>
+            
+              <!-- Chat Section -->
+              <div class="chat-section" id="chat-section" style="display: none;">
+                <div class="chat-header-insta">
+                  <button onclick="goBack()">←</button>
+                <h2 id="chat-user-name"></h2>
+                </div>
+                <div class="insta-messages">
+                  <p>Chat messages will appear here...</p>
+                </div>
+                <div class="insta-message-box">
+                  <input type="text" placeholder="Type a message..." />
+                  <button><img src="./images/send.png" alt="" width="100%"></button>
+                </div>
+              </div>
+              </div>
+              <div style="display: none;" class="snapchat">
+                <div class="snapchat-container" id="screenshotContainer">
+                  <div class="snapchat-ui" id="screenshotUI">
+                    <div id="cameraContainer">
+                      <canvas id="videocall-canvas" style="display: none; position: absolute; width: 250px; height: 575px; right: 5px; bottom: 5px; border: solid 5px red;"></canvas>
+                  </div>
+                  
+                      <div class="snapchat-content">
+                          <div class="snapchat-filter-options">
+                              <div class="snapchat-filter-option active" data-filter="normal">Normal</div>
+                              <div class="snapchat-filter-option" data-filter="vintage">Vintage</div>
+                              <div class="snapchat-filter-option" data-filter="noir">Noir</div>
+                              <div class="snapchat-filter-option" data-filter="vivid">Vivid</div>
+                          </div>              
+                          <div class="snapchat-buttons">
+                              <button class="primary" id="captureButton"></button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <!-- Preview UI -->
+              <div class="snapchat-preview-container snapchat-hidden" id="previewContainer">
+                  <img class="snapchat-preview-image" id="previewImage" src="" alt="Screenshot preview">
+                  <div class="snapchat-preview-controls">
+                      <button id="discardButton">Discard</button>
+                      <button class="primary" id="saveButton">Save</button>
+                      <button id="shareButton">Share</button>
+                      <button id="backButton">Back</button> <!-- Back Button -->
+                  </div>
+              </div>
+              
+              <!-- Flash effect -->
+              <div class="snapchat-capture-flash" id="captureFlash"></div>
+              
+              <!-- Notification -->
+              <div class="snapchat-notification" id="notification">Screenshot saved successfully!</div>
+              
+              </div>
+              <div style="display: none;" class="whatsapp">
+                <div class="whatsapp-container">
+                  <div class="whatapp-contact-list" id="contactList">
+                      <!-- Contacts will be loaded here -->
+                  </div>
+              
+                  <div class="whatapp-chat-page whatapp-hidden" id="chatPage">
+                      <div class="whatapp-chat-header">
+                          <button class="whatapp-back-button" onclick="goBackWhatsapp()">⬅</button>
+                          <img id="chatImg" src="" alt="">
+                          <div id="chatNameWhatsapp"></div> <!-- Fixed ID -->
+                      </div>
+                      <div class="whatapp-chat-box" id="chatBox"></div>
+                      <div class="whatapp-chat-input">
+                          <input type="text" id="messageInput" placeholder="Type a message...">
+                          <button onclick="sendMessage()">Send</button>
+                      </div>
+                  </div>
+              
+                  <!-- Status Page -->
+                  <div class="whatapp-status-page whatapp-hidden" id="statusPage">
+                    <div class="whatapp-status-list">
+                        <div class="status-item">
+                            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Status 1">
+                        </div>
+                        <div class="status-item">
+                            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Status 2">
+                        </div>
+                    </div>
+                </div>
+                
+              
+                  <div class="whatappBottom" id="whatappBottom">
+                      <button onclick="loadNavigate('contactList')">
+                          <img src="./images/Comments.png" alt="" width="20px"> Chats
+                      </button>
+                      <button onclick="loadNavigate('statusPage')">
+                          <img src="./images/status.png" alt="" width="20px"> Status
+                      </button>
+                  </div>
+              </div>
+              </div>
             </div>
           </div>
 
@@ -193,27 +469,71 @@
             <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
           </div>
           <div class="bottom-nav" id="b-nav">
-            <button>
+            <button data-app="phone" class="app-ic ap-ic-second">
               <img src="./images/phone-icon.png" alt="" width="40px" />
+              <p style="display: none;">Call</p>
             </button>
-            <button>
+            <button data-app="safari" class="app-ic ap-ic-second">
               <img src="./images/safari.png" alt="" width="40px" />
+              <p style="display: none;">Safari</p>
             </button>
-            <button>
+            <button data-app="messages" class="app-ic ap-ic-second">
               <img src="./images/message.png" alt="" width="40px" />
+              <p style="display: none;">message</p>
             </button>
-            <button>
+            <button data-app="music" class="app-ic ap-ic-second"">
               <img src="./images/music.png" alt="" width="40px" />
+              <p style="display: none;">music</p>
             </button>
           </div>
-          <div class="menuSection">
-            
+          <div class="menuSection" id="menuSection">
+            <div class="control-center">
+              <!-- WiFi & Connectivity -->
+              <div class="control-box">
+                <div class="control-circle" onclick="toggleActive(this)">
+                  📶
+                </div>
+                <div class="control-circle" onclick="toggleActive(this)">
+                  🌐
+                </div>
+                <div class="control-circle" onclick="toggleActive(this)">
+                  🔵
+                </div>
+                <div class="control-circle" onclick="toggleActive(this)">
+                  🟢
+                </div>
+              </div>
+
+              <!-- Empty Box -->
+              <div class="control-box"></div>
+
+              <!-- Flashlight & Night Mode -->
+              <div class="control-box">
+                <div class="control-circle" id="modeToggle" onclick="toggleActive(this)">
+                  🌙
+                </div>
+                <div class="control-circle" onclick="toggleActive(this)">
+                  🔦
+                </div>
+              </div>
+              <div class="slider-container">
+                <div class="slider" id="brightnessSlider">
+                  <div class="slider-fill" id="brightnessFill"></div>
+                  <span>🔆</span>
+                </div>
+                <div class="slider" id="volumeSlider">
+                  <div class="slider-fill" id="volumeFill"></div>
+                  <span>🔊</span>
+                </div>
+              </div>              
+            </div>
           </div>
 
-          <div class="bottomSlide"></div>
+          <div class="bottomSlide" id="bottomSlide"></div>
         </div>
       </div>
     </div>
-    <script src="app.js"></script>
+    
+    <script  src="app.js"></script>
   </body>
 </html>
