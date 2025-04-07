@@ -1022,8 +1022,8 @@ p {
   max-width: 400px;
   margin: auto;
   background: var(--bg-color);
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 0px;
+  /* padding: 10px; */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -1039,7 +1039,7 @@ p {
 .back-btn {
   background: none;
   border: none;
-  color: #007aff;
+  color: #ffffff;
   font-size: 16px;
   cursor: pointer;
   font-family: p-r;
@@ -1047,7 +1047,7 @@ p {
 
 .chat-messages {
   padding: 10px;
-  min-height: 445px;
+  min-height: 430px;
 }
 
 .chat-text {
@@ -2387,4 +2387,60 @@ p {
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+.chat-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  background-color: #000000;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 66px;
+  padding-top: 30px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: scroll;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background-color: #ffffff;
+}
+
+.chat-input input {
+  width: 80%;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.chat-input button {
+  background-color: #007bff;
+  padding: 10px;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.message-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+}
+
+.message-item strong {
+  color: #007bff;
 }

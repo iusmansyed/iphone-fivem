@@ -1,6 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-
 -- server.lua
 local Config = {
     SavePath = "screenshots/", -- Folder within the server resources where screenshots are saved
@@ -130,7 +129,9 @@ AddEventHandler('screenshot:share', function(imageData)
         else
             local errorMsg = "Failed to share to Discord"
             if text then
-                local success, errorData = pcall(function() return json.decode(text) end)
+                local success, errorData = pcall(function()
+                    return json.decode(text)
+                end)
                 if success and errorData.message then
                     errorMsg = errorMsg .. ": " .. errorData.message
                 end
@@ -141,7 +142,6 @@ AddEventHandler('screenshot:share', function(imageData)
         ['Content-Type'] = 'application/json'
     })
 end)
-
 
 -- Helper function to decode base64 to a file
 function base64DecodeToFile(base64Data, filePath)
@@ -180,11 +180,6 @@ AddEventHandler('screenshot:notify', function(message)
     -- This is a server-to-client event for notifications
     TriggerClientEvent('screenshot:notify', source, message)
 end)
-
-
-
-
-
 
 --------------------------------------------------
 
@@ -233,7 +228,7 @@ AddEventHandler("saveNewContact", function(contactName, phoneNumber)
     local src = source
     local Player = QBCore.Functions.GetPlayer(source)
     local citizen_id = Player.PlayerData.citizenid
-    
+
     -- Check if phone number already exists
     MySQL.Async.fetchScalar("SELECT COUNT(*) FROM mobile_user WHERE phone = @phone", {
         ["@phone"] = phoneNumber
@@ -251,7 +246,7 @@ AddEventHandler("saveNewContact", function(contactName, phoneNumber)
                     if rowsChanged > 0 then
                         print("✅ New contact saved: " .. contactName .. " - " .. phoneNumber)
                         TriggerClientEvent("phoneNotification", src, "Contact saved successfully")
-                        
+
                         -- Send updated contacts list back to client
                         MySQL.Async.fetchAll("SELECT username, phone FROM mobile_user", {}, function(users)
                             TriggerClientEvent("receiveContacts", src, users)
@@ -268,7 +263,7 @@ end)
 RegisterNetEvent("checkPhoneNumber")
 AddEventHandler("checkPhoneNumber", function(phoneNumber)
     local src = source
-    
+
     MySQL.Async.fetchAll("SELECT username, phone FROM mobile_user WHERE phone = @phone", {
         ["@phone"] = phoneNumber
     }, function(results)
@@ -284,52 +279,113 @@ end)
 
 --------------------------------------------------
 
-
-
 ----------------------Messages------------------------------
--- Event to send a message
--- Event to send a message
 RegisterNetEvent('qb-core:phone:sendMessage')
 AddEventHandler('qb-core:phone:sendMessage', function(data)
+    print("Received message data: " .. json.encode(data))
     local sender = data.sender
     local receiver = data.receiver
     local message = data.message
     local src = source
 
-    -- Save the message to the database
-    MySQL.Async.execute("INSERT INTO mobile_messages (sender, receiver, message) VALUES (@sender, @receiver, @message)", {
-        ["@sender"] = sender,
-        ["@receiver"] = receiver,
-        ["@message"] = message
-    }, function(rowsChanged)
-        if rowsChanged > 0 then
-            print("Message sent successfully by: " .. sender)
+    -- First check if a conversation already exists between these users
+    MySQL.Async.fetchAll(
+        "SELECT id, message FROM mobile_messages WHERE (sender = @sender AND receiver = @receiver) OR (sender = @receiver AND receiver = @sender) LIMIT 1",
+        {
+            ["@sender"] = sender,
+            ["@receiver"] = receiver
+        }, function(results)
+            if results and #results > 0 then
+                -- Conversation exists, update the existing record
+                local existingId = results[1].id
+                local existingMessages = json.decode(results[1].message or "[]") -- Ensure messages field is decoded correctly
 
-            -- Notify the sender that the message was sent
-            TriggerClientEvent('qb-core:phone:messageSent', src)
+                -- Add new message to the array
+                table.insert(existingMessages, {
+                    sender = sender,
+                    receiver = receiver,
+                    message = message,
+                    timestamp = os.time()
+                })
 
-            -- Send the message to the receiver's client (real-time communication)
-            TriggerClientEvent('qb-core:phone:receiveMessages', receiver, {{sender = sender, receiver = receiver, message = message}})
-        else
-            print("Failed to send message")
-        end
-    end)
+                -- Update the existing row with the new messages array
+                MySQL.Async.execute(
+                    "UPDATE mobile_messages SET message = @message, timestamp = CURRENT_TIMESTAMP WHERE id = @id", {
+                        ["@id"] = existingId,
+                        ["@message"] = json.encode(existingMessages) -- Ensure messages are stored as a JSON array
+                    }, function(rowsChanged)
+                        if rowsChanged > 0 then
+                            print("Message added to existing conversation")
+                            TriggerClientEvent('qb-core:phone:messageSent', src)
+                            TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
+                                sender = sender,
+                                receiver = receiver, -- Include receiver in the response
+                                message = message
+                            }})
+                        else
+                            print("Failed to update conversation")
+                        end
+                    end)
+            else
+                -- New conversation, create a new record
+                local messagesArray = {{
+                    sender = sender,
+                    receiver = receiver,
+                    message = message,
+                    timestamp = os.time()
+                }}
+
+                MySQL.Async.execute(
+                    "INSERT INTO mobile_messages (sender, receiver, message) VALUES (@sender, @receiver, @message)", {
+                        ["@sender"] = sender,
+                        ["@receiver"] = receiver,
+                        ["@message"] = json.encode(messagesArray) -- Store as a JSON array for new conversation
+                    }, function(rowsChanged)
+                        if rowsChanged > 0 then
+                            print("New conversation created")
+                            TriggerClientEvent('qb-core:phone:messageSent', src)
+                            TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
+                                sender = sender,
+                                receiver = receiver, -- Include receiver in the response
+                                message = message
+                            }})
+                        else
+                            print("Failed to create conversation")
+                        end
+                    end)
+            end
+        end)
 end)
 
--- Event to fetch messages for a user
+-- Load previous messages for a user
 RegisterNetEvent('qb-core:phone:getMessages')
-AddEventHandler('qb-core:phone:getMessages', function(user)
+AddEventHandler('qb-core:phone:getMessages', function(chatUser)
+ print("Fetching messages for user: " .. json.encode(chatUser))
     local src = source
-    MySQL.Async.fetchAll("SELECT sender, message, timestamp FROM mobile_messages WHERE sender = @user OR receiver = @user ORDER BY timestamp ASC", {
-        ["@user"] = user
-    }, function(messages)
-        -- Send the fetched messages to the client
-        TriggerClientEvent('qb-core:phone:receiveMessages', src, messages)
-    end)
+    local username = GetPlayerName(src) -- Assuming this is how you get the logged-in user's name
+local recievername = json.encode(chatUser.sender)
+    -- Ensure that chatUser is a string (just in case it's a table or incorrect type)
+    
+
+      -- Print the username correctly
+
+    -- Fetch messages where the user is either the sender or receiver
+    MySQL.Async.fetchAll(
+        "SELECT id, sender, receiver, message, timestamp FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
+        {
+            ["@user"] = username,
+            ["@chatUser"] = recievername
+        }, function(results)
+            -- Check if any results are returned
+            if results and #results > 0 then
+                -- Send the entire row data back to the client
+                print("Fetched all messages: " .. json.encode(results)) -- Debugging print
+                TriggerClientEvent('qb-core:phone:receiveMessages', src, results)
+            else
+                -- If no messages are found, notify the client
+                TriggerClientEvent('qb-core:phone:receiveMessages', src, {})
+                print("No messages found for user: " .. username)
+            end
+        end)
 end)
 
--- Confirmation of message sent
-RegisterNetEvent('qb-core:phone:messageSent')
-AddEventHandler('qb-core:phone:messageSent', function()
-    print("Message sent successfully!")
-end)

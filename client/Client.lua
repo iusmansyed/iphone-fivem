@@ -1,3 +1,5 @@
+local QBCore = exports['qb-core']:GetCoreObject()
+
 local batteryLevel = 50
 local charging = false
 
@@ -191,19 +193,21 @@ function TakeScreenshot(filterName)
         "files[]", function(data)
             -- Debug logging
             print("Screenshot Response Data:", data)
-            
+
             -- Parse the response to get the screenshot URL
-            local success, resp = pcall(function() return json.decode(data) end)
-            
+            local success, resp = pcall(function()
+                return json.decode(data)
+            end)
+
             if not success then
                 print("Failed to parse screenshot response:", resp)
                 ShowNotification("Failed to process screenshot")
                 return
             end
-            
+
             -- Debug logging
             print("Parsed Response:", json.encode(resp))
-            
+
             -- Try different possible response formats
             local screenshotUrl = nil
             if resp.url then
@@ -411,34 +415,42 @@ RegisterCommand("contacts", function()
 end, false)
 
 function ShowContactsUI()
-        SendNUIMessage({
-            action = "showContact",
-            user_data = contacts
-        })
+    SendNUIMessage({
+        action = "showContact",
+        user_data = contacts
+    })
 end
 
 -- Register NUI callback for saving contacts
 RegisterNUICallback('saveContact', function(data, cb)
     local phoneNumber = data.phoneNumber
     local contactName = data.contactName
-    
+
     if phoneNumber and contactName then
         TriggerServerEvent('saveNewContact', contactName, phoneNumber)
-        cb({success = true})
+        cb({
+            success = true
+        })
     else
-        cb({success = false})
+        cb({
+            success = false
+        })
     end
 end)
 
 -- Register NUI callback for checking phone numbers
 RegisterNUICallback('checkPhoneNumber', function(data, cb)
     local phoneNumber = data.phoneNumber
-    
+
     if phoneNumber then
         TriggerServerEvent('checkPhoneNumber', phoneNumber)
-        cb({success = true})
+        cb({
+            success = true
+        })
     else
-        cb({success = false})
+        cb({
+            success = false
+        })
     end
 end)
 
@@ -463,70 +475,96 @@ end)
 
 ----------------save data-----------------------------------------------
 
-
 ---------------------------Messages--------------------------------------------
+local chatHistory = {} -- This stores chat history for each user
+local currentChatUser = nil -- This stores the current chat user
+
+-- Send message command
+-- Add this to your client.lua
+RegisterNUICallback('sendMessage', function(data, cb)
+    local sender = GetPlayerName(PlayerId())
+    local receiver = data.receiver
+    local message = data.message
 
 
-local chatHistory = {} -- Holds chat histories for each user
-local currentChatUser = "Player2" -- Set this dynamically based on the user you're chatting with
-
--- Function to send a message to the server
-RegisterCommand("qb-core:phone:sendMessage", function(source, args, rawCommand)
-    local message = table.concat(args, " ") -- Combine the args to form the message text
-    if message and message ~= "" then
-        local sender = GetPlayerName(PlayerId()) -- Get the player name dynamically
-        local receiver = currentChatUser -- Dynamic receiver
-        print(sender .. " sent message to " .. receiver .. ": " .. message)
-
-        -- Trigger the server event to send the message
-        TriggerServerEvent('qb-core:phone:sendMessage', { sender = sender, receiver = receiver, message = message })
+    if receiver and message ~= "" then
+        -- This will trigger your server-side event handler
+        TriggerServerEvent('qb-core:phone:sendMessage', {
+            sender = sender,
+            receiver = receiver,
+            message = message
+        })
     else
-        print("Message cannot be empty!")
+        print("❌ Missing receiver or empty message!")
     end
-end, false)
 
--- Event to receive and display messages from the server
+    cb({
+        status = "success"
+    })
+end)
+RegisterNUICallback('getMessages', function(data, cb)
+    print(json.encode(data))
+    local sender = data.receiver
+
+    if sender then
+        -- This will trigger your server-side event handler
+        TriggerServerEvent('qb-core:phone:getMessages', {
+            sender = json.encode(sender),
+        })
+    else
+        print("❌ Missing receiver or empty message!")
+    end
+
+    cb({
+        status = "success"
+    })
+end)
+
+-- RegisterNUICallback('sendmsg', function(data, cb)
+--     -- Print the received data
+--     print('Message sent to: ' .. data.receiver)
+--     print('Message content: ' .. data.message)
+
+--     -- You can also log with different levels if needed
+--     Citizen.Trace('Message details - To: ' .. data.receiver .. ', Content: ' .. data.message)
+
+--     -- You might want to trigger a server event here to actually send the message
+--     TriggerServerEvent('phone:sendMessage', data.receiver, data.message)
+
+--     -- Send response back to the NUI
+--     cb({
+--         status = "success"
+--     })
+-- end)
+-- Show received messages
+-- client.lua
 RegisterNetEvent('qb-core:phone:receiveMessages')
 AddEventHandler('qb-core:phone:receiveMessages', function(messages)
-    for _, msg in ipairs(messages) do
-        if not chatHistory[msg.sender] then
-            chatHistory[msg.sender] = {} -- Create a new array for the sender if not exists
-        end
-        table.insert(chatHistory[msg.sender], msg) -- Insert new message to the history
-    end
+    -- Debugging: Print the messages received from the server
+    print("Received messages: " .. json.encode(messages))
 
-    -- Display messages (for example, show in a UI like a notification or chat window)
-    for _, msg in ipairs(messages) do
-        print(msg.sender .. ": " .. msg.message)
-    end
+    -- You can now send this data to JavaScript via an exported function, if required
+    -- Example: Using the NUI (HTML/JS) interface to pass the data
+    SendNUIMessage({
+        type = 'receiveMessages', -- A custom message type to handle on the JS side
+        messages = messages
+    })
 end)
 
--- Listen for message sent confirmation from the server
-RegisterNetEvent('qb-core:phone:messageSent')
-AddEventHandler('qb-core:phone:messageSent', function()
-    print("Message sent successfully!")
-end)
-
--- Function to show chat history (when the user opens the chat UI)
+-- View messages for current user
 RegisterCommand("viewMessages", function()
-    if chatHistory[currentChatUser] then
+    if currentChatUser and chatHistory[currentChatUser] then
         for _, msg in ipairs(chatHistory[currentChatUser]) do
             print(msg.sender .. ": " .. msg.message)
         end
     else
-        print("No chat history with " .. currentChatUser)
-    end
-end, false)
-
--- Listen for incoming messages and update chat UI accordingly
-RegisterNetEvent("qb-core:phone:showMessages")
-AddEventHandler("qb-core:phone:showMessages", function(messages)
-    -- Assuming you have a UI to display these messages:
-    for _, msg in ipairs(messages) do
-        -- Update UI or chat window to show the message
-        print(msg.sender .. ": " .. msg.message)
+        print("📭 No messages with this user yet.")
     end
 end)
 
-
----------------------------Messages--------------------------------------------
+-- NUI callback to load messages
+RegisterNUICallback("loadChat", function(data, cb)
+    currentChatUser = data.username
+    TriggerServerEvent('qb-core:phone:getMessages', GetPlayerName(PlayerId()))
+    cb({}) -- Return the response
+end)

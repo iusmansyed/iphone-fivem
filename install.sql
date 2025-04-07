@@ -6,10 +6,10 @@ CREATE TABLE IF NOT EXISTS mobile_user (
 );
 
 
-CREATE TABLE `mobile_messages` (
+CREATE TABLE IF NOT EXISTS `mobile_messages` (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `sender` VARCHAR(255) NOT NULL,
   `receiver` VARCHAR(255) NOT NULL,
-  `message` TEXT NOT NULL,
+  `messages` TEXT NOT NULL,
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

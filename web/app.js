@@ -106,37 +106,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 1. STARTUP SCREEN
     // Show for 2 seconds, then fade out
-  setTimeout(() => {
-    startupScreen.style.opacity = "0";
     setTimeout(() => {
-      startupScreen.style.display = "none";
+      startupScreen.style.opacity = "0";
+      setTimeout(() => {
+        startupScreen.style.display = "none";
         // Transition to language selection
-      languageSelection.style.display = "flex";
+        languageSelection.style.display = "flex";
         clock.style.color = "black";
-    }, 1000);
+      }, 1000);
     }, 2000);
 
     // 2. LANGUAGE SELECTION
     // Setup language selection functionality
-  const languageButtons = document.querySelectorAll(".language-btn");
-  let selectedLanguage = null;
+    const languageButtons = document.querySelectorAll(".language-btn");
+    let selectedLanguage = null;
 
     // Handle language button clicks
-  languageButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      languageButtons.forEach((btn) => btn.classList.remove("selected"));
-      this.classList.add("selected");
-      selectedLanguage = this.getAttribute("data-lang");
+    languageButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        languageButtons.forEach((btn) => btn.classList.remove("selected"));
+        this.classList.add("selected");
+        selectedLanguage = this.getAttribute("data-lang");
+      });
     });
-  });
 
     // Handle continue button click
-  document
-    .querySelector(".continue-btn")
-    .addEventListener("click", function () {
-      if (selectedLanguage) {
+    document
+      .querySelector(".continue-btn")
+      .addEventListener("click", function () {
+        if (selectedLanguage) {
           // Hide language selection
-        languageSelection.style.display = "none";
+          languageSelection.style.display = "none";
 
           // 3. GREETING SCREEN
           greeting.style.display = "flex";
@@ -159,11 +159,11 @@ document.addEventListener("DOMContentLoaded", function () {
           // Hide greeting after 3 seconds & show lock screen
           setTimeout(() => {
             greeting.style.display = "none";
-        lockScreen.style.display = "flex";
+            lockScreen.style.display = "flex";
           }, 3000);
 
-        console.log("Selected language:", selectedLanguage);
-      } else {
+          console.log("Selected language:", selectedLanguage);
+        } else {
           console.log("Please select a language to continue");
         }
       });
@@ -188,9 +188,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Show apps
     setTimeout(() => {
       lockScreen.style.display = "none";
-    apps.style.display = "flex";
-    bottomNav.style.display = "flex";
-    subDiv.classList.add("active");
+      apps.style.display = "flex";
+      bottomNav.style.display = "flex";
+      subDiv.classList.add("active");
     }, 500);
   });
 
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (clearButton) {
     clearButton.addEventListener("click", clearNumber);
   }
-  
+
   // Add event listener for the save number button
   const saveNumberButton = document.getElementById("saveNumberBtn");
   if (saveNumberButton) {
@@ -307,7 +307,7 @@ function initializeAppManagement() {
   appScreens[0].classList.add("active");
 
   // Enable Hold-to-Edit Mode
-document.querySelectorAll(".app-ic").forEach((app) => {
+  document.querySelectorAll(".app-ic").forEach((app) => {
     app.addEventListener("mousedown", handleAppHold);
     app.addEventListener("touchstart", handleAppHold, { passive: false });
 
@@ -368,11 +368,11 @@ function handleAppHold(e) {
     e.preventDefault();
   }
 
-    timer = setTimeout(() => {
-      if (!isEditMode) {
-        document.querySelector(".apps-wrapper").classList.add("edit-mode");
-        isEditMode = true;
-      }
+  timer = setTimeout(() => {
+    if (!isEditMode) {
+      document.querySelector(".apps-wrapper").classList.add("edit-mode");
+      isEditMode = true;
+    }
   }, 1000);
 
   const cleanup = () => {
@@ -636,7 +636,7 @@ function initializeAppOpening() {
   ];
 
   // Handle app clicks
-document.querySelectorAll(".app-ic").forEach((app) => {
+  document.querySelectorAll(".app-ic").forEach((app) => {
     app.addEventListener("click", function (e) {
       if (isEditMode || e.target.closest(".delete-icon")) return;
 
@@ -793,43 +793,46 @@ let contactsList = []; // Store contacts globally
 
 window.addEventListener("message", function (event) {
   const data = event.data;
-  
+
   switch (data.action) {
     case "showContact":
       contactsList = data.user_data || []; // Store contacts
       break;
-      
+
     case "phoneNumberResult":
       // Handle phone number check results
       const exists = data.exists;
       const contactData = data.contactData;
       const contactDropdown = document.getElementById("contactDropdown");
       const saveNumberBtn = document.getElementById("saveNumberBtn");
-      
+
       if (exists && contactData) {
         // Show contact info in dropdown
         contactDropdown.innerHTML = contactData
-          .map(contact => `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`)
+          .map(
+            (contact) =>
+              `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`
+          )
           .join("");
         contactDropdown.classList.remove("hidden");
         saveNumberBtn.classList.add("hidden");
-        
+
         // Add click event listeners to contact items
-        const contactItems = contactDropdown.querySelectorAll('.contact-item');
-        contactItems.forEach(item => {
-          item.addEventListener('click', function() {
-            const phoneNumber = this.getAttribute('data-phone');
+        const contactItems = contactDropdown.querySelectorAll(".contact-item");
+        contactItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            const phoneNumber = this.getAttribute("data-phone");
             dialDisplay.innerText = phoneNumber;
             contactDropdown.classList.add("hidden");
-  });
-});
+          });
+        });
       } else {
         // Show save button
         contactDropdown.classList.add("hidden");
         saveNumberBtn.classList.remove("hidden");
       }
       break;
-      
+
     case "phoneNotification":
       // Display notification
       showNotification(data.message);
@@ -851,23 +854,28 @@ function press(digit) {
   }
 
   const enteredNumber = dialDisplay.innerText;
-  
+
   // First check locally in cached contacts
-  const matchedContacts = contactsList.filter(contact => contact.phone.includes(enteredNumber));
+  const matchedContacts = contactsList.filter((contact) =>
+    contact.phone.includes(enteredNumber)
+  );
 
   if (matchedContacts.length > 0) {
     // If found locally, display them
     contactDropdown.innerHTML = matchedContacts
-      .map(contact => `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`)
+      .map(
+        (contact) =>
+          `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`
+      )
       .join("");
     contactDropdown.classList.remove("hidden");
     saveNumberBtn.classList.add("hidden");
-    
+
     // Add click event listeners to contact items
-    const contactItems = contactDropdown.querySelectorAll('.contact-item');
-    contactItems.forEach(item => {
-      item.addEventListener('click', function() {
-        const phoneNumber = this.getAttribute('data-phone');
+    const contactItems = contactDropdown.querySelectorAll(".contact-item");
+    contactItems.forEach((item) => {
+      item.addEventListener("click", function () {
+        const phoneNumber = this.getAttribute("data-phone");
         dialDisplay.innerText = phoneNumber;
         contactDropdown.classList.add("hidden");
       });
@@ -877,45 +885,49 @@ function press(digit) {
     // But only do this if the number is at least 3 digits for performance
     if (enteredNumber.length >= 3) {
       fetch(`https://Mobile/checkPhoneNumber`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phoneNumber: enteredNumber
-        })
+          phoneNumber: enteredNumber,
+        }),
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.found) {
-          // Show contact info in dropdown
-          contactDropdown.innerHTML = data.contacts
-            .map(contact => `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`)
-            .join("");
-          contactDropdown.classList.remove("hidden");
-          saveNumberBtn.classList.add("hidden");
-          
-          // Add click event listeners to contact items
-          const contactItems = contactDropdown.querySelectorAll('.contact-item');
-          contactItems.forEach(item => {
-            item.addEventListener('click', function() {
-              const phoneNumber = this.getAttribute('data-phone');
-              dialDisplay.innerText = phoneNumber;
-              contactDropdown.classList.add("hidden");
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.found) {
+            // Show contact info in dropdown
+            contactDropdown.innerHTML = data.contacts
+              .map(
+                (contact) =>
+                  `<div class="contact-item" style="color:#000" data-phone="${contact.phone}">${contact.username} - ${contact.phone}</div>`
+              )
+              .join("");
+            contactDropdown.classList.remove("hidden");
+            saveNumberBtn.classList.add("hidden");
+
+            // Add click event listeners to contact items
+            const contactItems =
+              contactDropdown.querySelectorAll(".contact-item");
+            contactItems.forEach((item) => {
+              item.addEventListener("click", function () {
+                const phoneNumber = this.getAttribute("data-phone");
+                dialDisplay.innerText = phoneNumber;
+                contactDropdown.classList.add("hidden");
+              });
             });
-          });
-        } else {
-          // Show save button
+          } else {
+            // Show save button
+            contactDropdown.classList.add("hidden");
+            saveNumberBtn.classList.remove("hidden");
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking phone number:", error);
+          // Still show save button in case of error
           contactDropdown.classList.add("hidden");
           saveNumberBtn.classList.remove("hidden");
-        }
-      })
-      .catch(error => {
-        console.error('Error checking phone number:', error);
-        // Still show save button in case of error
-        contactDropdown.classList.add("hidden");
-        saveNumberBtn.classList.remove("hidden");
-      });
+        });
     } else {
       // Not enough digits, just show save button
       contactDropdown.classList.add("hidden");
@@ -925,37 +937,39 @@ function press(digit) {
 }
 
 // We'll completely remove and reinstall all event listeners when the page loads
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   // First, let's disconnect and reconnect all dial buttons to ensure no duplicate events
   const dialGrid = document.querySelector(".dial-grid");
   if (dialGrid) {
     // Create a new dial grid with the same content
     const newDialGrid = dialGrid.cloneNode(true);
-    
+
     // Replace the old grid with the new one
     dialGrid.parentNode.replaceChild(newDialGrid, dialGrid);
-    
+
     // Add new event listeners to each non-call button
-    const dialButtons = newDialGrid.querySelectorAll(".dial-btn:not(.call-button)");
-    dialButtons.forEach(button => {
-      button.addEventListener("click", function() {
+    const dialButtons = newDialGrid.querySelectorAll(
+      ".dial-btn:not(.call-button)"
+    );
+    dialButtons.forEach((button) => {
+      button.addEventListener("click", function () {
         const digit = this.innerText;
         press(digit);
       });
     });
-    
+
     // Add event listener to call button separately
     const callButton = newDialGrid.querySelector(".call-button");
     if (callButton) {
       callButton.addEventListener("click", call);
     }
   }
-  
+
   // Also ensure the onclick attributes are removed from the HTML
-  document.querySelectorAll(".dial-btn").forEach(button => {
+  document.querySelectorAll(".dial-btn").forEach((button) => {
     button.removeAttribute("onclick");
   });
-  
+
   // Add event listener for the clear button
   const clearButton = document.getElementById("clearNumberBtn");
   if (clearButton) {
@@ -965,7 +979,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function saveNumber() {
   const number = document.getElementById("dialDisplay").innerText;
-  
+
   // Create a modal for entering the contact name
   const modal = document.createElement("div");
   modal.className = "contact-modal";
@@ -979,46 +993,52 @@ function saveNumber() {
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
+
   // Focus the input field
   document.getElementById("newContactName").focus();
-  
+
   // Add event listeners
-  document.getElementById("cancelSaveContact").addEventListener("click", function() {
-    document.body.removeChild(modal);
-  });
-  
-  document.getElementById("confirmSaveContact").addEventListener("click", function() {
-    const contactName = document.getElementById("newContactName").value.trim();
-    
-    if (contactName) {
-      // Send to server to save using fetch instead of $.post
-      fetch(`https://Mobile/saveContact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: number,
-          contactName: contactName
-        })
-      });
-      
-      // Clean up and show feedback
+  document
+    .getElementById("cancelSaveContact")
+    .addEventListener("click", function () {
       document.body.removeChild(modal);
-      showNotification("Saving contact...");
-      
-      // Reset dial display
-      document.getElementById("dialDisplay").innerText = "Enter Number";
-      document.getElementById("contactDropdown").classList.add("hidden");
-      document.getElementById("saveNumberBtn").classList.add("hidden");
-    } else {
-      // Show error if no name entered
-      showNotification("Please enter a name for the contact");
-    }
-  });
+    });
+
+  document
+    .getElementById("confirmSaveContact")
+    .addEventListener("click", function () {
+      const contactName = document
+        .getElementById("newContactName")
+        .value.trim();
+
+      if (contactName) {
+        // Send to server to save using fetch instead of $.post
+        fetch(`https://Mobile/saveContact`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber: number,
+            contactName: contactName,
+          }),
+        });
+
+        // Clean up and show feedback
+        document.body.removeChild(modal);
+        showNotification("Saving contact...");
+
+        // Reset dial display
+        document.getElementById("dialDisplay").innerText = "Enter Number";
+        document.getElementById("contactDropdown").classList.add("hidden");
+        document.getElementById("saveNumberBtn").classList.add("hidden");
+      } else {
+        // Show error if no name entered
+        showNotification("Please enter a name for the contact");
+      }
+    });
 }
 
 // Function to show a notification
@@ -1026,9 +1046,9 @@ function showNotification(message) {
   const notification = document.createElement("div");
   notification.className = "phone-notification";
   notification.textContent = message;
-  
+
   document.body.appendChild(notification);
-  
+
   // Remove after 3 seconds
   setTimeout(() => {
     notification.classList.add("fade-out");
@@ -1058,21 +1078,6 @@ suggestedSearches.addEventListener("click", function (event) {
   }
 });
 // Function to open chat screen
-function openChatTextUser(name) {
-  console.log(name);
-  const header = document.getElementById("hder");
-
-  const messageList = document.getElementById("messageList");
-  const chatScreen = document.getElementById("chatScreen");
-  const chatName = document.getElementById("chatName");
-
-  if (messageList) messageList.style.display = "none";
-  if (chatScreen) chatScreen.style.display = "block";
-  if (chatScreen) {
-    header.style.display = "none";
-  }
-  if (chatName) chatName.innerText = name;
-}
 
 function closeChat() {
   const messageList = document.getElementById("messageList");
@@ -1861,16 +1866,14 @@ window.addEventListener("message", function (event) {
   }
 });
 
-// Function to dynamically show contacts in the chat-box
 function showContactsUI(contacts) {
   const messageList = document.getElementById("messageList");
-  messageList.innerHTML = ""; // Clear any previous contacts
+  messageList.innerHTML = "";
 
-  // Loop through contacts and add them to the UI
   contacts.forEach((contact) => {
     const chatItem = document.createElement("div");
     chatItem.classList.add("chat-item");
-    chatItem.setAttribute("onclick", `openChatTextUser('${contact.username}')`); // Clicking opens the chat with user
+    chatItem.setAttribute("onclick", `openChatTextUser('${contact.username}')`);
 
     const chatName = document.createElement("div");
     chatName.classList.add("chat-name");
@@ -1878,7 +1881,7 @@ function showContactsUI(contacts) {
 
     const chatDetails = document.createElement("div");
     chatDetails.classList.add("chat-details");
-    chatDetails.innerText = `+${contact.phone} • ${getRandomTime()}`; // Display phone and random time
+    chatDetails.innerText = `+${contact.phone} • ${getRandomTime()}`;
 
     chatItem.appendChild(chatName);
     chatItem.appendChild(chatDetails);
@@ -1886,64 +1889,115 @@ function showContactsUI(contacts) {
   });
 }
 
-// Helper function to simulate a random time (e.g., 5 mins ago, Yesterday)
+// Send message to Lua
+let selectedChatUser = null; // To store the selected user's username
+
+// Show the chat screen and hide the user list
+function openChatTextUser(username) {
+  selectedChatUser = username; // Store the selected user's name
+
+  // Show the chat screen and hide other sections
+  document.getElementById("chatScreen").style.display = "flex";
+  document.getElementById("hder").style.display = "none";
+  document.getElementById("messages-main").style.display = "none";
+
+  // Update the chat header with the selected user's name
+  document.getElementById("chatName").innerText = selectedChatUser;
+
+  // Fetch messages for the selected user
+  fetch(`https://${GetParentResourceName()}/getMessages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      receiver: selectedChatUser, // Pass the selected user's name to the server
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // You can now process the 'data' to update the UI as needed
+    })
+    .catch((error) => {
+      console.error("Error fetching messages:", error);
+    });
+}
+
+// Send message to the selected user
+function sendMessageToServer() {
+  const message = document.getElementById("messageInputPhone").value;
+
+  if (!selectedChatUser || !message) {
+    console.warn("Either no user selected or message is empty.");
+    return;
+  }
+
+  // Send the message directly to the Lua NUI callback
+  fetch(`https://${GetParentResourceName()}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      receiver: selectedChatUser,
+      message: message,
+    }),
+  })
+    .then(() => {
+      // Clear the input field
+      document.getElementById("messageInputPhone").value = "";
+
+      // Display the sent message in the chat UI
+      const messageList = document.getElementById("phoneMessageList");
+      const msgItem = document.createElement("div");
+      msgItem.classList.add("message-item");
+      msgItem.innerHTML = `<strong>You:</strong> ${message}`;
+      messageList.appendChild(msgItem);
+    })
+    .catch((err) => {
+      console.error("Error sending message:", err);
+    });
+}
+
+// Close the chat screen (go back to contacts list or home screen)
+function closeMesChat() {
+  // Hide the chat screen and show the user list again
+  document.getElementById("chatScreen").style.display = "none";
+  document.getElementById("messages-main").style.display = "block";
+  document.getElementById("hder").style.display = "flex";
+}
+
+// Close the chat screen (go back to contacts list or home screen)
+
+// Add message to chat UI
+function addMessageToUI(msg) {
+  const chatBox = document.getElementById("chatBox");
+  const div = document.createElement("div");
+  div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+  chatBox.appendChild(div);
+}
+
+// When server sends previous or new messages
+window.addEventListener("message", function (event) {
+  if (event.data.action === "showMessages") {
+    showMessages(event.data.messages);
+  }
+});
+
+function showMessages(messages) {
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = "";
+  messages.forEach((msg) => {
+    const msgDiv = document.createElement("div");
+    msgDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+    chatBox.appendChild(msgDiv);
+  });
+}
+
 function getRandomTime() {
   const times = ["5 mins ago", "Yesterday", "2 days ago", "3 hours ago"];
   return times[Math.floor(Math.random() * times.length)];
 }
 
 // Function to open chat when a contact is clicked
-
-// --------message-------------------------------------------
-// Get the input field and the button
-// This code should be inside your web app (JS file)
-const messageInputPhone = document.getElementById("messageInputPhone");
-const messageList = document.getElementById("messageList");
-
-window.sendMessageToServer = function() {
-    const message = messageInputPhone.value;
-    console.log(">>>>>>>>>>>>>>",message);
-    
-    if (message?.trim()) {
-        const sender = "Player1";  // Use dynamic player name
-        const receiver = "Player2"; // Use dynamic receiver
-
-        // Send message to the Lua client
-        fetch(`https://${GetParentResourceName()}/qb-core:phone:sendMessage`, {
-            method: "POST",
-            body: JSON.stringify({
-                sender: sender,
-                receiver: receiver,
-                message: message
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Message sent:", data);
-            messageInputPhone.value = "";  // Clear input field
-        })
-        .catch(err => console.error("Error sending message:", err));
-    } else {
-        console.warn("Message input is empty!");
-    }
-};
-
-// Listen for messages from Lua
-window.addEventListener("message", function(event) {
-    if (event.data.action === "showMessages") {
-        const messages = event.data.messages;
-        messageList.innerHTML = ""; // Clear the list
-        messages.forEach((msg) => {
-            const chatItem = document.createElement("div");
-            chatItem.classList.add("chat-item");
-            chatItem.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-            messageList.appendChild(chatItem);
-        });
-    }
-});
-
-
-// --------message-------------------------------------------
 
 function clearNumber() {
   document.getElementById("dialDisplay").innerText = "Enter Number";
@@ -1954,16 +2008,18 @@ function clearNumber() {
 function call() {
   const dialDisplay = document.getElementById("dialDisplay");
   const number = dialDisplay.innerText;
-  
+
   // Check if the number exists in contacts
-  const matchedContact = contactsList.find(contact => contact.phone === number);
-  
+  const matchedContact = contactsList.find(
+    (contact) => contact.phone === number
+  );
+
   if (matchedContact) {
     showNotification(`Calling ${matchedContact.username}...`);
   } else {
     showNotification(`Calling ${number}...`);
   }
-  
+
   // Reset display after call
   setTimeout(() => {
     dialDisplay.innerText = "Enter Number";
