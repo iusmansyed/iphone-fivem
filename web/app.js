@@ -1,63 +1,3 @@
-// function updateClock() {
-//   let now = new Date();
-//   let hours = now.getHours();
-//   let minutes = now.getMinutes();
-
-//   // Format: 09:05 instead of 9:5
-//   hours = hours < 10 ? "0" + hours : hours;
-//   minutes = minutes < 10 ? "0" + minutes : minutes;
-
-//   document.getElementById("clock").innerText = `${hours}:${minutes}`;
-// }
-
-// // Update clock every second
-// setInterval(updateClock, 1000);
-
-// // Call function initially to set time immediately
-// updateClock();
-
-// let batteryLevel = 50; // Start from 50%
-// let charging = false;
-
-// // Function to update battery UI
-// function updateBatteryUI() {
-//   document.getElementById("battery-level").style.width = batteryLevel + "%";
-//   document.getElementById("charging-icon").style.display = charging
-//     ? "block"
-//     : "none";
-// }
-
-// // Listen for messages from Lua
-// window.addEventListener("message", function (event) {
-//   if (event.data.action === "updateBattery") {
-//     batteryLevel = event.data.level;
-//     charging = event.data.charging;
-//     updateBatteryUI();
-//   }
-// });
-
-// // Initialize UI
-// updateBatteryUI();
-
-// document.addEventListener("DOMContentLoaded", function () {
-//   document.getElementById("swipe-upm").addEventListener("click", function () {
-//     // Lock screen ko smoothly hide karo
-//     const lockScreen = document.querySelector(".iphone-lock-screen");
-//     lockScreen.style.transition = "transform 0.5s ease-in-out";
-//     lockScreen.style.transform = "translateY(-100%)";
-
-//     // Bottom nav ko show karo
-//     const bottomNav = document.getElementById("b-nav");
-//     bottomNav.style.display = "flex"; // block ki jagah flex use karo
-//     const subDiv = document.getElementById("subDiv");
-//     subDiv.classList.add("active")
-//     // Lock screen ko completely hide karne ke liye delay ke sath display none karna
-//     setTimeout(() => {
-//       lockScreen.style.display = "none";
-//       fetch(`https://${GetParentResourceName()}/closeUI`, { method: "POST" });
-//     }, 500);
-//   });
-// });
 const translations = {
   en: {
     heading: "Hello, Welcome!",
@@ -691,11 +631,7 @@ function initializeAppOpening() {
           '<div style="padding: 20px;">App content not available</div>';
         break;
     }
-    if (appName === "instagram") {
-      header.style.display = "none";
-    } else {
-      header.style.display = "flex";
-    }
+
     // if (appName === "maps") {
     //   header.style.display = "none";
     // }else{
@@ -797,6 +733,7 @@ window.addEventListener("message", function (event) {
   switch (data.action) {
     case "showContact":
       contactsList = data.user_data || []; // Store contacts
+      updateFavoritesList(contactsList); // Update favorites list
       break;
 
     case "phoneNumberResult":
@@ -839,6 +776,20 @@ window.addEventListener("message", function (event) {
       break;
   }
 });
+
+function updateFavoritesList(contacts) {
+  const favSection = document.querySelector("#favSection .phone-tab ul");
+  if (favSection && contacts.length > 0) {
+    favSection.innerHTML = contacts
+      .map(
+        (contact) =>
+          `<li class="contact-item" onclick="call()">⭐ ${contact.username} - ${contact.phone}</li>`
+      )
+      .join("");
+  } else if (favSection) {
+    favSection.innerHTML = '<li class="contact-item">No contacts found</li>';
+  }
+}
 
 function press(digit) {
   // Get references to the elements we need
@@ -1242,12 +1193,12 @@ const storyData = [
       {
         type: "image",
         content: "https://randomuser.me/api/portraits/men/10.jpg",
-        duration: 5000,
+        duration: 15000,
       },
       {
         type: "image",
         content: "https://randomuser.me/api/portraits/men/11.jpg",
-        duration: 5000,
+        duration: 15000,
       },
     ],
   },
@@ -1259,12 +1210,12 @@ const storyData = [
       {
         type: "image",
         content: "https://randomuser.me/api/portraits/women/10.jpg",
-        duration: 5000,
+        duration: 15000,
       },
       {
         type: "image",
         content: "https://randomuser.me/api/portraits/women/11.jpg",
-        duration: 5000,
+        duration: 15000,
       },
     ],
   },
@@ -1334,100 +1285,134 @@ function viewStory(storyId) {
     return;
   }
 
+  // Remove any existing story viewer first
+  const existingViewer = document.querySelector(".story-viewer");
+  if (existingViewer) {
+    existingViewer.remove();
+  }
+
+  const frame = document.getElementById("frame");
+
   // Create story viewer container
   const storyViewer = document.createElement("div");
   storyViewer.className = "story-viewer";
   storyViewer.innerHTML = `
-    <div class="story-header">
-      <img src="${story.image}" class="story-user-avatar">
-      <span class="story-username">${story.username}</span>
-      <button class="close-story-btn">&times;</button>
-    </div>
     <div class="story-progress-container">
       ${story.stories
         .map(
-          (_, index) => `
+          () => `
         <div class="story-progress-bar">
-          <div class="story-progress-bar-fill" data-index="${index}"></div>
+          <div class="story-progress-bar-fill"></div>
         </div>
       `
         )
         .join("")}
     </div>
+    <div class="story-header">
+      <img src="https://randomuser.me/api/portraits/men/${storyId}.jpg" class="story-user-avatar" />
+      <div class="story-username">${story.username}</div>
+      <button class="close-story-btn">×</button>
+    </div>
     <div class="story-content-container">
-      <img src="${
-        story.stories[0].content
-      }" class="story-content" alt="Story Image">
+      <img class="story-content" />
+      <div class="story-navigation">
+        <div class="story-nav-prev"></div>
+        <div class="story-nav-next"></div>
+      </div>
     </div>
   `;
 
-  // Append to body
-  document.body.appendChild(storyViewer);
+  // Append to frame
+  frame.appendChild(storyViewer);
 
   const storyContentImg = storyViewer.querySelector(".story-content");
-  const progressBarFills = storyViewer.querySelectorAll(
-    ".story-progress-bar-fill"
-  );
+  const progressBars = storyViewer.querySelectorAll(".story-progress-bar-fill");
   const closeBtn = storyViewer.querySelector(".close-story-btn");
+  const prevNav = storyViewer.querySelector(".story-nav-prev");
+  const nextNav = storyViewer.querySelector(".story-nav-next");
 
   let currentStoryIndex = 0;
-  let storyTimeout;
+  let autoAdvanceTimeout = null;
 
-  // Function to show next story
-  function showNextStory() {
-    if (currentStoryIndex < story.stories.length) {
-      const currentStory = story.stories[currentStoryIndex];
-      storyContentImg.src = currentStory.content;
+  function showStory(index) {
+    if (index < 0 || index >= story.stories.length) return;
 
-      // Reset all progress bars
-      progressBarFills.forEach((fill) => (fill.style.width = "0%"));
-
-      // Animate current progress bar
-      const currentProgressBar = progressBarFills[currentStoryIndex];
-      currentProgressBar.style.transition = `width ${currentStory.duration}ms linear`;
-      currentProgressBar.style.width = "100%";
-
-      // Set timeout for next story
-      storyTimeout = setTimeout(() => {
-        currentStoryIndex++;
-        if (currentStoryIndex < story.stories.length) {
-          showNextStory();
-        } else {
-          closeStoryViewer();
-        }
-      }, currentStory.duration);
+    // Clear any existing timeout
+    if (autoAdvanceTimeout) {
+      clearTimeout(autoAdvanceTimeout);
     }
+
+    currentStoryIndex = index;
+    const currentStory = story.stories[index];
+
+    // Reset all progress bars
+    progressBars.forEach((bar, i) => {
+      if (i < index) {
+        bar.style.width = "100%";
+      } else if (i === index) {
+        bar.style.width = "0%";
+        // Animate current progress bar
+        bar.style.width = "100%";
+        bar.style.transition = `width ${currentStory.duration}ms linear`;
+      } else {
+        bar.style.width = "0%";
+        bar.style.transition = "none";
+      }
+    });
+
+    // Show current story
+    storyContentImg.src = currentStory.content;
+
+    // Start auto-advance timer
+    startAutoAdvance();
   }
 
-  // Close story viewer
-  function closeStoryViewer() {
-    // Clear any pending timeout
-    if (storyTimeout) {
-      clearTimeout(storyTimeout);
+  // Navigation handlers
+  prevNav.addEventListener("click", () => {
+    if (currentStoryIndex > 0) {
+      showStory(currentStoryIndex - 1);
     }
-    document.body.removeChild(storyViewer);
-  }
+  });
 
-  // Event listeners
-  closeBtn.addEventListener("click", closeStoryViewer);
-
-  storyContentImg.addEventListener("click", () => {
-    // Clear previous timeout
-    if (storyTimeout) {
-      clearTimeout(storyTimeout);
-    }
-
-    currentStoryIndex++;
-    if (currentStoryIndex < story.stories.length) {
-      showNextStory();
+  nextNav.addEventListener("click", () => {
+    if (currentStoryIndex < story.stories.length - 1) {
+      showStory(currentStoryIndex + 1);
     } else {
       closeStoryViewer();
     }
   });
 
-  // Start showing stories
-  showNextStory();
+  function closeStoryViewer() {
+    // Clear any existing timeout
+    if (autoAdvanceTimeout) {
+      clearTimeout(autoAdvanceTimeout);
+    }
+
+    // Remove the story viewer if it exists
+    if (storyViewer && storyViewer.parentNode) {
+      storyViewer.parentNode.removeChild(storyViewer);
+    }
+  }
+
+  // Close button handler
+  closeBtn.addEventListener("click", closeStoryViewer);
+
+  // Start with first story
+  showStory(0);
+
+  // Auto-advance timer
+  function startAutoAdvance() {
+    const currentStory = story.stories[currentStoryIndex];
+    autoAdvanceTimeout = setTimeout(() => {
+      if (currentStoryIndex < story.stories.length - 1) {
+        showStory(currentStoryIndex + 1);
+      } else {
+        closeStoryViewer();
+      }
+    }, currentStory.duration);
+  }
 }
+
 // Function to render feed posts
 function renderFeed() {
   const feedSection = document.getElementById("feed-section");
@@ -1495,27 +1480,6 @@ function toggleLike(icon) {
 }
 
 // Switch Instagram Tab Function
-function switchInstaTab(tab) {
-  const usersList = document.getElementById("users-list");
-  const storySection = document.getElementById("story-section");
-  const feedSection = document.getElementById("feed-section");
-  const instaNotch = document.querySelector(".insta-notch");
-  const chatSection = document.getElementById("chat-section");
-
-  if (tab === "chat-section") {
-    usersList.style.display = "block";
-    storySection.style.display = "none";
-    feedSection.style.display = "none";
-    instaNotch.style.display = "none";
-    chatSection.style.display = "none";
-  } else {
-    usersList.style.display = "none";
-    storySection.style.display = "block";
-    feedSection.style.display = "block";
-    instaNotch.style.display = "flex";
-    chatSection.style.display = "none";
-  }
-}
 
 // Open Chat User Function
 function openChatUser(username) {
@@ -1860,15 +1824,18 @@ document.addEventListener("DOMContentLoaded", function () {
 window.addEventListener("message", function (event) {
   if (event.data.action === "showContact") {
     const contacts = event.data.user_data; // Assume the contacts are in event.data.contacts
-
     // Call the function to display the contacts
     showContactsUI(contacts);
   }
 });
 
+let allContacts = []; // To store the fetched contacts
+
+// Show all the contacts in the message list
 function showContactsUI(contacts) {
+  allContacts = contacts; // Save contacts for the modal
   const messageList = document.getElementById("messageList");
-  messageList.innerHTML = "";
+  messageList.innerHTML = ""; // Clear previous list
 
   contacts.forEach((contact) => {
     const chatItem = document.createElement("div");
@@ -1888,6 +1855,83 @@ function showContactsUI(contacts) {
     messageList.appendChild(chatItem);
   });
 }
+
+// Open the modal when user clicks the "+" button
+function openGroupModal() {
+  const modal = document.getElementById("groupModal");
+  const userList = document.getElementById("groupUserList");
+  userList.innerHTML = ""; // Clear previous checkboxes
+
+  allContacts.forEach((contact, index) => {
+    const userItem = document.createElement("div");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = contact.username; // only username in value
+    checkbox.id = `user_${index}`;
+    checkbox.setAttribute("data-phone", contact.phone); // store phone in data attribute
+
+    const label = document.createElement("label");
+    label.setAttribute("for", `user_${index}`);
+    label.innerText = `${contact.username} (${contact.phone})`;
+
+    userItem.appendChild(checkbox);
+    userItem.appendChild(label);
+    userList.appendChild(userItem);
+  });
+
+  modal.style.display = "flex";
+}
+
+// Create the group and send the data to the server
+function createGroup() {
+  const groupName = document.getElementById("groupNameInput").value;
+  const checkboxes = document.querySelectorAll(
+    "#groupUserList input[type='checkbox']:checked"
+  );
+
+  const selectedUsers = Array.from(checkboxes).map((cb) => ({
+    username: cb.value,
+    phone: cb.getAttribute("data-phone"),
+  }));
+
+  if (groupName === "" || selectedUsers.length === 0) {
+    return;
+  }
+
+  const groupData = {
+    name: groupName,
+    members: selectedUsers,
+  };
+
+  fetch(`https://${GetParentResourceName()}/group:display`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify(groupData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Group Created:", data);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
+  document.getElementById("groupModal").style.display = "none";
+  document.getElementById("groupNameInput").value = "";
+
+  console.log("Group creation triggered!");
+}
+
+// Add event listeners
+document
+  .getElementById("openGroupModalButton")
+  .addEventListener("click", openGroupModal);
+document
+  .getElementById("createGroupButton")
+  .addEventListener("click", createGroup);
 
 // Send message to Lua
 let selectedChatUser = null; // To store the selected user's username
@@ -1925,14 +1969,27 @@ function openChatTextUser(username) {
 
 // Send message to the selected user
 function sendMessageToServer() {
-  const message = document.getElementById("messageInputPhone").value;
+  const messageInput = document.getElementById("messageInputPhone");
+  const message = messageInput.value;
 
-  if (!selectedChatUser || !message) {
+  if (!selectedChatUser || !message.trim()) {
     console.warn("Either no user selected or message is empty.");
     return;
   }
 
-  // Send the message directly to the Lua NUI callback
+  // const messageList = document.getElementById("phoneMessageList");
+
+  // // Show message instantly in UI (temporary)
+  // const msgItem = document.createElement("div");
+  // msgItem.classList.add("message-item", "sent"); // Since it's sent by you
+  // msgItem.innerHTML = `${message}`;
+  // messageList.appendChild(msgItem);
+  // messageList.scrollTop = messageList.scrollHeight;
+
+  // Clear input field
+  messageInput.value = "";
+
+  // Send to server
   fetch(`https://${GetParentResourceName()}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1940,22 +1997,45 @@ function sendMessageToServer() {
       receiver: selectedChatUser,
       message: message,
     }),
-  })
-    .then(() => {
-      // Clear the input field
-      document.getElementById("messageInputPhone").value = "";
-
-      // Display the sent message in the chat UI
-      const messageList = document.getElementById("phoneMessageList");
-      const msgItem = document.createElement("div");
-      msgItem.classList.add("message-item");
-      msgItem.innerHTML = `<strong>You:</strong> ${message}`;
-      messageList.appendChild(msgItem);
-    })
-    .catch((err) => {
-      console.error("Error sending message:", err);
-    });
+  }).catch((err) => {
+    console.error("Error sending message:", err);
+    // Optional: Show error message or remove the temporary message
+  });
 }
+
+let lastMessageId = 0; // Track last message shown
+
+window.addEventListener("message", function (event) {
+  const data = event.data;
+
+  if (data.type === "receiveMessages") {
+    const messages = data.messages;
+    const messageList = document.getElementById("phoneMessageList");
+    const currentPlayer = data.name || "AsyncPc1";
+
+    messages.forEach((msg) => {
+      // Only append messages newer than lastMessageId
+      if (msg.id > lastMessageId) {
+        const msgItem = document.createElement("div");
+        msgItem.classList.add("message-item");
+
+        if (msg.sender === currentPlayer) {
+          msgItem.classList.add("sent");
+        } else {
+          msgItem.classList.add("received");
+        }
+
+        msgItem.innerHTML = `${msg.message}`;
+        messageList.appendChild(msgItem);
+
+        lastMessageId = msg.id; // Update last seen ID
+      }
+    });
+
+    // Scroll to bottom
+    messageList.scrollTop = messageList.scrollHeight;
+  }
+});
 
 // Close the chat screen (go back to contacts list or home screen)
 function closeMesChat() {
@@ -1968,12 +2048,12 @@ function closeMesChat() {
 // Close the chat screen (go back to contacts list or home screen)
 
 // Add message to chat UI
-function addMessageToUI(msg) {
-  const chatBox = document.getElementById("chatBox");
-  const div = document.createElement("div");
-  div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-  chatBox.appendChild(div);
-}
+// function addMessageToUI(msg) {
+//   const chatBox = document.getElementById("chatBox");
+//   const div = document.createElement("div");
+//   div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+//   chatBox.appendChild(div);
+// }
 
 // When server sends previous or new messages
 window.addEventListener("message", function (event) {
@@ -1982,15 +2062,15 @@ window.addEventListener("message", function (event) {
   }
 });
 
-function showMessages(messages) {
-  const chatBox = document.getElementById("chatBox");
-  chatBox.innerHTML = "";
-  messages.forEach((msg) => {
-    const msgDiv = document.createElement("div");
-    msgDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-    chatBox.appendChild(msgDiv);
-  });
-}
+// function showMessages(messages) {
+//   const chatBox = document.getElementById("chatBox");
+//   chatBox.innerHTML = "";
+//   messages.forEach((msg) => {
+//     const msgDiv = document.createElement("div");
+//     msgDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+//     chatBox.appendChild(msgDiv);
+//   });
+// }
 
 function getRandomTime() {
   const times = ["5 mins ago", "Yesterday", "2 days ago", "3 hours ago"];
@@ -2005,6 +2085,9 @@ function clearNumber() {
   document.getElementById("saveNumberBtn").classList.add("hidden");
 }
 
+// Add recentCalls array to store recent calls
+let recentCalls = [];
+
 function call() {
   const dialDisplay = document.getElementById("dialDisplay");
   const number = dialDisplay.innerText;
@@ -2013,6 +2096,20 @@ function call() {
   const matchedContact = contactsList.find(
     (contact) => contact.phone === number
   );
+
+  // Add to recent calls
+  const currentTime = new Date();
+  const callEntry = {
+    name: matchedContact ? matchedContact.username : number,
+    phone: number,
+    time: currentTime.toISOString(),
+    timestamp: currentTime.getTime(),
+  };
+
+  recentCalls.unshift(callEntry); // Add to start of array
+  if (recentCalls.length > 10) recentCalls.pop(); // Keep only last 10 calls
+
+  updateRecentsList();
 
   if (matchedContact) {
     showNotification(`Calling ${matchedContact.username}...`);
@@ -2024,4 +2121,678 @@ function call() {
   setTimeout(() => {
     dialDisplay.innerText = "Enter Number";
   }, 1000);
+}
+
+function updateRecentsList() {
+  const recentsSection = document.querySelector(
+    "#recentsSection .phone-tab ul"
+  );
+  if (recentsSection && recentCalls.length > 0) {
+    recentsSection.innerHTML = recentCalls
+      .map((call) => {
+        const timeAgo = getTimeAgo(new Date(call.timestamp));
+        return `<li class="contact-item" onclick="dialNumber('${call.phone}')">
+                <div class="recent-call-info">
+                  <span class="recent-call-icon">📞</span>
+                  <div class="recent-call-details">
+                    <div class="recent-call-name">${call.name}</div>
+                    <div class="recent-call-time">${timeAgo}</div>
+                  </div>
+                </div>
+              </li>`;
+      })
+      .join("");
+  } else if (recentsSection) {
+    recentsSection.innerHTML = '<li class="contact-item">No recent calls</li>';
+  }
+}
+
+function dialNumber(number) {
+  const dialDisplay = document.getElementById("dialDisplay");
+  dialDisplay.innerText = number;
+  switchTab("dialSection", document.querySelector(".menu-item:last-child"));
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays} days ago`;
+}
+
+// Group Modal Functionality
+document.addEventListener("DOMContentLoaded", function () {
+  const openGroupModalButton = document.getElementById("openGroupModalButton");
+  const groupModal = document.getElementById("groupModal");
+  const cancelGroupButton = document.getElementById("cancelGroupButton");
+  const createGroupButton = document.getElementById("createGroupButton");
+  const groupNameInput = document.getElementById("groupNameInput");
+
+  // Open modal when plus button is clicked
+  openGroupModalButton.addEventListener("click", function () {
+    groupModal.style.display = "flex";
+  });
+
+  // Close modal when cancel button is clicked
+  cancelGroupButton.addEventListener("click", function () {
+    groupModal.style.display = "none";
+    groupNameInput.value = ""; // Clear input
+  });
+
+  // Close modal when clicking outside the modal content
+  groupModal.addEventListener("click", function (e) {
+    if (e.target === groupModal) {
+      groupModal.style.display = "none";
+      groupNameInput.value = ""; // Clear input
+    }
+  });
+
+  // Create group functionality
+  createGroupButton.addEventListener("click", function () {
+    const groupName = groupNameInput.value.trim();
+    if (groupName) {
+      // Here you can add your group creation logic
+      console.log("Creating group:", groupName);
+      groupModal.style.display = "none";
+      groupNameInput.value = ""; // Clear input
+    } else {
+      console.log("Please enter a group name");
+    }
+  });
+});
+let currentGroupId = null;
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "displayGroups") {
+    const groupContainer = document.getElementById("groupList");
+    groupContainer.innerHTML = "";
+
+    event.data.groups.forEach((group) => {
+      const btn = document.createElement("button");
+      btn.innerText = group.name;
+      btn.onclick = () => {
+        currentGroupId = group.id;
+        document.getElementById("gc-name").innerText = group.name;
+        // Request messages
+        fetch(`https://${GetParentResourceName()}/getGroupMessages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ groupId: group.id }),
+        });
+
+        document.getElementById("groupChatScreen").style.display = "block";
+        document.getElementById("openGroupModalButton").style.display = "none";
+        document.getElementById("nav-sn2").style.display = "none";
+      };
+      groupContainer.appendChild(btn);
+    });
+  }
+
+  if (event.data.action === "loadGroupMessages") {
+    const msgContainer = document.querySelector(".group-chat-messages");
+    msgContainer.innerHTML = "";
+    event.data.messages.forEach((msg) => {
+      const div = document.createElement("div");
+      const time = new Date(msg.timestamp * 1000).toLocaleTimeString();
+      div.innerHTML = `
+      <div class="message-gc">
+      <p>${msg.sender} :</p>
+      <p>${msg.message} <span>${time}</span></p>
+      </div>
+       
+      
+      `;
+      msgContainer.appendChild(div);
+    });
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+});
+
+document
+  .querySelector(".group-chat-input button")
+  .addEventListener("click", () => {
+    const input = document.querySelector(".group-chat-input input");
+    const message = input.value.trim();
+    if (!message || !currentGroupId) return;
+
+    fetch(`https://${GetParentResourceName()}/sendGroupMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        groupId: currentGroupId,
+        message: message,
+      }),
+    });
+
+    input.value = "";
+  });
+
+// Back Button
+document
+  .querySelector(".group-chat-back")
+  .addEventListener("click", function () {
+    document.getElementById("groupChatScreen").style.display = "none";
+    document.getElementById("openGroupModalButton").style.display = "block";
+    document.getElementById("nav-sn2").style.display = "flex";
+  });
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "displayMembers") {
+    const chatBox = document.getElementById("chatMembers");
+    chatBox.innerHTML = "";
+    event.data.members.forEach((member) => {
+      const div = document.createElement("div");
+      div.innerText = `${member.username} (${member.phone})`;
+      chatBox.appendChild(div);
+    });
+  }
+});
+document.getElementById("sendBtn").addEventListener("click", () => {
+  const input = document.getElementById("messageInput");
+  const message = input.value.trim();
+  if (!message || !window.currentGroupId) return;
+
+  fetch(`https://${GetParentResourceName()}/sendGroupMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      groupId: window.currentGroupId,
+      sender: window.playerName || "Unknown", // make sure to set this somewhere
+      message: message,
+    }),
+  });
+
+  input.value = "";
+});
+function switchTabCht(tab) {
+  const chatScreen = document.getElementById("messageList");
+  const groupSection = document.getElementById("groupList").parentElement; // message-olma containing groupList + groupChatScreen
+
+  if (tab === "chat") {
+    chatScreen.style.display = "block";
+    groupSection.style.display = "none";
+  } else if (tab === "groups") {
+    chatScreen.style.display = "none";
+    groupSection.style.display = "block";
+  }
+}
+
+///////////////////////////////////gc ka code
+
+// ... existing code ...
+
+// Add member modal functionality
+let currentGroupMembers = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Add event listener for the add members button
+  const addMembersBtn = document.querySelector(".add-members");
+  if (addMembersBtn) {
+    addMembersBtn.addEventListener("click", openAddMemberModal);
+  }
+
+  // Add event listener for the close button
+  const closeModalBtn = document.getElementById("closeMemberModal");
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", () => {
+      document.getElementById("addMemberModal").style.display = "none";
+    });
+  }
+
+  // Add event listener for the confirm button
+  const confirmBtn = document.getElementById("confirmAddMembersButton");
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", handleAddMembers);
+  }
+
+  // Add event delegation for member removal
+  document.addEventListener("click", function (e) {
+    if (e.target && e.target.classList.contains("member-remove")) {
+      const username = e.target.dataset.username;
+      if (username) {
+        removeMemberFromGroup(username);
+      }
+    }
+  });
+});
+
+function showWarning(message) {
+  const warningDiv = document.getElementById("memberWarning");
+  if (warningDiv) {
+    warningDiv.textContent = message;
+    warningDiv.style.display = "block";
+    setTimeout(() => {
+      warningDiv.style.display = "none";
+    }, 3000);
+  }
+}
+
+function openAddMemberModal() {
+  const modal = document.getElementById("addMemberModal");
+  if (!modal) return;
+
+  modal.style.display = "block";
+
+  // Clear previous lists
+  const existingList = document.getElementById("existingMembersList");
+  const addList = document.getElementById("addMemberUserList");
+  if (existingList) existingList.innerHTML = "";
+  if (addList) addList.innerHTML = "";
+
+  // Get current group members
+  fetch(`https://${GetParentResourceName()}/getGroupMembers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ groupId: currentGroupId }),
+  });
+}
+
+function updateMemberLists(members) {
+  currentGroupMembers = members;
+  const existingList = document.getElementById("existingMembersList");
+  const addList = document.getElementById("addMemberUserList");
+
+  if (!existingList || !addList) return;
+
+  // Clear previous lists
+  existingList.innerHTML = "";
+  addList.innerHTML = "";
+
+  // Show existing members
+  members.forEach((member) => {
+    const memberItem = document.createElement("div");
+    memberItem.classList.add("member-item");
+    memberItem.innerHTML = `
+            <div class="member-info">
+                <div class="member-name">${member.username}</div>
+                <div class="member-phone">${member.phone}</div>
+            </div>
+            <button class="member-remove" data-username="${member.username}" type="button">×</button>
+        `;
+    existingList.appendChild(memberItem);
+  });
+
+  // Show available contacts for adding
+  if (allContacts) {
+    allContacts.forEach((contact) => {
+      // Skip if already a member
+      if (members.some((m) => m.username === contact.username)) return;
+
+      const memberItem = document.createElement("div");
+      memberItem.classList.add("member-item");
+      memberItem.innerHTML = `
+                <input type="checkbox" class="member-checkbox" data-username="${contact.username}" data-phone="${contact.phone}">
+                <div class="member-info">
+                    <div class="member-name">${contact.username}</div>
+                    <div class="member-phone">${contact.phone}</div>
+                </div>
+            `;
+      addList.appendChild(memberItem);
+    });
+  }
+}
+
+function handleAddMembers() {
+  const selectedMembers = document.querySelectorAll(".member-checkbox:checked");
+  if (selectedMembers.length === 0) {
+    showWarning("Please select at least one member to add");
+    return;
+  }
+
+  let addedCount = 0;
+  selectedMembers.forEach((checkbox) => {
+    const username = checkbox.dataset.username;
+
+    // Check if member already exists
+    if (currentGroupMembers.some((m) => m.username === username)) {
+      showWarning(`${username} is already a member of this group`);
+      return;
+    }
+
+    const memberData = {
+      groupId: currentGroupId,
+      member: {
+        username: checkbox.dataset.username,
+        phone: checkbox.dataset.phone,
+      },
+    };
+
+    fetch(`https://${GetParentResourceName()}/groupAddMembers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(memberData),
+    }).then(() => {
+      addedCount++;
+      if (addedCount === selectedMembers.length) {
+        // Refresh member list only after all members are added
+        refreshMemberList();
+      }
+    });
+  });
+
+  // Close modal
+  document.getElementById("addMemberModal").style.display = "none";
+}
+
+function removeMemberFromGroup(username) {
+  if (!username || !currentGroupId) {
+    console.error("Missing username or group ID for member removal");
+    showWarning("Cannot remove member: Missing information");
+    return;
+  }
+
+  const data = {
+    groupId: currentGroupId,
+    username: username,
+  };
+
+  fetch(`https://${GetParentResourceName()}/group:removeMember`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.success) {
+        showWarning(response.message || "Failed to remove member");
+      }
+    })
+    .catch((error) => {
+      console.error("Error removing member:", error);
+      showWarning("Failed to remove member. Please try again.");
+    });
+}
+
+function refreshMemberList() {
+  if (!currentGroupId) return;
+
+  fetch(`https://${GetParentResourceName()}/getGroupMembers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ groupId: currentGroupId }),
+  });
+}
+
+// Update the existing message event listener
+window.addEventListener("message", function (event) {
+  if (event.data.action === "displayMembers") {
+    updateMemberLists(event.data.members);
+  }
+  // ... keep other existing message handlers ...
+});
+
+// Close modal when clicking outside
+window.addEventListener("click", function (event) {
+  const modal = document.getElementById("addMemberModal");
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+});
+
+// ... existing code ...
+
+// Instagram Authentication
+document.addEventListener("DOMContentLoaded", function () {
+  // Get DOM elements
+  const showSignupBtn = document.getElementById("show-signup");
+  const showLoginBtn = document.getElementById("show-login");
+  const loginForm = document.getElementById("login-form");
+  const signupForm = document.getElementById("signup-form");
+  const loginBtn = document.getElementById("login-btn");
+  const signupBtn = document.getElementById("signup-btn");
+  const instagramAuth = document.getElementById("instagram-auth");
+  const instagramMain = document.getElementById("instagram-main");
+
+  // Show signup form
+  showSignupBtn.addEventListener("click", function () {
+    loginForm.style.display = "none";
+    signupForm.style.display = "flex";
+  });
+
+  // Show login form
+  showLoginBtn.addEventListener("click", function () {
+    signupForm.style.display = "none";
+    loginForm.style.display = "flex";
+  });
+
+  // Handle login
+  loginBtn.addEventListener("click", function () {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+
+    if (!username || !password) {
+      showError("Please fill in all fields");
+      return;
+    }
+    fetch(`https://${GetParentResourceName()}/loginUser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
+
+    // Here you would typically make an API call to verify credentials
+    // For demo purposes, we'll use a simple check
+  });
+
+  // Handle signup
+  signupBtn.addEventListener("click", function () {
+    const username = document.getElementById("signup-username").value;
+    const email = document.getElementById("signup-email").value;
+    const password = document.getElementById("signup-password");
+    const confirmPassword = document.getElementById("signup-confirm-password");
+
+    if (!username || !email || !password.value || !confirmPassword.value) {
+      showError("Please fill in all fields");
+      return;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      showError("Passwords do not match");
+      return;
+    }
+
+    fetch(`https://${GetParentResourceName()}/registerUser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password: password.value,
+        email,
+      }),
+    });
+
+    // Store user data (in a real app, this would be done on a server)
+    // localStorage.setItem(username, password.value);
+    // localStorage.setItem(username + '_email', email);
+
+    // Log the user in
+  });
+
+  // Helper function to show error messages
+  function showError(message) {
+    // Remove any existing error message
+    const existingError = document.querySelector(".auth-error");
+    if (existingError) {
+      existingError.remove();
+    }
+
+    // Create and show new error message
+    const error = document.createElement("div");
+    error.className = "auth-error";
+    error.textContent = message;
+
+    const activeForm =
+      signupForm.style.display === "none" ? loginForm : signupForm;
+    activeForm.insertBefore(error, activeForm.firstChild);
+
+    // Remove error after 3 seconds
+    setTimeout(() => error.remove(), 3000);
+  }
+
+  // Helper function for successful login
+
+  window.addEventListener("message", function (event) {
+    if (event.data.action === "showInstagram") {
+      if (event.data.username) {
+        console.log(JSON.stringify(event.data.username));
+        localStorage.setItem("userDetails", event.data.username);
+        instagramAuth.style.display = "none";
+        instagramMain.style.display = "block";
+        renderStories();
+        renderFeed();
+      }
+    }
+  });
+  instagramAuth.style.display = "none";
+  instagramMain.style.display = "block";
+  renderStories();
+  renderFeed();
+  var i = localStorage.getItem("userDetails");
+  if (i) {
+    instagramAuth.style.display = "none";
+    instagramMain.style.display = "block";
+    renderStories();
+    renderFeed();
+  }
+
+  window.addEventListener("message", function (event) {
+    const data = event.data;
+
+    if (data.type === "instagram:loginFailed") {
+      showError(data.message); // Show the error message in UI
+    }
+
+    if (data.type === "instagram:loginSuccess") {
+      loginSuccess(data.details); // Show main app
+    }
+  });
+  function showError(message) {
+    const errorBox = document.createElement("div");
+    errorBox.className = "auth-error";
+    errorBox.innerText = message;
+
+    const form = document.querySelector("#login-form");
+    form.prepend(errorBox);
+
+    setTimeout(() => errorBox.remove(), 3000);
+  }
+
+  // Check if user is already logged in
+});
+
+// ... existing code ...
+
+// Add these functions after your existing Instagram-related functions
+
+function openUploadSection() {
+  document.getElementById("upload-post-section").style.display = "block";
+  document.getElementById("upload-overlay").style.display = "block";
+}
+
+function closeUploadSection() {
+  document.getElementById("upload-post-section").style.display = "none";
+  document.getElementById("upload-overlay").style.display = "none";
+  // Reset the form
+  document.getElementById("link-input").value = "";
+  document.getElementById("caption-input").value = "";
+}
+
+// Add event listener for the share button
+document
+  .getElementById("share-link-btn")
+  .addEventListener("click", function () {
+    const link = document.getElementById("link-input").value.trim();
+    const caption = document.getElementById("caption-input").value.trim();
+
+    if (!link) {
+      alert("⚠️ Please paste a link.");
+      return;
+    }
+    var i = localStorage.getItem("userDetails");
+    // Send to Lua via NUI
+    fetch(`https://${GetParentResourceName()}/uploadPost`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        username: i.username,
+        image: link,
+        caption: caption,
+      }),
+    });
+
+    // Optionally reset the form
+    document.getElementById("link-input").value = "";
+    document.getElementById("caption-input").value = "";
+  });
+window.addEventListener("message", function (event) {
+  if (event.data.type === "showPosts") {
+    renderFeed(event.data.posts);
+    console.log(JSON.stringify(event.data.posts), "<<<<<<<<<<<<<<<<<");
+  }
+});
+
+function renderFeed(posts) {
+  const feed = document.getElementById("instagram-feed");
+  feed.innerHTML = "";
+
+  posts.forEach((post) => {
+    const postEl = document.createElement("div");
+    postEl.className = "insta-post";
+    postEl.innerHTML = `
+          <div class="post-username">@${post.username}</div>
+          <img src=${post.link} alt=""/>
+          <p class="post-caption">${post.caption}</p>
+          <small class="post-time">${post.date}</small>
+          
+          
+      `;
+    feed.appendChild(postEl);
+  });
+
+  // Like Button Click
+  document.querySelectorAll(".like-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const username = localStorage.getItem("instagram_logged_in");
+      fetch(`https://${GetParentResourceName()}/likePost`, {
+        method: "POST",
+        body: JSON.stringify({ id, username }),
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+  });
+
+  // Comment Button Click
+  document.querySelectorAll(".comment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const comment = document.querySelector(
+        `.comment-input[data-id="${id}"]`
+      ).value;
+      const username = localStorage.getItem("instagram_logged_in");
+      if (comment.trim() !== "") {
+        fetch(`https://${GetParentResourceName()}/commentPost`, {
+          method: "POST",
+          body: JSON.stringify({ id, username, comment }),
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    });
+  });
 }

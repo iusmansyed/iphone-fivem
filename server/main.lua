@@ -288,71 +288,25 @@ AddEventHandler('qb-core:phone:sendMessage', function(data)
     local message = data.message
     local src = source
 
-    -- First check if a conversation already exists between these users
-    MySQL.Async.fetchAll(
-        "SELECT id, message FROM mobile_messages WHERE (sender = @sender AND receiver = @receiver) OR (sender = @receiver AND receiver = @sender) LIMIT 1",
+    -- Insert the message as an individual entry in the database
+    MySQL.Async.execute("INSERT INTO mobile_messages (sender, receiver, message) VALUES (@sender, @receiver, @message)",
         {
             ["@sender"] = sender,
-            ["@receiver"] = receiver
-        }, function(results)
-            if results and #results > 0 then
-                -- Conversation exists, update the existing record
-                local existingId = results[1].id
-                local existingMessages = json.decode(results[1].message or "[]") -- Ensure messages field is decoded correctly
-
-                -- Add new message to the array
-                table.insert(existingMessages, {
+            ["@receiver"] = receiver,
+            ["@message"] = message
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                print("Message saved individually")
+                -- Trigger event to notify message sent
+                TriggerClientEvent('qb-core:phone:messageSent', src)
+                -- Send the message to the clients
+                TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
                     sender = sender,
                     receiver = receiver,
-                    message = message,
-                    timestamp = os.time()
-                })
-
-                -- Update the existing row with the new messages array
-                MySQL.Async.execute(
-                    "UPDATE mobile_messages SET message = @message, timestamp = CURRENT_TIMESTAMP WHERE id = @id", {
-                        ["@id"] = existingId,
-                        ["@message"] = json.encode(existingMessages) -- Ensure messages are stored as a JSON array
-                    }, function(rowsChanged)
-                        if rowsChanged > 0 then
-                            print("Message added to existing conversation")
-                            TriggerClientEvent('qb-core:phone:messageSent', src)
-                            TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
-                                sender = sender,
-                                receiver = receiver, -- Include receiver in the response
-                                message = message
-                            }})
-                        else
-                            print("Failed to update conversation")
-                        end
-                    end)
+                    message = message
+                }})
             else
-                -- New conversation, create a new record
-                local messagesArray = {{
-                    sender = sender,
-                    receiver = receiver,
-                    message = message,
-                    timestamp = os.time()
-                }}
-
-                MySQL.Async.execute(
-                    "INSERT INTO mobile_messages (sender, receiver, message) VALUES (@sender, @receiver, @message)", {
-                        ["@sender"] = sender,
-                        ["@receiver"] = receiver,
-                        ["@message"] = json.encode(messagesArray) -- Store as a JSON array for new conversation
-                    }, function(rowsChanged)
-                        if rowsChanged > 0 then
-                            print("New conversation created")
-                            TriggerClientEvent('qb-core:phone:messageSent', src)
-                            TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
-                                sender = sender,
-                                receiver = receiver, -- Include receiver in the response
-                                message = message
-                            }})
-                        else
-                            print("Failed to create conversation")
-                        end
-                    end)
+                print("Failed to save message")
             end
         end)
 end)
@@ -360,32 +314,333 @@ end)
 -- Load previous messages for a user
 RegisterNetEvent('qb-core:phone:getMessages')
 AddEventHandler('qb-core:phone:getMessages', function(chatUser)
- print("Fetching messages for user: " .. json.encode(chatUser))
     local src = source
-    local username = GetPlayerName(src) -- Assuming this is how you get the logged-in user's name
-local recievername = json.encode(chatUser.sender)
-    -- Ensure that chatUser is a string (just in case it's a table or incorrect type)
-    
+    local username = GetPlayerName(src)
+    local recievername = chatUser.sender
+    local cleanedReceiverName = json.decode(recievername)
+    print("USERNAME DEBUG:", username)
+    print("RECEIVER DEBUG:", recievername)
 
-      -- Print the username correctly
-
-    -- Fetch messages where the user is either the sender or receiver
     MySQL.Async.fetchAll(
-        "SELECT id, sender, receiver, message, timestamp FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
+        "SELECT * FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
         {
             ["@user"] = username,
-            ["@chatUser"] = recievername
+            ["@chatUser"] = cleanedReceiverName
         }, function(results)
-            -- Check if any results are returned
             if results and #results > 0 then
-                -- Send the entire row data back to the client
-                print("Fetched all messages: " .. json.encode(results)) -- Debugging print
                 TriggerClientEvent('qb-core:phone:receiveMessages', src, results)
             else
-                -- If no messages are found, notify the client
+                print("❌ No messages found between " .. username .. " and " .. recievername)
                 TriggerClientEvent('qb-core:phone:receiveMessages', src, {})
-                print("No messages found for user: " .. username)
             end
         end)
 end)
 
+------------------------------------gc
+-- Server Side (Lua)
+
+-- Register an event to receive the group data from the client
+-- Server-Side (Lua): Receiving Group Data
+
+RegisterServerEvent("group:create")
+AddEventHandler("group:create", function(data)
+    local groupName = data.name
+    local members = data.members
+
+    -- Insert group name first
+    MySQL.Async.execute('INSERT INTO groups (name) VALUES (@name)', {
+        ['@name'] = groupName
+    }, function(rowsChanged)
+        if rowsChanged > 0 then
+            -- Get the last inserted group ID
+            MySQL.Async.fetchScalar('SELECT id FROM groups WHERE name = @name ORDER BY id DESC LIMIT 1', {
+                ['@name'] = groupName
+            }, function(groupId)
+                if groupId then
+                    -- Insert each member
+                    for _, member in ipairs(members) do
+                        MySQL.Async.execute(
+                            'INSERT INTO group_members (group_id, username, phone) VALUES (@group_id, @username, @phone)',
+                            {
+                                ['@group_id'] = groupId,
+                                ['@username'] = member.username,
+                                ['@phone'] = member.phone
+                            })
+                    end
+                    print("✅ Group and members saved!")
+                else
+                    print("❌ Could not fetch group ID")
+                end
+            end)
+        else
+            print("❌ Failed to insert group")
+        end
+    end)
+end)
+
+--------------------add new user functionality
+RegisterServerEvent("group:addMember")
+AddEventHandler("group:addMember", function(data)
+    local groupId = data.groupId
+    local member = data.member -- { username = "", phone = "" }
+
+    -- First check if the member already exists in this group
+    MySQL.Async.fetchScalar(
+        'SELECT COUNT(*) FROM group_members WHERE group_id = @group_id AND username = @username',
+        {
+            ['@group_id'] = groupId,
+            ['@username'] = member.username
+        },
+        function(count)
+            if count and tonumber(count) > 0 then
+                print("⚠️ Member already exists in the group. Not adding again.")
+            else
+                -- If not exists, add the member
+                MySQL.Async.execute(
+                    'INSERT INTO group_members (group_id, username, phone) VALUES (@group_id, @username, @phone)',
+                    {
+                        ['@group_id'] = groupId,
+                        ['@username'] = member.username,
+                        ['@phone'] = member.phone
+                    },
+                    function(rowsChanged)
+                        if rowsChanged > 0 then
+                            print("✅ Member added to group!")
+                        else
+                            print("❌ Failed to add member")
+                        end
+                    end
+                )
+            end
+        end
+    )
+end)
+
+
+--------------------add new user functionality
+-----------------------remove user functionality
+RegisterServerEvent("group:removeMember")
+AddEventHandler("group:removeMember", function(data)
+    local src = source
+    local groupId = data.groupId
+    local username = data.username
+
+    if not groupId or not username then
+        TriggerClientEvent("group:memberRemoved", src, false, "Missing group ID or username")
+        return
+    end
+
+    MySQL.Async.execute(
+        'DELETE FROM group_members WHERE group_id = @group_id AND username = @username',
+        {
+            ['@group_id'] = groupId,
+            ['@username'] = username
+        },
+        function(rowsChanged)
+            if rowsChanged > 0 then
+                print("✅ Member removed from group!")
+                TriggerClientEvent("group:memberRemoved", src, true, "Member removed successfully")
+                
+                -- Refresh the group members list for all clients
+                MySQL.Async.fetchAll("SELECT username, phone FROM group_members WHERE group_id = @group_id", {
+                    ['@group_id'] = groupId
+                }, function(members)
+                    TriggerClientEvent("group:receiveGroupMembers", src, members)
+                end)
+            else
+                print("❌ Member not found or already removed")
+                TriggerClientEvent("group:memberRemoved", src, false, "Member not found or already removed")
+            end
+        end
+    )
+end)
+
+-----------------------remove user functionality
+------------------------------------gc
+
+-------------------------------gc arahy hain database se
+RegisterServerEvent("group:getList")
+AddEventHandler("group:getList", function()
+    local src = source -- ✅ correct way to get the source player ID
+
+    MySQL.Async.fetchAll("SELECT id, name, timestamp FROM groups", {}, function(groups)
+        print("✅ Server: Sending group list to", src)
+        TriggerClientEvent("group:receiveGroupList", src, groups)
+    end)
+end)
+
+RegisterServerEvent("getGroupMembers")
+AddEventHandler("getGroupMembers", function(data)
+    local src = source
+    local groupId = data.groupId
+    print("gropup members data , " .. groupId)
+
+    MySQL.Async.fetchAll("SELECT username, phone FROM group_members WHERE group_id = @group_id", {
+        ['@group_id'] = groupId
+    }, function(members)
+        TriggerClientEvent("group:receiveGroupMembers", src, members)
+    end)
+end)
+
+RegisterServerEvent("group:sendMessage")
+AddEventHandler("group:sendMessage", function(data)
+    local src = source
+    local sender = GetPlayerName(src)
+    local groupId = data.groupId
+    local message = data.message
+
+    -- Save message in database
+    MySQL.Async.execute("INSERT INTO group_messages (group_id, sender, message) VALUES (@group_id, @sender, @message)",
+        {
+            ["@group_id"] = groupId,
+            ["@sender"] = sender,
+            ["@message"] = message
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                print("💾 Message saved from", sender)
+
+                -- Send message to all players (you can filter by group if needed)
+                TriggerClientEvent("group:receiveMessage", -1, {
+                    sender = sender,
+                    groupId = groupId,
+                    message = message
+                })
+            else
+                print("❌ Failed to save message")
+            end
+        end)
+end)
+RegisterServerEvent("group:getMessages")
+AddEventHandler("group:getMessages", function(groupId)
+    local src = source
+    MySQL.Async.fetchAll(
+        "SELECT sender, message, timestamp FROM group_messages WHERE group_id = @groupId ORDER BY timestamp ASC", {
+            ["@groupId"] = groupId
+        }, function(messages)
+            TriggerClientEvent("group:loadMessages", src, {
+                action = "loadGroupMessages",
+                messages = messages
+            })
+        end)
+end)
+-------------------------------gc arahy hain database se
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------instagram
+--signup
+
+RegisterServerEvent("insta:registerUser")
+AddEventHandler("insta:registerUser", function(data)
+    local src = source
+    local username = data.username
+    local email = data.email
+    local password = data.password
+
+    -- Check if username exists
+    MySQL.Async.fetchScalar("SELECT username FROM instagram_users WHERE username = @username", {
+        ['@username'] = username
+    }, function(result)
+        if result then
+            print("❌ Username already exists: " .. username)
+            -- Optionally send error to client
+        else
+            -- Insert user
+            MySQL.Async.execute("INSERT INTO instagram_users (username, email, password) VALUES (@username, @email, @password)", {
+                ['@username'] = username,
+                ['@email'] = email,
+                ['@password'] = password
+            }, function(rowsChanged)
+                print("✅ Registered new user: " .. username)
+                -- Trigger login success or next steps here
+            end)
+        end
+    end)
+end)
+
+
+--login
+RegisterServerEvent("insta:loginUser")
+AddEventHandler("insta:loginUser", function(data)
+    local src = source
+    local username = data.username
+    local password = data.password
+
+    MySQL.Async.fetchAll("SELECT * FROM instagram_users WHERE username = @username", {
+        ['@username'] = username
+    }, function(result)
+        if result and result[1] then
+            local user = result[1]
+
+            -- ✅ Match both username and password
+            if user.username == username and user.password == password then
+                print("✅ Login successful for: " .. username)
+
+                TriggerClientEvent("instagram:loginSuccess", src, {
+                    username = user.username,
+                    email = user.email,
+                    password = user.password
+                })
+            else
+                print("❌ Username or Password incorrect for: " .. username)
+                TriggerClientEvent("instagram:loginFailed", src, "❌ Username or Password incorrect for: " .. username)
+
+            end
+        else
+            print("❌ Username not found: " .. username)
+            TriggerClientEvent("instagram:loginFailed", src, "❌ Username or Password incorrect for: " .. username)
+        end
+    end)
+end)
+
+
+
+
+RegisterServerEvent("insta:uploadPost")
+AddEventHandler("insta:uploadPost", function(data)
+    local src = source
+    local username = data.username
+    local caption = data.caption
+    local image = data.image
+
+    MySQL.Async.execute("INSERT INTO instagram_posts (username, image, caption) VALUES (@username, @image, @caption)", {
+        ["@username"] = username,
+        ["@image"] = image,
+        ["@caption"] = caption
+    }, function(rowsChanged)
+        print("✅ Post uploaded by: " .. username)
+        TriggerClientEvent("instagram:postUploaded", src)
+    end)
+end)
+
+
+RegisterServerEvent("insta:getAllPosts")
+AddEventHandler("insta:getAllPosts", function(src)
+    local source = src or source
+    MySQL.Async.fetchAll("SELECT * FROM instagram_posts ORDER BY id DESC", {}, function(result)
+        print("printing details",json.encode(result))
+        TriggerClientEvent("insta:loadPosts", source, result)
+    end)
+end)
+---------------------instagram

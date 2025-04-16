@@ -13,3 +13,44 @@ CREATE TABLE IF NOT EXISTS `mobile_messages` (
   `messages` TEXT NOT NULL,
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS `groups` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+
+);
+
+CREATE TABLE IF NOT EXISTS `group_members` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT,
+    username VARCHAR(255),
+    phone VARCHAR(20),
+    FOREIGN KEY (group_id) REFERENCES groups(id)
+);
+CREATE TABLE IF NOT EXISTS `group_messages` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    sender VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE IF NOT EXISTS `instagram_users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `email` VARCHAR(100),
+  `password` VARCHAR(100),
+  PRIMARY KEY (`id`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `instagram_posts` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    image TEXT,
+    caption TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

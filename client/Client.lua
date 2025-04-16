@@ -486,7 +486,6 @@ RegisterNUICallback('sendMessage', function(data, cb)
     local receiver = data.receiver
     local message = data.message
 
-
     if receiver and message ~= "" then
         -- This will trigger your server-side event handler
         TriggerServerEvent('qb-core:phone:sendMessage', {
@@ -509,7 +508,7 @@ RegisterNUICallback('getMessages', function(data, cb)
     if sender then
         -- This will trigger your server-side event handler
         TriggerServerEvent('qb-core:phone:getMessages', {
-            sender = json.encode(sender),
+            sender = json.encode(sender)
         })
     else
         print("❌ Missing receiver or empty message!")
@@ -540,18 +539,15 @@ end)
 -- client.lua
 RegisterNetEvent('qb-core:phone:receiveMessages')
 AddEventHandler('qb-core:phone:receiveMessages', function(messages)
-    -- Debugging: Print the messages received from the server
-    print("Received messages: " .. json.encode(messages))
-
-    -- You can now send this data to JavaScript via an exported function, if required
-    -- Example: Using the NUI (HTML/JS) interface to pass the data
+    -- print("Received messages: " .. json.encode(messages))
+    local name = GetPlayerName(PlayerId())
     SendNUIMessage({
-        type = 'receiveMessages', -- A custom message type to handle on the JS side
-        messages = messages
+        type = 'receiveMessages',
+        messages = messages,
+        name = name
     })
 end)
 
--- View messages for current user
 RegisterCommand("viewMessages", function()
     if currentChatUser and chatHistory[currentChatUser] then
         for _, msg in ipairs(chatHistory[currentChatUser]) do
@@ -568,3 +564,207 @@ RegisterNUICallback("loadChat", function(data, cb)
     TriggerServerEvent('qb-core:phone:getMessages', GetPlayerName(PlayerId()))
     cb({}) -- Return the response
 end)
+
+------------------------------gc
+
+-- RegisterNetEvent('groupMem')
+-- AddEventHandler('groupMem', function(data)
+--     -- Print the group details on the server console
+--     print("Group Name: " .. data.name)
+--     print("Members: " .. table.concat(data.members, ", "))
+
+--     -- Show the group details in the chat
+--     TriggerEvent("chat:addMessage", { args = {"Group Name: " .. data.name, "Members: " .. table.concat(data.members, ", ")}})
+-- end)
+
+RegisterNUICallback('group:display', function(data, cb)
+    -- Process the data
+    TriggerServerEvent("group:create", data)
+
+    -- Send a response back to the client
+    cb({
+        success = true
+    })
+end)
+------------------------------gc
+
+---------------------------gc arahy hain main.lua ki file se
+RegisterNetEvent("group:receiveGroupList")
+AddEventHandler("group:receiveGroupList", function(groups)
+    print("Received groups: " .. json.encode(groups))
+    -- Trigger NUI event to send data to JavaScript
+    SendNUIMessage({
+        action = "displayGroups",
+        groups = groups
+    })
+end)
+
+-- Requesting the group list from the server
+TriggerServerEvent("group:getList")
+
+RegisterNetEvent("group:receiveGroupMembers")
+AddEventHandler("group:receiveGroupMembers", function(members)
+    SendNUIMessage({
+        action = "displayMembers",
+        members = members
+    })
+end)
+RegisterNUICallback('getGroupMembers', function(data, cb)
+    -- Process the data
+    TriggerServerEvent("getGroupMembers", data)
+
+    -- Send a response back to the client
+    cb({
+        success = true
+    })
+end)
+
+RegisterNUICallback('sendGroupMessage', function(data, cb)
+    -- Process the data
+    local playerData = {
+        groupId = data.groupId,
+        message = data.message
+
+    }
+
+    TriggerServerEvent("group:sendMessage", data)
+
+    -- Send a response back to the client
+    cb({
+        success = true
+    })
+end)
+
+RegisterNUICallback("getGroupMessages", function(data, cb)
+    TriggerServerEvent("group:getMessages", data.groupId)
+    cb("ok")
+end)
+RegisterNetEvent("group:loadMessages")
+AddEventHandler("group:loadMessages", function(data)
+    SendNUIMessage({
+        action = "loadGroupMessages",
+        messages = data.messages
+    })
+end)
+---------------------------gc arahy hain main.lua ki file se
+
+
+
+--------------------------add member
+RegisterNUICallback("groupAddMembers", function(data, cb)
+    -- Send the data to the server to add the member
+    TriggerServerEvent("group:addMember", data)
+    cb({
+        success = true
+    })
+end)
+
+-- Add NUI callback for removing members
+RegisterNUICallback("group:removeMember", function(data, cb)
+    if not data.groupId or not data.username then
+        cb({ success = false, message = "Missing group ID or username" })
+        return
+    end
+
+    -- Trigger server event to remove member
+    TriggerServerEvent("group:removeMember", {
+        groupId = data.groupId,
+        username = data.username
+    })
+
+    cb({ success = true })
+end)
+
+-- Register event to handle member removal response
+RegisterNetEvent("group:memberRemoved")
+AddEventHandler("group:memberRemoved", function(success, message)
+    if success then
+        -- Refresh the group members list
+        TriggerServerEvent("getGroupMembers", { groupId = currentGroupId })
+    end
+    
+    -- Send message to UI to show notification
+    SendNUIMessage({
+        action = "showNotification",
+        message = message
+    })
+end)
+--------------------------add member
+
+
+
+
+
+RegisterNUICallback("registerUser", function(data, cb)
+    TriggerServerEvent("insta:registerUser", data)
+    cb({})
+end)
+
+
+RegisterNUICallback("loginUser", function(data, cb)
+    TriggerServerEvent("insta:loginUser", data)
+    cb({})
+end)
+RegisterNetEvent("instagram:loginSuccess")
+AddEventHandler("instagram:loginSuccess", function(username)
+    -- NUI focus off and show main app
+    SetNuiFocus(false, false)
+    SendNUIMessage({
+        action = "showInstagram",
+        username = username
+    })
+end)
+RegisterNetEvent("instagram:loginFailed")
+AddEventHandler("instagram:loginFailed", function(message)
+    SendNUIMessage({
+        type = "instagram:loginFailed",
+        message = message
+    })
+end)
+
+
+
+
+RegisterNUICallback("uploadPost", function(data, cb)
+    print(json.encode(data))
+    local playerName = GetPlayerName(PlayerId()) -- ya stored username
+    TriggerServerEvent("insta:uploadPost", {
+        username = playerName,
+        caption = data.caption,
+        image = data.image
+    })
+    cb("ok")
+end)
+
+
+
+
+RegisterNetEvent("insta:loadPosts")
+AddEventHandler("insta:loadPosts", function(posts)
+    print(json.encode(posts))
+    SendNUIMessage({
+        type = "showPosts",
+        posts = posts
+    })
+end)
+Citizen.CreateThread(function()
+    Citizen.Wait(50)
+    TriggerServerEvent("insta:getAllPosts")
+    TriggerServerEvent("qb-core:phone:getMessages")
+end)
+-- Optionally call on start
+
+
+
+
+
+
+
+
+
+
+
+-----------instagram---------------
+
+
+-----------instagram---------------

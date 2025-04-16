@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class="mobile">
-      <div class="frame">
+      <div class="frame" id="frame">
         <div class="subDiv" id="subDiv">
           <div class="notch">
             <p id="clock"></p>
@@ -108,13 +108,13 @@
                   </button>
                   <p>Instagram</p>
                 </div>
-                <div class="app-ic" draggable="true" data-app="whatsapp">
+                <!-- <div class="app-ic" draggable="true" data-app="whatsapp">
                   <span class="delete-icon">×</span>
                   <button>
                     <img src="/web/images/whatsapp.png" alt="Maps" />
                   </button>
                   <p>Whatsapp</p>
-                </div>
+                </div> -->
               </div>
             
               <div class="app-screen">
@@ -224,19 +224,90 @@
               </div>
               </div>
               <div id="messages-main" class="messages">
-                <div id="messageList" class="chat-box">
-                  <div onclick="openChatTextUser('john')">john</div>
-                    <!-- Chat items will be inserted here dynamically -->
+                <!-- Messages Section -->
+                <div id="messagesSection" class="message-section">
+                  <div id="messageList" class="chat-box">
+                    <p style="color: #fff; padding: 5px;">Loading ... </p>
+                    <!-- Individual chats will be inserted here dynamically -->
+                  </div>
                 </div>
-            </div>
+
+                <!-- Groups Section -->
+                <div id="groupsSection" class="groups-section" style="display: none;">
+                  <div id="groupList" class="group-list">
+                    <button>
+                      groups
+                    </button>
+                    <!-- Groups will be inserted here dynamically -->
+                  </div>
+                </div>
+
+                <!-- Group Chat Screen -->
+                <div id="groupChatScreen" class="group-chat-screen" style="display: none;">
+                  <div class="group-chat-header">
+                    <button class="group-chat-back">←</button>
+                    <div class="group-chat-name" id="gc-name">Group Name</div>
+                    <button class="add-members">+</button>
+                  </div>
+                  <div id="addMemberModal" style="display: none;">
+                    <h3>Manage Group Members</h3>
+                    <div id="memberWarning" class="member-warning" style="display: none;"></div>
+                    <div class="member-sections">
+                      <div class="existing-members-section">
+                        <h4>Current Members</h4>
+                        <div id="existingMembersList"></div>
+                      </div>
+                      <div class="add-members-section">
+                        <h4>Add New Members</h4>
+                        <div id="addMemberUserList"></div>
+                      </div>
+                    </div>
+                    <button id="confirmAddMembersButton">Add Selected Members</button>
+                    <button id="closeMemberModal" class="close-modal">×</button>
+                  </div>
+                  <div class="group-chat-messages">
+                    <!-- Group messages will be inserted here dynamically -->
+                  </div>
+                  <div class="group-chat-input">
+                    <input id="messageInput" type="text" placeholder="Type a message..." />
+                    <button id="sendBtn">
+                      <img src="./images/send.png" alt="" width="20px" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Group Creation Modal -->
+                <div id="groupModal" class="group-modal" style="display: none;">
+                  <div class="group-modal-content">
+                    <h3>Create Group</h3>
+                    <input type="text" id="groupNameInput" placeholder="Enter group name" />
+                    <div id="groupUserList" class="user-list">
+                      <!-- Users with checkboxes will be injected here -->
+                    </div>
+                    <div class="group-modal-buttons">
+                      <button id="cancelGroupButton">Cancel</button>
+                      <button id="createGroupButton">Create Group</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Create Group Button -->
+                <button id="openGroupModalButton" class="group-add-button">+</button>
+
+                <!-- Navigation Buttons -->
+                <div class="gcmsg-btmNb" id="nav-sn2">
+                  <button onclick="switchTabCht('chat')">Chat</button>
+                  <button onclick="switchTabCht('groups')">Groups</button>
+                </div>
+              </div>
             
-            <!-- Chat Screen -->
+            <!-- Individual Chat Screen -->
             <div id="chatScreen" class="chat-screen" style="display: none;">
                 <div class="chat-header">
                     <button class="back-btn" onclick="closeMesChat()">⬅ <span id="chatName"></span></button>
                 </div>
                 <div class="chat-messages" id="phoneMessageList">
-                    <!-- Old messages will be shown here -->
+                    <!-- Messages will be inserted here dynamically -->
                 </div>
                 <div class="chat-input">
                     <input type="text" id="messageInputPhone" placeholder="Type a message..." />
@@ -338,45 +409,63 @@
               </div>
               </div>
               <div style="display: none;" class="instagram">
-                <div class="insta-notch">
-                  <div class="notch-bk-btn">
-                    <button class="insta-back-button" >←</button>
-                  <h1 class="app-title">Instagram</h1>
+                <div class="instagram-auth" id="instagram-auth">
+                  <div class="instagram-logo">
+                    <h1>Instagram</h1>
                   </div>
-                  <div onclick="switchInstaTab('chat-section', this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                    <path d="M4 2h16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2zm0 2v16l3-3h13V4H4zm3 6h10v2H7v-2zm0-4h10v2H7V6zm0 8h7v2H7v-2z"/>
-                    </svg>
+                  
+                  <!-- Login Form -->
+                  <div class="auth-form" id="login-form">
+                    <input type="text" id="login-username" placeholder="Username">
+                    <input type="password" id="login-password" placeholder="Password">
+                    <button id="login-btn">Log In</button>
+                    <p class="auth-switch">Don't have an account? <span id="show-signup">Sign up</span></p>
+                  </div>
+
+                  <!-- Signup Form -->
+                  <div class="auth-form" id="signup-form" style="display: none;">
+                    <input type="text" id="signup-username" placeholder="Username">
+                    <input type="email" id="signup-email" placeholder="Email">
+                    <input type="password" id="signup-password" placeholder="Password">
+                    <input type="password" id="signup-confirm-password" placeholder="Confirm Password">
+                    <button id="signup-btn">Sign Up</button>
+                    <p class="auth-switch">Already have an account? <span id="show-login">Log in</span></p>
+                  </div>
                 </div>
-                </div>
-                <div class="instagram-story-section" id="story-section">
-                  <!-- Stories will be loaded here dynamically -->
-              </div>
-              
-              <div class="feed-section" id="feed-section">
-                  <!-- Feed posts will be loaded here dynamically -->
-              </div>
-              <div class="users-list-section" id="users-list" style="display: none;">
-                <h2 onclick="switchInstaTab('feed-section')">← Chats</h2>
-                <ul>
-                  <li onclick="openChatUser('Ali')">Ali</li>
-                  <li onclick="openChatUser('Ahmed')">Ahmed</li>
-                  <li onclick="openChatUser('Sara')">Sara</li>
-                </ul>
-              </div>
-            
-              <!-- Chat Section -->
-              <div class="chat-section" id="chat-section" style="display: none;">
-                <div class="chat-header-insta">
-                  <button onclick="goBack()">←</button>
-                <h2 id="chat-user-name"></h2>
-                </div>
-                <div class="insta-messages">
-                  <p>Chat messages will appear here...</p>
-                </div>
-                <div class="insta-message-box">
-                  <input type="text" placeholder="Type a message..." />
-                  <button><img src="./images/send.png" alt="" width="100%"></button>
+
+                <!-- Main Instagram Content (hidden initially) -->
+                <div class="instagram-main" id="instagram-main" style="display: none;">
+                  <div class="insta-notch">
+                    <h1>Instagram</h1>
+                    <button>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 2v4h10V2l2 2v3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1V4l2-2zM5 8h14v12c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div id="story-section" class="instagram-story-section"></div>
+                  <div class="overlay" id="upload-overlay"></div>
+                  <div id="upload-post-section">
+                    <button class="modal-close-btn" onclick="closeUploadSection()">×</button>
+                    <div class="upload-header">
+                      <h3>Share Link</h3>
+                    </div>
+                    <div class="link-input-container">
+                      <textarea id="link-input" placeholder="Paste a link to share..." rows="3"></textarea>
+                      <textarea id="caption-input" placeholder="Write a caption..." rows="4"></textarea>
+                    </div>
+                    <button class="upload-btn" id="share-link-btn">Share</button>
+                    <button class="cancel-btn" onclick="closeUploadSection()">Cancel</button>
+                  </div>
+                  <div id="instagram-feed" class="feed-section"></div>
+                  <div class="insta-bottom-nav">
+                    <button onclick="openUploadSection()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               </div>
