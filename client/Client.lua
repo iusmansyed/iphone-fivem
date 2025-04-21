@@ -591,7 +591,6 @@ end)
 ---------------------------gc arahy hain main.lua ki file se
 RegisterNetEvent("group:receiveGroupList")
 AddEventHandler("group:receiveGroupList", function(groups)
-    print("Received groups: " .. json.encode(groups))
     -- Trigger NUI event to send data to JavaScript
     SendNUIMessage({
         action = "displayGroups",
@@ -648,8 +647,6 @@ AddEventHandler("group:loadMessages", function(data)
 end)
 ---------------------------gc arahy hain main.lua ki file se
 
-
-
 --------------------------add member
 RegisterNUICallback("groupAddMembers", function(data, cb)
     -- Send the data to the server to add the member
@@ -662,7 +659,10 @@ end)
 -- Add NUI callback for removing members
 RegisterNUICallback("group:removeMember", function(data, cb)
     if not data.groupId or not data.username then
-        cb({ success = false, message = "Missing group ID or username" })
+        cb({
+            success = false,
+            message = "Missing group ID or username"
+        })
         return
     end
 
@@ -672,7 +672,9 @@ RegisterNUICallback("group:removeMember", function(data, cb)
         username = data.username
     })
 
-    cb({ success = true })
+    cb({
+        success = true
+    })
 end)
 
 -- Register event to handle member removal response
@@ -680,9 +682,11 @@ RegisterNetEvent("group:memberRemoved")
 AddEventHandler("group:memberRemoved", function(success, message)
     if success then
         -- Refresh the group members list
-        TriggerServerEvent("getGroupMembers", { groupId = currentGroupId })
+        TriggerServerEvent("getGroupMembers", {
+            groupId = currentGroupId
+        })
     end
-    
+
     -- Send message to UI to show notification
     SendNUIMessage({
         action = "showNotification",
@@ -691,15 +695,10 @@ AddEventHandler("group:memberRemoved", function(success, message)
 end)
 --------------------------add member
 
-
-
-
-
 RegisterNUICallback("registerUser", function(data, cb)
     TriggerServerEvent("insta:registerUser", data)
     cb({})
 end)
-
 
 RegisterNUICallback("loginUser", function(data, cb)
     TriggerServerEvent("insta:loginUser", data)
@@ -708,10 +707,14 @@ end)
 RegisterNetEvent("instagram:loginSuccess")
 AddEventHandler("instagram:loginSuccess", function(username)
     -- NUI focus off and show main app
+    print("Instagram login success for user: " .. json.encode(username))
     SetNuiFocus(false, false)
     SendNUIMessage({
         action = "showInstagram",
-        username = username
+        id = username.id,
+        username = username.username,
+        password = username.password,
+        email = username.email
     })
 end)
 RegisterNetEvent("instagram:loginFailed")
@@ -722,49 +725,235 @@ AddEventHandler("instagram:loginFailed", function(message)
     })
 end)
 
-
-
-
 RegisterNUICallback("uploadPost", function(data, cb)
     print(json.encode(data))
     local playerName = GetPlayerName(PlayerId()) -- ya stored username
     TriggerServerEvent("insta:uploadPost", {
-        username = playerName,
+        username = data.username,
         caption = data.caption,
         image = data.image
     })
     cb("ok")
 end)
 
-
-
-
 RegisterNetEvent("insta:loadPosts")
 AddEventHandler("insta:loadPosts", function(posts)
-    print(json.encode(posts))
     SendNUIMessage({
         type = "showPosts",
-        posts = posts
+        insta_posts = posts
     })
 end)
+
 Citizen.CreateThread(function()
     Citizen.Wait(50)
     TriggerServerEvent("insta:getAllPosts")
     TriggerServerEvent("qb-core:phone:getMessages")
+    TriggerServerEvent("insta:getComments")
 end)
 -- Optionally call on start
 
+RegisterNUICallback("likePost", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("insta:likePost", {
+        postId = data.postID,
+        username = data.username
+    })
+    cb("ok")
+end)
+RegisterNUICallback("addComment", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("insta:addComment", {
+        post_id = data.postId,
+        comment = data.comment,
+        username = data.username
+    })
+    cb("ok")
+end)
+
+RegisterNUICallback("viewComment", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("insta:getComments", {
+        postId = data.postId
+    })
+    cb("ok")
+end)
+RegisterNUICallback("getAllInstagramUserDetails", function(data, cb)
+    TriggerServerEvent("insta:GetAllUsersInfo", 
+        data
+    )
+    cb("ok")
+end)
+RegisterNetEvent("instagram:loadInstaAllUsers",function(users)
+    SendNUIMessage({
+        type = "loadInstaAllUsers",
+        users = users
+    })
+end)
 
 
+RegisterNetEvent("insta:sendComments", function(postId, comments)
+
+    SendNUIMessage({
+        type = "sendComments",
+        comments = comments
+    })
+end)
+-----------instagram---------------
+-- stories
+RegisterNUICallback("uploadStory", function(data, cb)
+    TriggerServerEvent("insta:uploadStory", {
+        image = data.image,
+        username = data.username
+    })
+    cb({})
+end)
+
+RegisterNUICallback("getStories", function(_, cb)
+    TriggerServerEvent("insta:getStories")
+    cb({})
+end)
+
+RegisterNetEvent("insta:loadStories")
+AddEventHandler("insta:loadStories", function(stories)
+    username = GetPlayerName(PlayerId())
+    SendNUIMessage({
+        type = "loadStories",
+        stories = stories.stories
+    })
+end)
+
+-- stories
+
+---get all users
+RegisterNUICallback("getAllUsers", function(data, cb)
+    TriggerServerEvent("insta:AllUsersGet", data)
+    cb({})
+end)
+RegisterNUICallback("renderPost", function(_, cb)
+    TriggerServerEvent("insta:getAllPosts") -- 🔁 server se fresh posts
+    cb({})
+end)
+RegisterNetEvent("instagram:loadAllUsers")
+AddEventHandler("instagram:loadAllUsers", function(users)
+    SendNUIMessage({
+        type = "instagramUsers",
+        users = users
+    })
+end)
+---get all users
+
+----follower    
+RegisterNUICallback("followUser", function(data, cb)
+    TriggerServerEvent("insta:followUser", {
+        followerId = data.followerId,
+        followingId = data.followingId
+    })
+    cb({})
+end)
+RegisterNUICallback("unfollowUser", function(data, cb)
+    TriggerServerEvent("insta:unfollowUser", {
+        followerId = data.followerId,
+        followingId = data.followingId
+    })
+    cb({})
+end)
+RegisterNUICallback("getFollowData", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("instagram:getFollowerData", data)
+    cb({})
+end)
+
+-- Trigger karna data mangwane ke liye
+
+-- Data receive karna
+RegisterNetEvent("instagram:receiveFollowerData")
+AddEventHandler("instagram:receiveFollowerData", function(followersCount, followingCount)
+    -- NUI ko bhejna
+    print("Followers: ")
+    SendNUIMessage({
+        type = "updateFollowStats",
+        followers = followersCount,
+        following = followingCount
+    })
+end)
 
 
-
-
-
-
-
+----follower    
+---update profile
+RegisterNUICallback("updateProfile", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("insta:updateProfile",data)
+    cb({})
+end)
+---update profile
 
 -----------instagram---------------
 
+-------------------pma
 
------------instagram---------------
+RegisterNUICallback('startCall', function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent('phone:call', data.phoneNumber)
+    cb({})
+end)
+RegisterNetEvent('phone:playerOffline')
+AddEventHandler('phone:playerOffline', function()
+
+    SendNUIMessage({
+        action = "playerOffline"
+    })
+end)
+
+RegisterNetEvent('phone:incomingCall', function(callerNumber)
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        type = "incomingCall",
+        number = callerNumber
+    })
+end)
+
+RegisterNUICallback("acceptCall", function(data, cb)
+    local src = source
+    print("📞 Call Accepted by:", data)
+    local phoneNumber = data.number
+    print("📞 Call Accepted by:", src, "for number:", phoneNumber)
+    exports['pma-voice']:setCallChannel(1)
+    SendNUIMessage({
+        type = "hideCallUI"
+    })
+    cb({})
+end)
+
+RegisterNUICallback("rejectCall", function(data, cb)
+    local src = source
+    print("📴 Call Rejected by:", src)
+
+    exports['pma-voice']:setCallChannel(0) -- leave voice channel
+    SendNUIMessage({
+        type = "hideCallUI"
+    })
+
+    cb({})
+end)
+RegisterNUICallback("endCall", function(data, cb)
+    local src = source
+
+    print(json.encode(data), "call ended")
+    exports['pma-voice']:setCallChannel(0)
+    TriggerServerEvent("phone:callEnded", data)
+    cb({})
+end)
+
+RegisterNUICallback("phone:getContacts", function(data, cb)
+    TriggerServerEvent("phone:getContactInfo")
+end)
+
+
+RegisterNetEvent("phone:sendContactInfo", function(contacts)
+    print("Received contacts: " .. json.encode(contacts))
+    SendNUIMessage({
+        action = "showRecentContacts",
+        contacts = contacts
+    })
+end)
+-------------------pma

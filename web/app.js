@@ -587,8 +587,8 @@ function initializeAppOpening() {
   });
 
   // Handle back button
-  backButton.addEventListener("click", closeApp);
-  instabackButton.addEventListener("click", closeApp);
+  backButton?.addEventListener("click", closeApp);
+  instabackButton?.addEventListener("click", closeApp);
 
   function openApp(appName, title) {
     // Update app title
@@ -776,14 +776,17 @@ window.addEventListener("message", function (event) {
       break;
   }
 });
-
+function closeUploadSection() {
+  const uploadSection = document.getElementById("upload-post-section");
+  uploadSection.style.display = "none";
+}
 function updateFavoritesList(contacts) {
   const favSection = document.querySelector("#favSection .phone-tab ul");
   if (favSection && contacts.length > 0) {
     favSection.innerHTML = contacts
       .map(
         (contact) =>
-          `<li class="contact-item" onclick="call()">⭐ ${contact.username} - ${contact.phone}</li>`
+          `<li class="contact-item" onclick=dialNumber(${contact.phone})>⭐ ${contact.username} - ${contact.phone}</li>`
       )
       .join("");
   } else if (favSection) {
@@ -886,6 +889,115 @@ function press(digit) {
     }
   }
 }
+document
+  .getElementById("callButton")
+  .addEventListener("click", function (event) {
+    const dialDisplay = document.getElementById("dialDisplay");
+    const numberToCall = dialDisplay.innerText.trim();
+    document.getElementById("callingScreen").style.display = "flex";
+    document.getElementById("callerName").innerHTML = `+${numberToCall}`;
+    if (!numberToCall || numberToCall === "Enter Number") {
+      console.log("No number entered.");
+      return;
+    }
+
+    fetch(`https://${GetParentResourceName()}/startCall`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phoneNumber: numberToCall,
+      }),
+    });
+  });
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "playerOffline") {
+    document.getElementById("callingName").innerHTML = "Player Offline";
+    setTimeout(() => {
+      document.getElementById("callingScreen").style.display = "none";
+    }, 2000);
+  }
+});
+
+//incoming call
+let callInterval;
+let seconds = 0;
+
+// Format seconds into MM:SS
+function formatTime(seconds) {
+  const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secs = String(seconds % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+}
+
+function startCallTimer() {
+  seconds = 0;
+  document.getElementById("callTimer").innerText = formatTime(seconds);
+  callInterval = setInterval(() => {
+    seconds++;
+    document.getElementById("callTimer").innerText = formatTime(seconds);
+  }, 1000);
+}
+
+function stopCallTimer() {
+  clearInterval(callInterval);
+  seconds = 0;
+  document.getElementById("callTimer").innerText = "00:00";
+}
+let CallerNum = null; // Global variable
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "incomingCall") {
+    CallerNum = event.data.number; // 👈 Set the number here!
+
+    document.getElementById("callUI").style.display = "block";
+    document.getElementById("caller-number").innerText =
+      "📞 Incoming call from: " + CallerNum;
+  }
+
+  if (event.data.type === "hideCallUI") {
+    document.getElementById("callUI").style.display = "none";
+  }
+});
+
+function acceptCall() {
+  console.log("📞 Accepting call to:", CallerNum); // Debug log
+
+  fetch(`https://${GetParentResourceName()}/acceptCall`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ number: CallerNum }), // 👈 Send the caller number
+  });
+
+  document.getElementById("callUI").style.display = "none";
+  document.getElementById("callingScreen").style.display = "flex";
+  startCallTimer();
+}
+
+function rejectCall() {
+  fetch(`https://${GetParentResourceName()}/rejectCall`, { method: "POST" });
+
+  document.getElementById("callUI").style.display = "none";
+  document.getElementById("callingScreen").style.display = "none";
+  stopCallTimer(); // 👈 stop timer
+}
+
+// Optional: End call button logic
+document.getElementById("endCallButton").addEventListener("click", () => {
+  const currentTime = new Date().toISOString();
+  fetch(`https://${GetParentResourceName()}/endCall`, {
+    method: "POST",
+    body: JSON.stringify({ number: CallerNum, time: currentTime }),
+  });
+  document.getElementById("callingScreen").style.display = "none";
+  stopCallTimer();
+});
+
+//incoming call
 
 // We'll completely remove and reinstall all event listeners when the page loads
 document.addEventListener("DOMContentLoaded", function () {
@@ -1222,262 +1334,11 @@ const storyData = [
   // ... other existing story entries
 ];
 
-const feedData = [
-  {
-    id: 1,
-    username: "travel_enthusiast",
-    userImage: "https://randomuser.me/api/portraits/women/12.jpg",
-    postImage: "https://randomuser.me/api/portraits/men/1.jpg",
-    likes: 1243,
-    caption: "Exploring new horizons! 🌄 #travel #adventure",
-    comments: 42,
-  },
-  {
-    id: 2,
-    username: "foodie_central",
-    userImage: "https://randomuser.me/api/portraits/men/22.jpg",
-    postImage: "https://randomuser.me/api/portraits/men/1.jpg",
-    likes: 892,
-    caption: "Today's special dish! 🍕 #foodgram #delicious",
-    comments: 29,
-  },
-  {
-    id: 3,
-    username: "fitness_guru",
-    userImage: "https://randomuser.me/api/portraits/women/33.jpg",
-    postImage: "https://randomuser.me/api/portraits/men/1.jpg",
-    likes: 1537,
-    caption: "No pain, no gain! 💪 #workout #fitnessmotivation",
-    comments: 76,
-  },
-];
-
 // Function to render stories
-function renderStories() {
-  const storySection = document.getElementById("story-section");
-
-  // Clear any existing content
-  storySection.innerHTML = "";
-
-  const storiesContainer = document.createElement("div");
-  storiesContainer.className = "stories";
-
-  storyData.forEach((story) => {
-    const storyElement = document.createElement("div");
-    storyElement.className = "story";
-    storyElement.onclick = () => viewStory(story.id);
-
-    storyElement.innerHTML = `
-      <img src="${story.image}" alt="${story.username}'s story">
-      <p>${story.username}</p>
-    `;
-
-    storiesContainer.appendChild(storyElement);
-  });
-
-  storySection.appendChild(storiesContainer);
-}
-
-function viewStory(storyId) {
-  const story = storyData.find((story) => story.id === storyId);
-  if (!story || !story.stories || story.stories.length === 0) {
-    console.error("No stories found for this user");
-    return;
-  }
-
-  // Remove any existing story viewer first
-  const existingViewer = document.querySelector(".story-viewer");
-  if (existingViewer) {
-    existingViewer.remove();
-  }
-
-  const frame = document.getElementById("frame");
-
-  // Create story viewer container
-  const storyViewer = document.createElement("div");
-  storyViewer.className = "story-viewer";
-  storyViewer.innerHTML = `
-    <div class="story-progress-container">
-      ${story.stories
-        .map(
-          () => `
-        <div class="story-progress-bar">
-          <div class="story-progress-bar-fill"></div>
-        </div>
-      `
-        )
-        .join("")}
-    </div>
-    <div class="story-header">
-      <img src="https://randomuser.me/api/portraits/men/${storyId}.jpg" class="story-user-avatar" />
-      <div class="story-username">${story.username}</div>
-      <button class="close-story-btn">×</button>
-    </div>
-    <div class="story-content-container">
-      <img class="story-content" />
-      <div class="story-navigation">
-        <div class="story-nav-prev"></div>
-        <div class="story-nav-next"></div>
-      </div>
-    </div>
-  `;
-
-  // Append to frame
-  frame.appendChild(storyViewer);
-
-  const storyContentImg = storyViewer.querySelector(".story-content");
-  const progressBars = storyViewer.querySelectorAll(".story-progress-bar-fill");
-  const closeBtn = storyViewer.querySelector(".close-story-btn");
-  const prevNav = storyViewer.querySelector(".story-nav-prev");
-  const nextNav = storyViewer.querySelector(".story-nav-next");
-
-  let currentStoryIndex = 0;
-  let autoAdvanceTimeout = null;
-
-  function showStory(index) {
-    if (index < 0 || index >= story.stories.length) return;
-
-    // Clear any existing timeout
-    if (autoAdvanceTimeout) {
-      clearTimeout(autoAdvanceTimeout);
-    }
-
-    currentStoryIndex = index;
-    const currentStory = story.stories[index];
-
-    // Reset all progress bars
-    progressBars.forEach((bar, i) => {
-      if (i < index) {
-        bar.style.width = "100%";
-      } else if (i === index) {
-        bar.style.width = "0%";
-        // Animate current progress bar
-        bar.style.width = "100%";
-        bar.style.transition = `width ${currentStory.duration}ms linear`;
-      } else {
-        bar.style.width = "0%";
-        bar.style.transition = "none";
-      }
-    });
-
-    // Show current story
-    storyContentImg.src = currentStory.content;
-
-    // Start auto-advance timer
-    startAutoAdvance();
-  }
-
-  // Navigation handlers
-  prevNav.addEventListener("click", () => {
-    if (currentStoryIndex > 0) {
-      showStory(currentStoryIndex - 1);
-    }
-  });
-
-  nextNav.addEventListener("click", () => {
-    if (currentStoryIndex < story.stories.length - 1) {
-      showStory(currentStoryIndex + 1);
-    } else {
-      closeStoryViewer();
-    }
-  });
-
-  function closeStoryViewer() {
-    // Clear any existing timeout
-    if (autoAdvanceTimeout) {
-      clearTimeout(autoAdvanceTimeout);
-    }
-
-    // Remove the story viewer if it exists
-    if (storyViewer && storyViewer.parentNode) {
-      storyViewer.parentNode.removeChild(storyViewer);
-    }
-  }
-
-  // Close button handler
-  closeBtn.addEventListener("click", closeStoryViewer);
-
-  // Start with first story
-  showStory(0);
-
-  // Auto-advance timer
-  function startAutoAdvance() {
-    const currentStory = story.stories[currentStoryIndex];
-    autoAdvanceTimeout = setTimeout(() => {
-      if (currentStoryIndex < story.stories.length - 1) {
-        showStory(currentStoryIndex + 1);
-      } else {
-        closeStoryViewer();
-      }
-    }, currentStory.duration);
-  }
-}
-
-// Function to render feed posts
-function renderFeed() {
-  const feedSection = document.getElementById("feed-section");
-
-  // Clear any existing content
-  feedSection.innerHTML = "";
-
-  feedData.forEach((post) => {
-    const postElement = document.createElement("div");
-    postElement.className = "post";
-
-    postElement.innerHTML = `
-      <div class="post-header">
-        <img src="${post.userImage}" alt="${post.username}">
-        <span class="username">${post.username}</span>
-      </div>
-      <img src="${post.postImage}" alt="Post by ${
-      post.username
-    }" class="post-image">
-      <div class="post-actions">
-        <div class="post-likes">
-          <svg class="like-icon" onclick="toggleLike(this)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-            <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
-          </svg>
-          <svg class="dislike-icon hidden" onclick="toggleLike(this)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-            <path fill="red" d="M256 96l-12-12c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5l180.7 168.7c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84z"/>
-          </svg>
-          <span class="like-count">${post.likes.toLocaleString()} likes</span>
-        </div>
-        <div class="post-caption">
-          <span class="username">${post.username}</span> ${post.caption}
-        </div>
-        <div class="post-comments">View all ${post.comments} comments</div>
-      </div>
-    `;
-
-    feedSection.appendChild(postElement);
-  });
-}
 
 // Function to handle story viewing
 
 // Toggle like function
-function toggleLike(icon) {
-  const postLikes = icon.parentElement;
-  const likeIcon = postLikes.querySelector(".like-icon");
-  const dislikeIcon = postLikes.querySelector(".dislike-icon");
-  const likeCount = postLikes.querySelector(".like-count");
-
-  let currentLikes = parseInt(
-    likeCount.innerText.split(" ")[0].replace(",", "")
-  );
-
-  if (likeIcon.classList.contains("hidden")) {
-    // Switch to like
-    likeIcon.classList.remove("hidden");
-    dislikeIcon.classList.add("hidden");
-    likeCount.innerText = `${(currentLikes - 1).toLocaleString()} likes`;
-  } else {
-    // Switch to dislike
-    likeIcon.classList.add("hidden");
-    dislikeIcon.classList.remove("hidden");
-    likeCount.innerText = `${(currentLikes + 1).toLocaleString()} likes`;
-  }
-}
 
 // Switch Instagram Tab Function
 
@@ -1508,10 +1369,10 @@ function goBack() {
 }
 
 // Initialize the page
-document.addEventListener("DOMContentLoaded", function () {
-  renderStories();
-  renderFeed();
-});
+// document.addEventListener("DOMContentLoaded", function () {
+//   renderStories();
+//   renderFeed();
+// });
 function openChat(userName) {
   document.getElementById("users-list").style.display = "none";
   document.getElementById("chat-section").style.display = "block";
@@ -2123,19 +1984,24 @@ function call() {
   }, 1000);
 }
 
-function updateRecentsList() {
+function updateRecentsList(data) {
   const recentsSection = document.querySelector(
     "#recentsSection .phone-tab ul"
   );
-  if (recentsSection && recentCalls.length > 0) {
-    recentsSection.innerHTML = recentCalls
+
+  if (recentsSection && data?.length > 0) {
+    recentsSection.innerHTML = data
+      .slice() // make a copy to avoid mutating original
+      .reverse() // reverse the order
       .map((call) => {
-        const timeAgo = getTimeAgo(new Date(call.timestamp));
-        return `<li class="contact-item" onclick="dialNumber('${call.phone}')">
+        const timeAgo = getTimeAgo(call.time);
+        return `<li class="contact-item" onclick="dialNumber('${call.receiver}')">
                 <div class="recent-call-info">
                   <span class="recent-call-icon">📞</span>
                   <div class="recent-call-details">
-                    <div class="recent-call-name">${call.name}</div>
+                    <div class="recent-call-name">
+                      +${call.receiver}
+                    </div>
                     <div class="recent-call-time">${timeAgo}</div>
                   </div>
                 </div>
@@ -2147,6 +2013,22 @@ function updateRecentsList() {
   }
 }
 
+function getRecentTabs() {
+  fetch(`https://${GetParentResourceName()}/phone:getContacts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {});
+}
+
+window.addEventListener("message", function (event) {
+  if (event.data.action === "showRecentContacts") {
+    updateRecentsList(event.data.contacts);
+  }
+});
 function dialNumber(number) {
   const dialDisplay = document.getElementById("dialDisplay");
   dialDisplay.innerText = number;
@@ -2614,14 +2496,14 @@ document.addEventListener("DOMContentLoaded", function () {
         email,
       }),
     });
-
+    signupForm.style.display = "none";
+    loginForm.style.display = "flex";
     // Store user data (in a real app, this would be done on a server)
     // localStorage.setItem(username, password.value);
     // localStorage.setItem(username + '_email', email);
 
     // Log the user in
   });
-
   // Helper function to show error messages
   function showError(message) {
     // Remove any existing error message
@@ -2642,14 +2524,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Remove error after 3 seconds
     setTimeout(() => error.remove(), 3000);
   }
-
   // Helper function for successful login
-
   window.addEventListener("message", function (event) {
     if (event.data.action === "showInstagram") {
       if (event.data.username) {
-        console.log(JSON.stringify(event.data.username));
         localStorage.setItem("userDetails", event.data.username);
+        localStorage.setItem("user_id", event.data.id);
         instagramAuth.style.display = "none";
         instagramMain.style.display = "block";
         renderStories();
@@ -2657,11 +2537,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
-  instagramAuth.style.display = "none";
-  instagramMain.style.display = "block";
-  renderStories();
-  renderFeed();
   var i = localStorage.getItem("userDetails");
+  window.addEventListener("message", function (event) {
+    if (event.data.type === "loadInstaAllUsers") {
+      document.getElementById(
+        "user-name-pfp"
+      ).innerText = ` @${event.data.users[0].username}`;
+      var pfp = document.getElementById("prf-pic");
+      pfp.src = event.data.users[0].image;
+    
+    }
+  });
   if (i) {
     instagramAuth.style.display = "none";
     instagramMain.style.display = "block";
@@ -2693,7 +2579,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check if user is already logged in
 });
-
+function getAllInstagramUserDetails() {
+  fetch(`https://${GetParentResourceName()}/getAllInstagramUserDetails`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: localStorage.getItem("user_id"),
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Received data from server:", data);
+      // Update your UI with the received data (posts)
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+getAllInstagramUserDetails();
 // ... existing code ...
 
 // Add these functions after your existing Instagram-related functions
@@ -2702,7 +2607,12 @@ function openUploadSection() {
   document.getElementById("upload-post-section").style.display = "block";
   document.getElementById("upload-overlay").style.display = "block";
 }
-
+function openEditModal() {
+  document.getElementById("edit-pfp-modal").style.display = "flex";
+}
+function closeEditModal() {
+  document.getElementById("edit-pfp-modal").style.display = "none";
+}
 function closeUploadSection() {
   document.getElementById("upload-post-section").style.display = "none";
   document.getElementById("upload-overlay").style.display = "none";
@@ -2711,6 +2621,29 @@ function closeUploadSection() {
   document.getElementById("caption-input").value = "";
 }
 
+function updateProfile() {
+  var profile = document.getElementById("profile-photo").value;
+
+  fetch(`https://${GetParentResourceName()}/updateProfile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({
+      userId: localStorage.getItem("user_id"),
+      profile: profile,
+    }),
+  });
+  profile = "";
+  document.getElementById("edit-pfp-modal").style.display = "none";
+}
+
+function logout() {
+  localStorage.removeItem("userDetails");
+  document.getElementById("instagram-auth").style.display = "block";
+  document.getElementById("instagram-main").style.display = "none";
+}
 // Add event listener for the share button
 document
   .getElementById("share-link-btn")
@@ -2722,7 +2655,7 @@ document
       alert("⚠️ Please paste a link.");
       return;
     }
-    var i = localStorage.getItem("userDetails");
+    var username = localStorage.getItem("userDetails");
     // Send to Lua via NUI
     fetch(`https://${GetParentResourceName()}/uploadPost`, {
       method: "POST",
@@ -2730,11 +2663,31 @@ document
         "Content-Type": "application/json; charset=UTF-8",
       },
       body: JSON.stringify({
-        username: i.username,
+        username: username,
         image: link,
         caption: caption,
       }),
     });
+    closeUploadSection();
+    setTimeout(() => {
+      fetch(`https://${GetParentResourceName()}/renderPost`, {
+        method: "POST", // Or 'GET', depending on your use case
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          /* optional data if needed */
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Received data from server:", data);
+          // Update your UI with the received data (posts)
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }, 2000);
 
     // Optionally reset the form
     document.getElementById("link-input").value = "";
@@ -2742,57 +2695,605 @@ document
   });
 window.addEventListener("message", function (event) {
   if (event.data.type === "showPosts") {
-    renderFeed(event.data.posts);
-    console.log(JSON.stringify(event.data.posts), "<<<<<<<<<<<<<<<<<");
+    renderFeed(event.data.insta_posts);
   }
 });
+function getTimeAgo(date) {
+  const now = new Date();
+  const secondsAgo = Math.floor((now - new Date(date)) / 1000);
 
+  const intervals = {
+    y: 31536000,
+    m: 2592000,
+    w: 604800,
+    d: 86400,
+    hr: 3600,
+    min: 60,
+    sec: 1,
+  };
+
+  for (let key in intervals) {
+    const interval = Math.floor(secondsAgo / intervals[key]);
+    if (interval >= 1) {
+      if (key === "sec" && interval < 60) return "Just now";
+      return `${interval} ${key}${interval > 1 ? "s" : ""} ago`;
+    }
+  }
+}
+window.addEventListener("message", function (event) {
+  if (event.data.type === "sendComments") {
+    renderPubComments(event.data.comments);
+    console.log(">>>>>>>>>>", JSON.stringify(event.data.comments));
+  }
+});
 function renderFeed(posts) {
   const feed = document.getElementById("instagram-feed");
   feed.innerHTML = "";
-
-  posts.forEach((post) => {
+  posts?.forEach((post) => {
     const postEl = document.createElement("div");
     postEl.className = "insta-post";
     postEl.innerHTML = `
-          <div class="post-username">@${post.username}</div>
-          <img src=${post.link} alt=""/>
-          <p class="post-caption">${post.caption}</p>
-          <small class="post-time">${post.date}</small>
-          
-          
-      `;
+    <div class="post-username">@${post.username}</div>
+    <img src="${post.image}" alt=""/>
+    <p class="post-caption">${post.caption}</p>
+    <small class="post-time">${getTimeAgo(post.created_at)}</small>
+  
+    <div class="post-actions">
+      <button class="like-btn" data-id="${post.id}">❤️  ${
+      post.likeCount || 0
+    }</button>
+      <button class="comment-btn" data-id="${post.id}">💬  ${
+      post.commentCount || 0
+    }</button>
+      <button class="share-btn" data-id="${post.id}">🔗  ${
+      post.shareCount || 0
+    }</button>
+    </div>
+  
+    <div class="comment-section" id="comments-${
+      post.id
+    }" style="bottom: -880px;">
+    <button class="close-comment-btn" data-id="${post.id}">
+    x
+    </button>
+    <div class="peoples-comments" id="public-comments"></div>
+    <div class="comment-input-section">
+      <input type="text" class="comment-input" placeholder="Write a comment..." />
+      <button class="send-comment-btn"><img src="./images/send.png"/></button>
+      </div>
+    </div>
+  `;
+
     feed.appendChild(postEl);
   });
 
-  // Like Button Click
+  setupPostInteractions();
+}
+
+function renderPubComments(comments) {
+  var comments_div = document.getElementById("public-comments");
+  comments_div.innerHTML = "";
+  comments.forEach((comment) => {
+    const commentEl = document.createElement("div");
+    commentEl.className = "comment-item";
+    commentEl.innerHTML = `
+      <h4><strong>${comment.username}:</strong>
+       <span>${getTimeAgo(comment.timeStamp)} </span></h4>
+      <p>${comment.comment}</p>
+    `;
+    comments_div.appendChild(commentEl);
+  });
+}
+function setupPostInteractions() {
   document.querySelectorAll(".like-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      const username = localStorage.getItem("instagram_logged_in");
+      const postId = btn.getAttribute("data-id");
+      var username = localStorage.getItem("userDetails");
+      fetch(`https://${GetParentResourceName()}/renderPost`, {
+        method: "POST", // Or 'GET', depending on your use case
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Received data from server:", data);
+          // Update your UI with the received data (posts)
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+
       fetch(`https://${GetParentResourceName()}/likePost`, {
         method: "POST",
-        body: JSON.stringify({ id, username }),
-        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postID: postId, username: username }),
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
       });
     });
   });
+  document.querySelectorAll(".close-comment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const postId = btn.getAttribute("data-id");
+      const commentBox = document.getElementById(`comments-${postId}`);
+      commentBox.style.bottom = "-880px";
+    });
+  });
 
-  // Comment Button Click
   document.querySelectorAll(".comment-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      const comment = document.querySelector(
-        `.comment-input[data-id="${id}"]`
-      ).value;
-      const username = localStorage.getItem("instagram_logged_in");
-      if (comment.trim() !== "") {
-        fetch(`https://${GetParentResourceName()}/commentPost`, {
-          method: "POST",
-          body: JSON.stringify({ id, username, comment }),
-          headers: { "Content-Type": "application/json" },
+      const postId = btn.getAttribute("data-id");
+      const commentBox = document.getElementById(`comments-${postId}`);
+      commentBox.style.bottom =
+        commentBox.style.bottom === "-880px" ? "-80px" : "-880px";
+      fetch(`https://${GetParentResourceName()}/viewComment`, {
+        method: "POST",
+        body: JSON.stringify({ postId }),
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+      });
+    });
+  });
+  document.querySelectorAll(".send-comment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = btn.previousElementSibling;
+      const comment = input.value.trim();
+      fetch(`https://${GetParentResourceName()}/renderPost`, {
+        method: "POST", // Or 'GET', depending on your use case
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          /* optional data if needed */
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Received data from server:", data);
+          // Update your UI with the received data (posts)
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
         });
+
+      // 🔥 Get postId from the closest parent element (post)
+      const postElement = btn.closest(".insta-post");
+      const postId = postElement
+        .querySelector(".like-btn")
+        .getAttribute("data-id");
+      var username = localStorage.getItem("userDetails");
+      if (comment !== "") {
+        fetch(`https://${GetParentResourceName()}/addComment`, {
+          method: "POST",
+          body: JSON.stringify({ postId, comment, username }),
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+        });
+        input.value = "";
       }
     });
   });
+
+  document.querySelectorAll(".share-btn").forEach((btn) => {
+    const postId = btn.getAttribute("data-id");
+    fetch(`https://${GetParentResourceName()}/sharePost`, {
+      method: "POST",
+      body: JSON.stringify({ postId }),
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+    });
+  });
 }
+
+document.getElementById("openModal").addEventListener("click", () => {
+  document.getElementById("story-upload").style.display = "flex";
+});
+document.getElementById("close-story-modal").addEventListener("click", () => {
+  document.getElementById("story-upload").style.display = "none";
+});
+
+let stories = [];
+
+// Show story upload modal
+document.getElementById("openModal").addEventListener("click", () => {
+  document.getElementById("story-upload").style.display = "block";
+});
+
+// Close story upload modal
+document.getElementById("close-story-modal").addEventListener("click", () => {
+  document.getElementById("story-upload").style.display = "none";
+});
+
+// Upload story
+document.getElementById("upload-story").addEventListener("click", () => {
+  const imageUrlInput = document.getElementById("story-image-url");
+  const imageUrl = imageUrlInput.value.trim();
+  var username = localStorage.getItem("userDetails");
+
+  if (imageUrl !== "") {
+    fetch(`https://${GetParentResourceName()}/uploadStory`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({ image: imageUrl, username: username }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          imageUrl = ""; // Clear input field
+          document.getElementById("story-upload").style.display = "none"; // Hide modal
+          loadStories(); // Reload stories
+        }
+      });
+  }
+});
+
+function loadStories() {
+  fetch(`https://${GetParentResourceName()}/getStories`)
+    .then((res) => res.json())
+    .then((data) => {
+      // console.log("Stories loaded:", data); // Debugging line
+      stories = data;
+    });
+}
+
+// Show story viewer
+function showStory(username, userStories, initialIndex = 0) {
+  console.log("Showing stories for:", username);
+
+  const viewer = document.getElementById("storyViewer");
+  const storyContent = document.getElementById("storyContent");
+
+  // Clear previous story content
+  storyContent.innerHTML = "";
+
+  // Create story slider with progress indicators
+  const progressContainer = document.createElement("div");
+  progressContainer.className = "story-progress-container";
+
+  // Add progress bars for each story
+  userStories.forEach((_, i) => {
+    const progressBar = document.createElement("div");
+    progressBar.className = `story-progress ${
+      i === initialIndex ? "active" : ""
+    }`;
+    progressContainer.appendChild(progressBar);
+  });
+
+  // Add story content
+  const storyImage = document.createElement("img");
+  storyImage.id = "storyImage";
+  storyImage.src = userStories[initialIndex].image;
+
+  const storyUser = document.createElement("div");
+  storyUser.id = "storyUser";
+  storyUser.textContent = `@${username}`;
+
+  // Add navigation controls
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "story-nav-btn prev-btn";
+  prevBtn.innerHTML = "‹";
+  prevBtn.style.display = initialIndex > 0 ? "block" : "none";
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "story-nav-btn next-btn";
+  nextBtn.innerHTML = "›";
+  nextBtn.style.display =
+    initialIndex < userStories.length - 1 ? "block" : "none";
+
+  // Append elements to viewer
+  storyContent.appendChild(progressContainer);
+  storyContent.appendChild(storyUser);
+  storyContent.appendChild(storyImage);
+  storyContent.appendChild(prevBtn);
+  storyContent.appendChild(nextBtn);
+
+  // Set current story index
+  viewer.dataset.currentIndex = initialIndex;
+  viewer.dataset.currentUser = username;
+  viewer.dataset.totalStories = userStories.length;
+
+  // Store stories in viewer
+  viewer.stories = userStories;
+
+  // Show viewer
+  viewer.style.display = "flex";
+
+  // Auto progress after 5 seconds
+  startStoryTimer();
+
+  // Navigation event listeners
+  prevBtn.addEventListener("click", navigateStory.bind(null, -1));
+  nextBtn.addEventListener("click", navigateStory.bind(null, 1));
+
+  // Touch/swipe navigation
+  let touchStartX = 0;
+  storyContent.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  storyContent.addEventListener("touchend", (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > 30) {
+      // Minimum swipe distance
+      navigateStory(diff > 0 ? 1 : -1);
+    }
+  });
+}
+
+// Timer for auto-advancing stories
+let storyTimer;
+function startStoryTimer() {
+  clearTimeout(storyTimer);
+  storyTimer = setTimeout(() => {
+    navigateStory(1);
+  }, 5000); // 5 seconds per story
+}
+
+// Navigate between stories
+function navigateStory(direction) {
+  const viewer = document.getElementById("storyViewer");
+  const currentIndex = parseInt(viewer.dataset.currentIndex);
+  const totalStories = parseInt(viewer.dataset.totalStories);
+  const currentUser = viewer.dataset.currentUser;
+  const userStories = viewer.stories;
+
+  clearTimeout(storyTimer);
+
+  const newIndex = currentIndex + direction;
+
+  // Check if we're still within the current user's stories
+  if (newIndex >= 0 && newIndex < totalStories) {
+    updateStoryView(currentUser, userStories, newIndex);
+  } else if (newIndex >= totalStories) {
+    // Move to next user's stories or close
+    viewer.style.display = "none";
+  } else if (newIndex < 0) {
+    // Move to previous user's stories or stay at beginning
+    // For simplicity, we'll just stay at beginning
+    startStoryTimer();
+  }
+}
+
+// Update the story view without recreating everything
+function updateStoryView(username, stories, newIndex) {
+  const viewer = document.getElementById("storyViewer");
+  const storyImage = document.getElementById("storyImage");
+  const progressBars = document.querySelectorAll(".story-progress");
+  const prevBtn = document.querySelector(".prev-btn");
+  const nextBtn = document.querySelector(".next-btn");
+
+  // Update image
+  storyImage.src = stories[newIndex].image;
+
+  // Update progress bars
+  progressBars.forEach((bar, i) => {
+    if (i < newIndex) {
+      bar.className = "story-progress viewed";
+    } else if (i === newIndex) {
+      bar.className = "story-progress active";
+    } else {
+      bar.className = "story-progress";
+    }
+  });
+
+  // Update navigation buttons
+  prevBtn.style.display = newIndex > 0 ? "block" : "none";
+  nextBtn.style.display = newIndex < stories.length - 1 ? "block" : "none";
+
+  // Update current index
+  viewer.dataset.currentIndex = newIndex;
+
+  // Restart timer
+  startStoryTimer();
+}
+
+// Close viewer
+document.getElementById("closeViewer").addEventListener("click", () => {
+  document.getElementById("storyViewer").style.display = "none";
+  clearTimeout(storyTimer);
+});
+
+// Group stories by username
+function groupStoriesByUser(stories) {
+  const grouped = {};
+  stories.forEach((story) => {
+    if (!grouped[story.username]) {
+      grouped[story.username] = [];
+    }
+    grouped[story.username].push(story);
+  });
+  return grouped;
+}
+
+// Listen for external trigger
+window.addEventListener("message", (event) => {
+  if (event.data.type === "loadStories") {
+    const currentUsername = localStorage.getItem("userDetails");
+
+    const myStoriesBar = document.getElementById("myStoriesBar");
+    const storyBar = document.getElementById("storyBar");
+
+    myStoriesBar.innerHTML = "";
+    storyBar.innerHTML = "";
+
+    // Group stories by username
+    const groupedStories = groupStoriesByUser(event.data.stories);
+
+    // For each user with stories
+    Object.keys(groupedStories).forEach((username) => {
+      const userStories = groupedStories[username];
+      const storyEl = document.createElement("div");
+      storyEl.className = "story-circle";
+
+      // Use the latest story image as the preview
+      storyEl.innerHTML = `
+        <img src="${
+          userStories[0].image
+        }" alt="${username}'s story" width="100%" />
+        ${
+          userStories.length > 1
+            ? '<div class="multi-story-indicator"></div>'
+            : ""
+        }
+      `;
+
+      storyEl.addEventListener("click", () => {
+        showStory(username, userStories, 0);
+      });
+
+      if (username === currentUsername) {
+        myStoriesBar.appendChild(storyEl);
+      } else {
+        storyBar.appendChild(storyEl);
+      }
+    });
+  }
+});
+
+// Load on page load
+loadStories();
+
+// get all users
+function getAllUsers() {
+  var i = localStorage.getItem("userDetails");
+  fetch(`https://${GetParentResourceName()}/getAllUsers`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({ username: i }),
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  });
+}
+// get all users
+
+function openFollowers() {
+  document.getElementById("main-feed-section").style.display = "none";
+  document.getElementById("follower-section").style.display = "block";
+  document.getElementById("Profile-Ig-section").style.display = "none";
+  document.getElementById("up-sc").style.display = "none";
+  getAllUsers();
+}
+
+function openFeed() {
+  document.getElementById("main-feed-section").style.display = "block";
+  document.getElementById("follower-section").style.display = "none";
+  document.getElementById("Profile-Ig-section").style.display = "none";
+  document.getElementById("up-sc").style.display = "flex";
+}
+function goToIgProfile() {
+  document.getElementById("main-feed-section").style.display = "none";
+  document.getElementById("follower-section").style.display = "none";
+  document.getElementById("Profile-Ig-section").style.display = "block";
+  document.getElementById("up-sc").style.display = "none";
+getAllInstagramUserDetails();
+
+}
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "instagramUsers") {
+    renderUsersToFollow(event.data.users);
+  }
+});
+// Initialize followingMap first
+let followingData = [];
+window.addEventListener("message", function (event) {
+  if (event.data.type === "updateFollowStats") {
+    followingData = event.data.following;
+  }
+});
+
+function renderUsersToFollow(users) {
+  const section = document.getElementById("follower-section");
+  section.innerHTML = "";
+
+  users.forEach((user) => {
+    const isFollowing = followingData.includes(user.id);
+    const userDiv = document.createElement("div");
+    userDiv.className = "user-item";
+    userDiv.innerHTML = `
+      <div class="user-info">
+        <strong>${user.username}</strong>
+        <p>${user.email}</p>
+      </div>
+      <button class="follow-btn" data-id="${user.id}" style="display: ${
+      isFollowing ? "none" : "block"
+    }">Follow</button>
+      <button class="unfollow-btn" data-id="${user.id}" style="display: ${
+      isFollowing ? "block" : "none"
+    }">Unfollow</button>
+    `;
+    section.appendChild(userDiv);
+
+    // Add click handlers right after element is added
+    const followBtn = userDiv.querySelector(".follow-btn");
+    const unfollowBtn = userDiv.querySelector(".unfollow-btn");
+
+    followBtn.addEventListener("click", () => {
+      const followingId = user.id;
+      const currentUserId = localStorage.getItem("user_id");
+
+      fetch(`https://${GetParentResourceName()}/followUser`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ followerId: currentUserId, followingId }),
+      });
+
+      fetchFollowStats();
+    });
+
+    unfollowBtn.addEventListener("click", () => {
+      const followingId = user.id;
+      const currentUserId = localStorage.getItem("user_id");
+
+      fetch(`https://${GetParentResourceName()}/unfollowUser`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ followerId: currentUserId, followingId }),
+      });
+
+      fetchFollowStats();
+    });
+  });
+}
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "updateFollowStats") {
+    document.getElementById("followers-count").innerText =
+      event.data.followers.length;
+    document.getElementById("following-count").innerText =
+      event.data.following.length;
+  }
+});
+
+function fetchFollowStats() {
+  const currentUserId = localStorage.getItem("user_id");
+
+  fetch(`https://${GetParentResourceName()}/getFollowData`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: currentUserId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      // This is where we need to process the data
+    })
+    .catch((error) => {
+      console.error("Error fetching follow stats:", error);
+    });
+}
+
+fetchFollowStats();

@@ -14,3 +14,6 @@ dependencies {
     'qb-core',
     'oxmysql'
 }
+dependencies {
+    'pma-voice'  -- Or whichever voice resource you're using
+}

@@ -181,6 +181,9 @@ AddEventHandler('screenshot:notify', function(message)
     TriggerClientEvent('screenshot:notify', source, message)
 end)
 
+-----------------------------------pma voice
+
+-----------------------------------pma voice
 --------------------------------------------------
 
 RegisterNetEvent("saveUserData")
@@ -385,37 +388,29 @@ AddEventHandler("group:addMember", function(data)
     local member = data.member -- { username = "", phone = "" }
 
     -- First check if the member already exists in this group
-    MySQL.Async.fetchScalar(
-        'SELECT COUNT(*) FROM group_members WHERE group_id = @group_id AND username = @username',
-        {
-            ['@group_id'] = groupId,
-            ['@username'] = member.username
-        },
-        function(count)
-            if count and tonumber(count) > 0 then
-                print("⚠️ Member already exists in the group. Not adding again.")
-            else
-                -- If not exists, add the member
-                MySQL.Async.execute(
-                    'INSERT INTO group_members (group_id, username, phone) VALUES (@group_id, @username, @phone)',
-                    {
-                        ['@group_id'] = groupId,
-                        ['@username'] = member.username,
-                        ['@phone'] = member.phone
-                    },
-                    function(rowsChanged)
-                        if rowsChanged > 0 then
-                            print("✅ Member added to group!")
-                        else
-                            print("❌ Failed to add member")
-                        end
+    MySQL.Async.fetchScalar('SELECT COUNT(*) FROM group_members WHERE group_id = @group_id AND username = @username', {
+        ['@group_id'] = groupId,
+        ['@username'] = member.username
+    }, function(count)
+        if count and tonumber(count) > 0 then
+            print("⚠️ Member already exists in the group. Not adding again.")
+        else
+            -- If not exists, add the member
+            MySQL.Async.execute(
+                'INSERT INTO group_members (group_id, username, phone) VALUES (@group_id, @username, @phone)', {
+                    ['@group_id'] = groupId,
+                    ['@username'] = member.username,
+                    ['@phone'] = member.phone
+                }, function(rowsChanged)
+                    if rowsChanged > 0 then
+                        print("✅ Member added to group!")
+                    else
+                        print("❌ Failed to add member")
                     end
-                )
-            end
+                end)
         end
-    )
+    end)
 end)
-
 
 --------------------add new user functionality
 -----------------------remove user functionality
@@ -430,29 +425,25 @@ AddEventHandler("group:removeMember", function(data)
         return
     end
 
-    MySQL.Async.execute(
-        'DELETE FROM group_members WHERE group_id = @group_id AND username = @username',
-        {
-            ['@group_id'] = groupId,
-            ['@username'] = username
-        },
-        function(rowsChanged)
-            if rowsChanged > 0 then
-                print("✅ Member removed from group!")
-                TriggerClientEvent("group:memberRemoved", src, true, "Member removed successfully")
-                
-                -- Refresh the group members list for all clients
-                MySQL.Async.fetchAll("SELECT username, phone FROM group_members WHERE group_id = @group_id", {
-                    ['@group_id'] = groupId
-                }, function(members)
-                    TriggerClientEvent("group:receiveGroupMembers", src, members)
-                end)
-            else
-                print("❌ Member not found or already removed")
-                TriggerClientEvent("group:memberRemoved", src, false, "Member not found or already removed")
-            end
+    MySQL.Async.execute('DELETE FROM group_members WHERE group_id = @group_id AND username = @username', {
+        ['@group_id'] = groupId,
+        ['@username'] = username
+    }, function(rowsChanged)
+        if rowsChanged > 0 then
+            print("✅ Member removed from group!")
+            TriggerClientEvent("group:memberRemoved", src, true, "Member removed successfully")
+
+            -- Refresh the group members list for all clients
+            MySQL.Async.fetchAll("SELECT username, phone FROM group_members WHERE group_id = @group_id", {
+                ['@group_id'] = groupId
+            }, function(members)
+                TriggerClientEvent("group:receiveGroupMembers", src, members)
+            end)
+        else
+            print("❌ Member not found or already removed")
+            TriggerClientEvent("group:memberRemoved", src, false, "Member not found or already removed")
         end
-    )
+    end)
 end)
 
 -----------------------remove user functionality
@@ -525,31 +516,8 @@ AddEventHandler("group:getMessages", function(groupId)
 end)
 -------------------------------gc arahy hain database se
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ---------------------instagram
---signup
+-- signup
 
 RegisterServerEvent("insta:registerUser")
 AddEventHandler("insta:registerUser", function(data)
@@ -567,20 +535,20 @@ AddEventHandler("insta:registerUser", function(data)
             -- Optionally send error to client
         else
             -- Insert user
-            MySQL.Async.execute("INSERT INTO instagram_users (username, email, password) VALUES (@username, @email, @password)", {
-                ['@username'] = username,
-                ['@email'] = email,
-                ['@password'] = password
-            }, function(rowsChanged)
-                print("✅ Registered new user: " .. username)
-                -- Trigger login success or next steps here
-            end)
+            MySQL.Async.execute(
+                "INSERT INTO instagram_users (username, email, password) VALUES (@username, @email, @password)", {
+                    ['@username'] = username,
+                    ['@email'] = email,
+                    ['@password'] = password
+                }, function(rowsChanged)
+                    print("✅ Registered new user: " .. username)
+                    -- Trigger login success or next steps here
+                end)
         end
     end)
 end)
 
-
---login
+-- login
 RegisterServerEvent("insta:loginUser")
 AddEventHandler("insta:loginUser", function(data)
     local src = source
@@ -598,6 +566,7 @@ AddEventHandler("insta:loginUser", function(data)
                 print("✅ Login successful for: " .. username)
 
                 TriggerClientEvent("instagram:loginSuccess", src, {
+                    id = user.id,
                     username = user.username,
                     email = user.email,
                     password = user.password
@@ -613,9 +582,26 @@ AddEventHandler("insta:loginUser", function(data)
         end
     end)
 end)
-
-
-
+RegisterServerEvent("insta:GetAllUsersInfo")
+AddEventHandler("insta:GetAllUsersInfo", function(data)
+    local src = source
+    print("data assa-><<<<", json.encode(data.userId))
+    MySQL.Async.fetchAll("SELECT * FROM instagram_users WHERE id = ?", {
+        data.userId
+    }, function(users)
+        print("users -><<<<", json.encode(users))
+        TriggerClientEvent("instagram:loadInstaAllUsers", src, users)
+    end)
+end)
+RegisterServerEvent("insta:AllUsersGet")
+AddEventHandler("insta:AllUsersGet", function(data)
+    local src = source
+    MySQL.Async.fetchAll("SELECT * FROM instagram_users WHERE username != @username", {
+        ['@username'] = data.username
+    }, function(users)
+        TriggerClientEvent("instagram:loadAllUsers", src, users)
+    end)
+end)
 
 RegisterServerEvent("insta:uploadPost")
 AddEventHandler("insta:uploadPost", function(data)
@@ -624,23 +610,303 @@ AddEventHandler("insta:uploadPost", function(data)
     local caption = data.caption
     local image = data.image
 
-    MySQL.Async.execute("INSERT INTO instagram_posts (username, image, caption) VALUES (@username, @image, @caption)", {
-        ["@username"] = username,
-        ["@image"] = image,
-        ["@caption"] = caption
-    }, function(rowsChanged)
-        print("✅ Post uploaded by: " .. username)
-        TriggerClientEvent("instagram:postUploaded", src)
-    end)
+    MySQL.Async.execute("INSERT INTO instagram_posts (username, image, caption) VALUES (@username, @image, @caption)",
+        {
+            ["@username"] = username,
+            ["@image"] = image,
+            ["@caption"] = caption
+        }, function(rowsChanged)
+            print("✅ Post uploaded by: " .. username)
+            TriggerClientEvent("instagram:postUploaded", src)
+        end)
 end)
-
 
 RegisterServerEvent("insta:getAllPosts")
 AddEventHandler("insta:getAllPosts", function(src)
     local source = src or source
-    MySQL.Async.fetchAll("SELECT * FROM instagram_posts ORDER BY id DESC", {}, function(result)
-        print("printing details",json.encode(result))
-        TriggerClientEvent("insta:loadPosts", source, result)
+    MySQL.Async.fetchAll("SELECT * FROM instagram_posts ORDER BY id DESC", {}, function(posts)
+        local updatedPosts = {}
+
+        for _, post in ipairs(posts) do
+            local postId = post.id
+
+            -- Get counts
+            local likes = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_likes WHERE post_id = @post_id", {
+                ["@post_id"] = postId
+            }) or 0
+            local comments = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_comments WHERE post_id = @post_id",
+                {
+                    ["@post_id"] = postId
+                }) or 0
+            -- local shares = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_shares WHERE post_id = @post_id", {["@post_id"] = postId}) or 0
+
+            post.likeCount = likes
+            post.commentCount = comments
+            post.shareCount = shares
+
+            table.insert(updatedPosts, post)
+        end
+
+        TriggerClientEvent("insta:loadPosts", source, updatedPosts)
     end)
 end)
+
+RegisterServerEvent("insta:likePost")
+AddEventHandler("insta:likePost", function(data)
+    local src = source
+    print("likes post", json.encode(data.postId))
+
+    MySQL.Async.fetchScalar("SELECT COUNT(*) FROM instagram_likes WHERE post_id = @post_id AND username = @username", {
+        ['@post_id'] = data.postId,
+        ['@username'] = data.username
+    }, function(count)
+        if count > 0 then
+            -- Already liked → remove like (unlike)
+            MySQL.Async.execute("DELETE FROM instagram_likes WHERE post_id = @post_id AND username = @username", {
+                ['@post_id'] = data.postId,
+                ['@username'] = data.username
+            }, function(rowsChanged)
+                if rowsChanged > 0 then
+                    print("❌ Post unliked by: " .. data.username)
+                    TriggerClientEvent("insta:postUnliked", -1, data.postId)
+
+                end
+            end)
+        else
+            -- Not liked yet → add like
+            MySQL.Async.execute("INSERT INTO instagram_likes (post_id, username) VALUES (@post_id, @username)", {
+                ['@post_id'] = data.postId,
+                ['@username'] = data.username
+            }, function(rowsChanged)
+                if rowsChanged > 0 then
+                    print("✅ Post liked by: " .. data.username)
+                    TriggerClientEvent("insta:postLiked", -1, data.postId)
+                end
+            end)
+        end
+    end)
+end)
+local function broadcastLikeCount(postId)
+    MySQL.Async.fetchScalar("SELECT COUNT(*) FROM instagram_likes WHERE post_id = @post_id", {
+        ['@post_id'] = postId
+    }, function(count)
+        -- 🔁 Send updated count to all clients
+        TriggerClientEvent("insta:updateLikeCount", -1, {
+            postId = postId,
+            likeCount = count
+        })
+    end)
+end
+
+RegisterServerEvent("insta:addComment")
+AddEventHandler("insta:addComment", function(data)
+    local src = source
+    local username = GetPlayerName(src)
+    print("comment post", json.encode(data))
+    MySQL.Async.execute(
+        "INSERT INTO instagram_comments (post_id, comment, username) VALUES (@post_id, @comment, @username)", {
+            ['@post_id'] = data.post_id,
+            ['@comment'] = data.comment,
+            ['@username'] = data.username
+        })
+end)
+
+RegisterServerEvent("insta:getComments")
+AddEventHandler("insta:getComments", function(postId)
+    local src = source
+    MySQL.Async.fetchAll("SELECT * FROM instagram_comments WHERE post_id = @post_id", {
+        ['@post_id'] = postId.postId
+    }, function(comments)
+        TriggerClientEvent("insta:sendComments", src, postId, comments)
+    end)
+end)
+
+-- story section
+RegisterServerEvent("insta:uploadStory")
+AddEventHandler("insta:uploadStory", function(data)
+    local src = source
+    local username = GetPlayerName(src)
+
+    -- Expiry 24 hours from now
+    local expires_at = os.date("%Y-%m-%d %H:%M:%S", os.time() + (24 * 60 * 60))
+
+    MySQL.Async.execute(
+        "INSERT INTO instagram_stories (username, image, expires_at) VALUES (@username, @image, @expires_at)", {
+            ["@username"] = data.username,
+            ["@image"] = data.image,
+            ["@expires_at"] = expires_at
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                TriggerClientEvent("insta:storyUploaded", src, {
+                    success = true
+                })
+            else
+                TriggerClientEvent("insta:storyUploaded", src, {
+                    success = false
+                })
+            end
+        end)
+end)
+
+RegisterServerEvent("insta:getStories")
+AddEventHandler("insta:getStories", function()
+    local src = source
+    local username = GetPlayerName(src)
+    MySQL.Async.fetchAll(
+        "SELECT * FROM instagram_stories WHERE created_at >= NOW() - INTERVAL 1 DAY ORDER BY created_at DESC", {},
+        function(result)
+            TriggerClientEvent("insta:loadStories", src, {
+                type = "loadStories",
+                username = username,
+                stories = result
+            })
+        end)
+end)
+
+-- story section
+
+-- FOLLOWERS AND FOLLOWING
+-- FOLLOW
+RegisterNetEvent("insta:followUser")
+AddEventHandler("insta:followUser", function(data)
+    MySQL.Async.execute("INSERT INTO instagram_followers (follower_id, following_id) VALUES (@follower, @following)", {
+        ['@follower'] = data.followerId,
+        ['@following'] = data.followingId
+    })
+end)
+
+-- UNFOLLOW
+RegisterNetEvent("insta:unfollowUser")
+AddEventHandler("insta:unfollowUser", function(data)
+    MySQL.Async.execute("DELETE FROM instagram_followers WHERE follower_id = @follower AND following_id = @following", {
+        ['@follower'] = data.followerId,
+        ['@following'] = data.followingId
+    })
+end)
+
+-- GET FOLLOWING COUNT
+RegisterNetEvent("instagram:getFollowerData")
+AddEventHandler("instagram:getFollowerData", function(userId)
+    local src = source
+
+    -- Get followers (users who follow me)
+    MySQL.Async.fetchAll("SELECT follower_id FROM instagram_followers WHERE following_id = @id", {
+        ['@id'] = userId.userId
+    }, function(followers)
+        local followersIds = {}
+        for i, row in ipairs(followers) do
+            print("followers", json.encode(row.follower_id))
+            table.insert(followersIds, row.follower_id)
+        end
+
+        -- Get followings (users I follow)
+        MySQL.Async.fetchAll("SELECT following_id FROM instagram_followers WHERE follower_id = @id", {
+            ['@id'] = userId.userId
+        }, function(followings)
+            local followingIds = {}
+            for i, row in ipairs(followings) do
+                print("followeing", json.encode(row.following_id))
+                table.insert(followingIds, row.following_id)
+            end
+
+            -- Send arrays to client
+            TriggerClientEvent("instagram:receiveFollowerData", src, followersIds, followingIds)
+        end)
+    end)
+end)
+
+-- FOLLOWERS AND FOLLOWING
+
+-- update proflie
+RegisterServerEvent("insta:updateProfile")
+AddEventHandler("insta:updateProfile", function(data)
+    print("Updating profile data: " .. json.encode(data))
+    local src = source  
+
+    local image = data.image
+    local userId = data.userId
+    local query = "UPDATE users SET profile = @profile WHERE id = @id"
+    local params = {
+        ["@profile"] = data.profile,
+        ["@id"] = userId
+    }
+    MySQL.Async.execute(query, params, function(rowsChanged)
+        if rowsChanged > 0 then
+            print("✅ Profile updated for user ID: " .. data.userId)
+            TriggerClientEvent("insta:profileUpdated", src, true)
+        else
+            print("❌ Failed to update profile for user ID: " .. data.userId)
+            TriggerClientEvent("insta:profileUpdated", src, false)
+        end
+    end)
+
+end)
+-- update proflie
+
 ---------------------instagram
+
+------------------calll
+local QBCore = exports['qb-core']:GetCoreObject()
+
+RegisterServerEvent('phone:call')
+AddEventHandler('phone:call', function(targetNumber)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayerByPhone(targetNumber)
+
+    if Player.Offline == false then
+        local targetSrc = Player.PlayerData.source
+        print("📞 Target player is online. Src: " .. targetSrc)
+
+        -- You can pass the caller's phone number or name
+        TriggerClientEvent('phone:incomingCall', targetSrc, xPlayer.PlayerData.charinfo.phone, src)
+
+        TriggerClientEvent('phone:callStarted', src, targetSrc)
+    else
+        print("❌ Target player is offline.")
+        TriggerClientEvent('phone:playerOffline', src)
+    end
+end)
+
+-- Dummy function: replace this with your own logic to get citizenid from phone number
+function GetCitizenIdFromPhoneNumber(phone)
+    print("🔍 Looking up citizen ID for phone number: " .. tostring(phone))
+    local result = MySQL.Sync.fetchAll('SELECT citizen_id FROM mobile_user WHERE phone = ?', {phone})
+    if result[1] then
+        print("✅ Citizen ID found: " .. json.encode(result[1].citizen_id))
+        return result[1].citizen_id
+    else
+        print("❌ No citizen ID found for phone number: " .. tostring(phone))
+    end
+    return nil
+end
+
+RegisterServerEvent('phone:callEnded')
+AddEventHandler('phone:callEnded', function(targetSrc)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+
+    local sender = xPlayer.PlayerData.charinfo.phone
+
+    local time = os.date("%Y-%m-%d %H:%M:%S")
+    MySQL.Async.execute('INSERT INTO phone_call_logs (caller, receiver, time, status) VALUES (?, ?, ?, ?)',
+        {sender, targetSrc.number, time, "declined"})
+end)
+
+RegisterServerEvent('phone:getContactInfo')
+AddEventHandler('phone:getContactInfo', function(contactNumber)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local sender = xPlayer.PlayerData.charinfo.phone
+
+    MySQL.Async.fetchAll('SELECT * FROM phone_call_logs WHERE caller = ?', {sender}, function(result)
+        if result and #result > 0 then
+            print("📞 Call logs found for caller: " .. json.encode(result))
+            TriggerClientEvent('phone:sendContactInfo', src, result) -- send full result
+        else
+            TriggerClientEvent('phone:sendContactInfo', src, nil)
+        end
+    end)
+end)
+
+------------------calll
