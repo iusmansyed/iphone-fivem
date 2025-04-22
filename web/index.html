@@ -258,7 +258,7 @@
                 <!-- Messages Section -->
                 <div id="messagesSection" class="message-section">
                   <div id="messageList" class="chat-box">
-                    <p style="color: #fff; padding: 5px;">Loading ... </p>
+                    <p style="color: #fff; padding: 5px;" class="loading">Loading ... </p>
                     <!-- Individual chats will be inserted here dynamically -->
                   </div>
                 </div>
@@ -414,7 +414,6 @@
               <div style=" display: none;" class="maps">
                 <div class="map-container-iphone">
                   <div class="map-view" id="mapContainer">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126469.25790368786!2d-80.61237617994237!3d7.877870543571153!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fad9253446ef0f3%3A0xb57d26f88752b998!2sLos%20Santos%2C%20Los%20Santos%20Province%2C%20Panama!5e0!3m2!1sen!2s!4v1745246290710!5m2!1sen!2s" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                       <div class="map-search-bar">
                           <svg class="map-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <circle cx="11" cy="11" r="8"></circle>
@@ -489,10 +488,12 @@
                     
                   </div>
                   <div class="story-upload" id="story-upload" style="display: none;">
-                    <button class="close-story-modal" id="close-story-modal" style="width: 30px;">x</button>
+                    <div class="innerModal-story-upload">
+                      <button class="close-story-modal" id="close-story-modal" style="width: 30px;">x</button>
                     <h3>Upload Your Story</h3>
                     <input type="text" id="story-image-url" placeholder="Enter Image URL" />
                     <button id="upload-story">Upload Story</button>
+                    </div>
                   </div>
                 
                   <!-- Story Bar -->
@@ -552,12 +553,20 @@
                         <button onclick="openEditModal()">Edit Profile Image</button>
                       </div>
                         <div class="edit-pfp-modal" id="edit-pfp-modal" style="display: none;">
+                         <div class="innerEdit-Pfp">
                           <button class="close-edit-pfp-modal" id="close-edit-pfp-modal" onclick="closeEditModal()">×</button>
                           <h3>Edit Profile</h3>
                           <input type="text" id="profile-photo" placeholder="Upload Image">
                           <button id="save-profile-btn" onclick="updateProfile()">Save</button>
+                         </div>
                         </div>
 
+                        <div class="post-grid" id="postGrid">
+                              <!-- all post will render here -->
+                        </div>
+                        <div class="profile-view" id="profileView" style="display: none;">
+
+                        </div>
                    </div>
                   <div class="insta-bottom-nav">
                     <!-- Existing Buttons -->
@@ -600,11 +609,6 @@
               </div>
               <div style="display: none;" class="snapchat">
                 <div class="snapchat-container" id="screenshotContainer">
-                  <div class="snapchat-ui" id="screenshotUI">
-                    <div id="cameraContainer">
-                      <canvas id="videocall-canvas" style="display: none; position: absolute; width: 250px; height: 575px; right: 5px; bottom: 5px; border: solid 5px red;"></canvas>
-                  </div>
-                  
                       <div class="snapchat-content">
                           <div class="snapchat-filter-options">
                               <div class="snapchat-filter-option active" data-filter="normal">Normal</div>
@@ -637,48 +641,7 @@
               <div class="snapchat-notification" id="notification">Screenshot saved successfully!</div>
               
               </div>
-              <div style="display: none;" class="whatsapp">
-                <div class="whatsapp-container">
-                  <div class="whatapp-contact-list" id="contactList">
-                      <!-- Contacts will be loaded here -->
-                  </div>
-              
-                  <div class="whatapp-chat-page whatapp-hidden" id="chatPage">
-                      <div class="whatapp-chat-header">
-                          <button class="whatapp-back-button" onclick="goBackWhatsapp()">⬅</button>
-                          <img id="chatImg" src="" alt="">
-                          <div id="chatNameWhatsapp"></div> <!-- Fixed ID -->
-                      </div>
-                      <div class="whatapp-chat-box" id="chatBox"></div>
-                      <div class="whatapp-chat-input">
-                          <input type="text" id="messageInput" placeholder="Type a message...">
-                          <button onclick="sendMessage()">Send</button>
-                      </div>
-                  </div>
-              
-                  <!-- Status Page -->
-                  <div class="whatapp-status-page whatapp-hidden" id="statusPage">
-                    <div class="whatapp-status-list">
-                        <div class="status-item">
-                            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Status 1">
-                        </div>
-                        <div class="status-item">
-                            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Status 2">
-                        </div>
-                    </div>
-                </div>
-                
-              
-                  <div class="whatappBottom" id="whatappBottom">
-                      <button onclick="loadNavigate('contactList')">
-                          <img src="./images/Comments.png" alt="" width="20px"> Chats
-                      </button>
-                      <button onclick="loadNavigate('statusPage')">
-                          <img src="./images/status.png" alt="" width="20px"> Status
-                      </button>
-                  </div>
-              </div>
-              </div>
+            
             </div>
           </div>
         
@@ -752,7 +715,6 @@
         </div>
       </div>
     </div>
-    
     <script  src="app.js"></script>
   </body>
 </html>

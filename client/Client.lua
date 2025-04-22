@@ -386,6 +386,37 @@ function StopPhoneCamera()
     })
 end
 
+
+
+
+
+
+
+-------------------appplications
+RegisterNUICallback("maps",function(data)
+    print(json.encode(data))
+    
+end)
+RegisterNUICallback("music",function(data)
+    print(json.encode(data))
+    
+end)
+RegisterNUICallback("safari",function(data)
+    print(json.encode(data))
+    
+end)
+-------------------appplications
+
+
+
+
+
+
+
+
+
+
+
 ----------------save data-----------------------------------------------
 local contacts = {}
 
@@ -502,7 +533,6 @@ RegisterNUICallback('sendMessage', function(data, cb)
     })
 end)
 RegisterNUICallback('getMessages', function(data, cb)
-    print(json.encode(data))
     local sender = data.receiver
 
     if sender then
@@ -707,7 +737,6 @@ end)
 RegisterNetEvent("instagram:loginSuccess")
 AddEventHandler("instagram:loginSuccess", function(username)
     -- NUI focus off and show main app
-    print("Instagram login success for user: " .. json.encode(username))
     SetNuiFocus(false, false)
     SendNUIMessage({
         action = "showInstagram",
@@ -726,7 +755,6 @@ AddEventHandler("instagram:loginFailed", function(message)
 end)
 
 RegisterNUICallback("uploadPost", function(data, cb)
-    print(json.encode(data))
     local playerName = GetPlayerName(PlayerId()) -- ya stored username
     TriggerServerEvent("insta:uploadPost", {
         username = data.username,
@@ -743,7 +771,17 @@ AddEventHandler("insta:loadPosts", function(posts)
         insta_posts = posts
     })
 end)
+RegisterNUICallback("getUserUploadPost",function(data)
+    TriggerServerEvent("insta:getMyPosts",data)
+end)
 
+RegisterNetEvent("insta:postFetched")
+AddEventHandler("insta:postFetched",function(data)
+    SendNUIMessage({
+        type = "ownPostFetched",
+        ownPosts = data
+    })
+end)
 Citizen.CreateThread(function()
     Citizen.Wait(50)
     TriggerServerEvent("insta:getAllPosts")
@@ -753,7 +791,6 @@ end)
 -- Optionally call on start
 
 RegisterNUICallback("likePost", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("insta:likePost", {
         postId = data.postID,
         username = data.username
@@ -761,7 +798,6 @@ RegisterNUICallback("likePost", function(data, cb)
     cb("ok")
 end)
 RegisterNUICallback("addComment", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("insta:addComment", {
         post_id = data.postId,
         comment = data.comment,
@@ -771,7 +807,6 @@ RegisterNUICallback("addComment", function(data, cb)
 end)
 
 RegisterNUICallback("viewComment", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("insta:getComments", {
         postId = data.postId
     })
@@ -858,7 +893,6 @@ RegisterNUICallback("unfollowUser", function(data, cb)
     cb({})
 end)
 RegisterNUICallback("getFollowData", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("instagram:getFollowerData", data)
     cb({})
 end)
@@ -881,7 +915,6 @@ end)
 ----follower    
 ---update profile
 RegisterNUICallback("updateProfile", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("insta:updateProfile",data)
     cb({})
 end)
@@ -892,7 +925,6 @@ end)
 -------------------pma
 
 RegisterNUICallback('startCall', function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent('phone:call', data.phoneNumber)
     cb({})
 end)
@@ -938,7 +970,6 @@ end)
 RegisterNUICallback("endCall", function(data, cb)
     local src = source
 
-    print(json.encode(data), "call ended")
     exports['pma-voice']:setCallChannel(0)
     TriggerServerEvent("phone:callEnded", data)
     cb({})
@@ -950,7 +981,6 @@ end)
 
 
 RegisterNetEvent("phone:sendContactInfo", function(contacts)
-    print("Received contacts: " .. json.encode(contacts))
     SendNUIMessage({
         action = "showRecentContacts",
         contacts = contacts

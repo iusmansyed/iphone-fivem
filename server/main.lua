@@ -93,7 +93,6 @@ AddEventHandler('screenshot:share', function(imageData)
 
     -- Validate imageData
     if not imageData or imageData == "" then
-        print("Invalid image data received from client")
         TriggerClientEvent('screenshot:notify', src, "Invalid screenshot data")
         return
     end
@@ -196,7 +195,7 @@ AddEventHandler("saveUserData", function(username, citizen_id)
         ["@citizen_id"] = citizen_id
     }, function(count)
         if count > 0 then
-            print("⚠️ User already exists: " .. username)
+
         else
             -- ✅ Save new user if not already saved
             MySQL.Async.execute(
@@ -206,7 +205,6 @@ AddEventHandler("saveUserData", function(username, citizen_id)
                     ["@citizen_id"] = citizen_id
                 }, function(rowsChanged)
                     if rowsChanged > 0 then
-                        print("✅ User data saved for: " .. username)
                         TriggerClientEvent("userSavedNotify", src)
                     else
                         print("❌ Failed to save user data for: " .. username)
@@ -220,7 +218,6 @@ RegisterNetEvent("requestContacts")
 AddEventHandler("requestContacts", function()
     local src = source
     MySQL.Async.fetchAll("SELECT username, phone FROM mobile_user", {}, function(users)
-        print("✅ Fetched contacts for user: " .. src)
         TriggerClientEvent("receiveContacts", src, users)
     end)
 end)
@@ -247,7 +244,6 @@ AddEventHandler("saveNewContact", function(contactName, phoneNumber)
                     ["@citizen_id"] = citizen_id
                 }, function(rowsChanged)
                     if rowsChanged > 0 then
-                        print("✅ New contact saved: " .. contactName .. " - " .. phoneNumber)
                         TriggerClientEvent("phoneNotification", src, "Contact saved successfully")
 
                         -- Send updated contacts list back to client
@@ -285,7 +281,6 @@ end)
 ----------------------Messages------------------------------
 RegisterNetEvent('qb-core:phone:sendMessage')
 AddEventHandler('qb-core:phone:sendMessage', function(data)
-    print("Received message data: " .. json.encode(data))
     local sender = data.sender
     local receiver = data.receiver
     local message = data.message
@@ -299,7 +294,6 @@ AddEventHandler('qb-core:phone:sendMessage', function(data)
             ["@message"] = message
         }, function(rowsChanged)
             if rowsChanged > 0 then
-                print("Message saved individually")
                 -- Trigger event to notify message sent
                 TriggerClientEvent('qb-core:phone:messageSent', src)
                 -- Send the message to the clients
@@ -321,8 +315,7 @@ AddEventHandler('qb-core:phone:getMessages', function(chatUser)
     local username = GetPlayerName(src)
     local recievername = chatUser.sender
     local cleanedReceiverName = json.decode(recievername)
-    print("USERNAME DEBUG:", username)
-    print("RECEIVER DEBUG:", recievername)
+
 
     MySQL.Async.fetchAll(
         "SELECT * FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
@@ -585,11 +578,7 @@ end)
 RegisterServerEvent("insta:GetAllUsersInfo")
 AddEventHandler("insta:GetAllUsersInfo", function(data)
     local src = source
-    print("data assa-><<<<", json.encode(data.userId))
-    MySQL.Async.fetchAll("SELECT * FROM instagram_users WHERE id = ?", {
-        data.userId
-    }, function(users)
-        print("users -><<<<", json.encode(users))
+    MySQL.Async.fetchAll("SELECT * FROM instagram_users WHERE id = ?", {data.userId}, function(users)
         TriggerClientEvent("instagram:loadInstaAllUsers", src, users)
     end)
 end)
@@ -642,7 +631,7 @@ AddEventHandler("insta:getAllPosts", function(src)
 
             post.likeCount = likes
             post.commentCount = comments
-            post.shareCount = shares
+          
 
             table.insert(updatedPosts, post)
         end
@@ -821,13 +810,13 @@ end)
 RegisterServerEvent("insta:updateProfile")
 AddEventHandler("insta:updateProfile", function(data)
     print("Updating profile data: " .. json.encode(data))
-    local src = source  
+    local src = source
 
     local image = data.image
     local userId = data.userId
-    local query = "UPDATE users SET profile = @profile WHERE id = @id"
+    local query = "UPDATE instagram_users SET image = @image WHERE id = @id"
     local params = {
-        ["@profile"] = data.profile,
+        ["@image"] = data.profile,
         ["@id"] = userId
     }
     MySQL.Async.execute(query, params, function(rowsChanged)
@@ -841,6 +830,41 @@ AddEventHandler("insta:updateProfile", function(data)
     end)
 
 end)
+
+RegisterServerEvent("insta:getMyPosts")
+AddEventHandler("insta:getMyPosts", function(data)
+    print(json.encode(data))
+    local src = source
+
+    MySQL.Async.fetchAll("SELECT * FROM instagram_posts WHERE username = @username", {
+        ["@username"] = data.username
+    }, function(posts)
+        local updatedPosts = {}
+
+        for _, post in ipairs(posts) do
+            local postId = post.id
+
+            -- Get counts
+            local likes = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_likes WHERE post_id = @post_id", {
+                ["@post_id"] = postId
+            }) or 0
+
+            local comments = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_comments WHERE post_id = @post_id", {
+                ["@post_id"] = postId
+            }) or 0
+
+            -- Add counts to post
+            post.likeCount = likes
+            post.commentCount = comments
+
+            table.insert(updatedPosts, post)
+        end
+
+        TriggerClientEvent("insta:postFetched", src, updatedPosts)
+    end)
+end)
+
+
 -- update proflie
 
 ---------------------instagram

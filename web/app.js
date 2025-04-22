@@ -588,6 +588,7 @@ function initializeAppOpening() {
 
   // Handle back button
   backButton?.addEventListener("click", closeApp);
+
   instabackButton?.addEventListener("click", closeApp);
 
   function openApp(appName, title) {
@@ -631,7 +632,33 @@ function initializeAppOpening() {
           '<div style="padding: 20px;">App content not available</div>';
         break;
     }
-
+    if (appName === "maps") {
+      fetch(`https://${GetParentResourceName()}/maps`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify("maps"),
+      });
+    }
+    if (appName === "music") {
+      fetch(`https://${GetParentResourceName()}/music`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify("music"),
+      });
+    }
+    if (appName === "safari") {
+      fetch(`https://${GetParentResourceName()}/safari`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify("safari"),
+      });
+    }
     // if (appName === "maps") {
     //   header.style.display = "none";
     // }else{
@@ -657,6 +684,9 @@ function initializeAppOpening() {
       });
     }, 300);
   }
+  document.getElementById("bottomSlide").addEventListener("click", function () {
+    closeApp();
+  });
 }
 
 // Initialize when the document is ready
@@ -2537,15 +2567,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
+  instagramAuth.style.display = "none";
+  instagramMain.style.display = "block";
   var i = localStorage.getItem("userDetails");
   window.addEventListener("message", function (event) {
     if (event.data.type === "loadInstaAllUsers") {
       document.getElementById(
         "user-name-pfp"
-      ).innerText = ` @${event.data.users[0].username}`;
+      ).innerText = ` @${event?.data?.users[0]?.username}`;
+
       var pfp = document.getElementById("prf-pic");
       pfp.src = event.data.users[0].image;
-    
     }
   });
   if (i) {
@@ -2591,16 +2623,89 @@ function getAllInstagramUserDetails() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Received data from server:", data);
       // Update your UI with the received data (posts)
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 }
+function getUserUploadPosts() {
+  fetch(`https://${GetParentResourceName()}/getUserUploadPost`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: localStorage.getItem("userDetails"),
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("received data from server", JSON.stringify(data));
+    })
+    .catch((error) => {
+      console.log("Error Fetching data", error);
+    });
+}
 getAllInstagramUserDetails();
 // ... existing code ...
+window.addEventListener("message", function (event) {
+  if (event.data.type === "ownPostFetched") {
+    var postGrid = document.getElementById("postGrid");
+    postGrid.innerHTML = "";
+    var posts = event.data.ownPosts;
 
+    if (posts.length > 0) {
+      posts.forEach((post) => {
+        var div = document.createElement("div");
+        div.classList.add("post-card");
+
+        // Create image element separately
+        var img = document.createElement("img");
+        img.src = post.image;
+        img.classList.add("post-image");
+
+        // Attach click listener and pass post object
+        img.addEventListener("click", function () {
+          openPost(post);
+        });
+
+        // Append image to div and div to grid
+        div.appendChild(img);
+        postGrid.appendChild(div);
+      });
+    } else {
+      var div = document.createElement("div");
+      div.classList.add("no-post-message");
+      div.innerText = "No posts found.";
+      postGrid.appendChild(div);
+    }
+  }
+});
+
+function openPost(data) {
+  console.log("data", JSON.stringify(data));
+  var profileView = document.getElementById("profileView");
+  profileView.style.display = "block";
+  profileView.innerHTML = `
+ <div class="innerPreview">
+ <button id="closePreviewBtn" class="close-btn">✖</button>
+ <h3>@${localStorage.getItem("userDetails")}</h3>
+  <img src=${data.image} alt="" />
+  <div class="preview-actions">
+  <p>${data.caption}</p>
+  <button class="like-btn" data-id="${data.id}">❤️  ${
+    data.likeCount || 0
+  }</button>
+  </div>
+ </div>
+  `;
+  document
+    .getElementById("closePreviewBtn")
+    .addEventListener("click", function () {
+      profileView.style.display = "none";
+    });
+}
 // Add these functions after your existing Instagram-related functions
 
 function openUploadSection() {
@@ -2635,14 +2740,20 @@ function updateProfile() {
       profile: profile,
     }),
   });
-  profile = "";
+  setTimeout(() => {
+    profile = "";
+  }, 1000);
   document.getElementById("edit-pfp-modal").style.display = "none";
 }
 
 function logout() {
   localStorage.removeItem("userDetails");
+  localStorage.removeItem("user_id");
   document.getElementById("instagram-auth").style.display = "block";
   document.getElementById("instagram-main").style.display = "none";
+  getAllInstagramUserDetails();
+  getUserUploadPosts();
+  loadStories();
 }
 // Add event listener for the share button
 document
@@ -2745,14 +2856,12 @@ function renderFeed(posts) {
       <button class="comment-btn" data-id="${post.id}">💬  ${
       post.commentCount || 0
     }</button>
-      <button class="share-btn" data-id="${post.id}">🔗  ${
-      post.shareCount || 0
-    }</button>
+    
     </div>
   
     <div class="comment-section" id="comments-${
       post.id
-    }" style="bottom: -880px;">
+    }" style="display : none">
     <button class="close-comment-btn" data-id="${post.id}">
     x
     </button>
@@ -2818,7 +2927,7 @@ function setupPostInteractions() {
     btn.addEventListener("click", () => {
       const postId = btn.getAttribute("data-id");
       const commentBox = document.getElementById(`comments-${postId}`);
-      commentBox.style.bottom = "-880px";
+      commentBox.style.display = "none";
     });
   });
 
@@ -2826,8 +2935,8 @@ function setupPostInteractions() {
     btn.addEventListener("click", () => {
       const postId = btn.getAttribute("data-id");
       const commentBox = document.getElementById(`comments-${postId}`);
-      commentBox.style.bottom =
-        commentBox.style.bottom === "-880px" ? "-80px" : "-880px";
+      commentBox.style.display =
+        commentBox.style.display === "none" ? "block" : "none";
       fetch(`https://${GetParentResourceName()}/viewComment`, {
         method: "POST",
         body: JSON.stringify({ postId }),
@@ -2926,7 +3035,7 @@ document.getElementById("upload-story").addEventListener("click", () => {
       .then((res) => res.json())
       .then((data) => {
         if (data) {
-          imageUrl = ""; // Clear input field
+          imageUrlInput.value = ""; // ✅ Clear input field
           document.getElementById("story-upload").style.display = "none"; // Hide modal
           loadStories(); // Reload stories
         }
@@ -2945,7 +3054,6 @@ function loadStories() {
 
 // Show story viewer
 function showStory(username, userStories, initialIndex = 0) {
-  console.log("Showing stories for:", username);
 
   const viewer = document.getElementById("storyViewer");
   const storyContent = document.getElementById("storyContent");
@@ -3199,8 +3307,8 @@ function goToIgProfile() {
   document.getElementById("follower-section").style.display = "none";
   document.getElementById("Profile-Ig-section").style.display = "block";
   document.getElementById("up-sc").style.display = "none";
-getAllInstagramUserDetails();
-
+  getAllInstagramUserDetails();
+  getUserUploadPosts();
 }
 
 window.addEventListener("message", function (event) {
