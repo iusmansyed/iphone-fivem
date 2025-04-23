@@ -562,6 +562,8 @@ function initializeAppOpening() {
   const instagramApp = document.querySelector(".instagram");
   const whatsApp = document.querySelector(".whatsapp");
   const snapchatApp = document.querySelector(".snapchat");
+  const settings = document.querySelector(".settings");
+  const youtube = document.querySelector(".youtube");
 
   // Array of all app content divs
   const allAppDivs = [
@@ -573,6 +575,8 @@ function initializeAppOpening() {
     instagramApp,
     whatsApp,
     snapchatApp,
+    settings,
+    youtube,
   ];
 
   // Handle app clicks
@@ -623,8 +627,11 @@ function initializeAppOpening() {
       case "snapchat":
         if (snapchatApp) snapchatApp.style.display = "block";
         break;
-      case "whatsapp":
-        if (whatsApp) whatsApp.style.display = "block";
+      case "settings":
+        if (settings) settings.style.display = "block";
+        break;
+      case "youtube":
+        if (youtube) youtube.style.display = "block";
         break;
       default:
         // If no matching app, show default content
@@ -657,6 +664,15 @@ function initializeAppOpening() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify("safari"),
+      });
+    }
+    if (appName === "settings") {
+      fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(),
       });
     }
     // if (appName === "maps") {
@@ -3054,7 +3070,6 @@ function loadStories() {
 
 // Show story viewer
 function showStory(username, userStories, initialIndex = 0) {
-
   const viewer = document.getElementById("storyViewer");
   const storyContent = document.getElementById("storyContent");
 
@@ -3405,3 +3420,243 @@ function fetchFollowStats() {
 }
 
 fetchFollowStats();
+
+function themeForSetting() {
+  if (localStorage.getItem("theme") === "dark") {
+    document.getElementById("setting-white").style.display = "block";
+    document.getElementById("white-plate").style.display = "block";
+
+    document.querySelectorAll(".white-call").forEach((el) => {
+      el.style.display = "block";
+    });
+  } else {
+    document.getElementById("setting-black").style.display = "block";
+    document.getElementById("black-plate").style.display = "block";
+
+    document.querySelectorAll(".black-call").forEach((el) => {
+      el.style.display = "block";
+    });
+  }
+}
+
+themeForSetting();
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "Mob-info") {
+    document.getElementById("ph-num").innerText = event.data.data.phone;
+    document.getElementById("sr-num").innerText = event.data.data.serialNumber;
+  }
+});
+
+const wallpapers = [
+  {
+    wallpaper: "./images/wallpaper-1.jpg",
+    name: "Palm",
+  },
+  {
+    wallpaper: "./images/wallpaper-2.jpg",
+    name: "galaxy",
+  },
+  {
+    wallpaper: "./images/iphone-wall-paper.jpg",
+    name: "default",
+  },
+];
+
+showWallpapers(wallpapers);
+
+function showWallpapers(param) {
+  const wallpapersDiv = document.getElementById("inner-Wp");
+  param.forEach((item) => {
+    const img = document.createElement("img");
+    img.src = item.wallpaper;
+    img.style.width = "100%";
+    img.style.cursor = "pointer";
+    img.style.borderRadius = "10px";
+    img.addEventListener("click", () => {
+      localStorage.setItem("selectedWallpaper", item.wallpaper);
+      localStorage.setItem("selectedWallpaperName", item.wallpaper);
+      document.getElementById("wallpapers").style.bottom = "-500px";
+      showToast("Wallpaper Updated");
+      document.getElementById(
+        "subDiv"
+      ).style.backgroundImage = `url(${item.wallpaper})`;
+      document.getElementById("bg-name").innerText = item.name;
+    });
+    wallpapersDiv.appendChild(img);
+  });
+}
+window.addEventListener("DOMContentLoaded", () => {
+  const wallP = localStorage.getItem("selectedWallpaper");
+  const wallPName = localStorage.getItem("selectedWallpaperName");
+  if (wallP) {
+    document.getElementById("subDiv").style.backgroundImage = `url(${wallP})`;
+  }
+  if (wallPName) {
+    document.getElementById("bg-name").innerText = wallPName;
+  }
+});
+
+function openWallPaperModal() {
+  document.getElementById("wallpapers").style.bottom = "0px";
+}
+
+document.getElementById("top-slider").addEventListener("click", function () {
+  document.getElementById("wallpapers").style.bottom = "-500px";
+});
+
+function showToast(params) {
+  var toastMessage = document.getElementById("toast");
+  toastMessage.style.right = "0px";
+  toastMessage.innerHTML = params;
+  setTimeout(() => {
+    toastMessage.style.right = "-300px";
+  }, 2000);
+}
+
+function SwitchYoutubeTab(div) {
+  if (div === "upload") {
+    document.getElementById("upload").style.display = "block";
+    document.getElementById("video").style.display = "none";
+    document.getElementById("up-btn").classList.add("active");
+    document.getElementById("vid-btn").classList.remove("active");
+  } else if (div === "videos") {
+    document.getElementById("video").style.display = "flex";
+    document.getElementById("upload").style.display = "none"; // <-- Fixed this line
+    document.getElementById("up-btn").classList.remove("active");
+    document.getElementById("vid-btn").classList.add("active");
+  }
+}
+
+document.getElementById("openUploadModal").addEventListener("click", () => {
+  document.getElementById("uploadModal").style.display = "flex";
+});
+
+function closeUploadModal() {
+  document.getElementById("uploadModal").style.display = "none";
+}
+
+function uploadYoutubeLink() {
+  const youtubeLink = document.getElementById("youtubeInput").value;
+  const captionLink = document.getElementById("captionInput").value;
+
+  fetch(`https://${GetParentResourceName()}/sendYoutubeVideo`, {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify({
+      videoLink: youtubeLink,
+      caption: captionLink,
+    }),
+  });
+
+  // Clear inputs
+  document.getElementById("youtubeInput").value = "";
+  document.getElementById("captionInput").value = "";
+  // Close modal
+  closeUploadModal();
+}
+
+function searchYoutubeVideo() {
+  var searchQuery = document.getElementById("youtube-search").value;
+  if (searchQuery.trim() === "") {
+    return;
+  }
+  fetch(`https://${GetParentResourceName()}/youtube:search`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify(searchQuery), // 👈 user input sent to server
+  });
+}
+window.addEventListener("message", function (event) {
+  if (event.data.type === "YoutubeVideosResults") {
+    var data = event.data.data;
+    var VideoFeed = document.getElementById("all-videos");
+
+    // Clear previous results
+    VideoFeed.innerHTML = "";
+
+    // Check if there is no data
+    if (!data || data.length === 0) {
+      var noVideosMessage = document.createElement("p");
+      noVideosMessage.classList.add("not-found");
+      noVideosMessage.textContent = "No videos found";
+      VideoFeed.appendChild(noVideosMessage);
+      return; // Exit the function early if no data
+    }
+
+    // Process and display videos
+    data.forEach((element) => {
+      var div = document.createElement("div");
+      div.classList.add("video-box"); // optional: for styling
+      div.addEventListener("click", function () {
+        OpenVideo(element); // ya koi custom function bhi call kar sakte ho
+      });
+
+      // Create iframe - Fix the src attribute
+      var iframe = document.createElement("iframe");
+      // Make sure the YouTube link is properly formatted for embedding
+      if (element.youtube_link) {
+        // Handle different YouTube URL formats
+        var videoId = extractYouTubeVideoId(element.youtube_link);
+        if (videoId) {
+          iframe.src = "https://www.youtube.com/embed/" + videoId;
+        } else {
+          // Fallback if unable to extract video ID
+          iframe.src = element.youtube_link;
+        }
+      }
+      iframe.width = "100%";
+      iframe.height = "200";
+      iframe.frameBorder = "0";
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
+      var time = getTimeAgo(element.created_at);
+      var txtBody = document.createElement("div");
+      var caption = document.createElement("p");
+      caption.textContent = element.caption_link;
+      var timeStamps = document.createElement("p");
+      timeStamps.classList.add("time-ago");
+      timeStamps.textContent = time;
+      txtBody.appendChild(caption);
+      txtBody.appendChild(timeStamps);
+      div.appendChild(iframe);
+      div.appendChild(txtBody);
+      VideoFeed.appendChild(div);
+    });
+  }
+});
+
+// Helper function to extract YouTube video ID from various URL formats
+function extractYouTubeVideoId(url) {
+  if (!url) return null;
+
+  // Handle standard YouTube URLs
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+
+  return match && match[2].length === 11 ? match[2] : null;
+}
+
+function OpenVideo(element) {
+  var videoContainer = document.getElementById("video-play");
+  videoContainer.style.display = "block";
+  var video = document.getElementById("iframe-youtube-video");
+  var time = document.getElementById("youtube-time");
+  var timeAgo = getTimeAgo(element.created_at)
+  time.innerText = timeAgo
+  var caption = document.getElementById("youtube-caption");
+  var videoId = extractYouTubeVideoId(element.youtube_link);
+  if (videoId) {
+    video.src = "https://www.youtube.com/embed/" + videoId;
+  }
+  caption.innerText = element.caption_link;
+}
+
+
+document.getElementById("back-youtube").addEventListener('click',function(){
+  var videoContainer = document.getElementById("video-play");
+  videoContainer.style.display = "none";
+})

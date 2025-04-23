@@ -97,16 +97,23 @@
                 <div class="app-ic" draggable="true" data-app="snapchat">
                   <span class="delete-icon">×</span>
                   <button>
-                    <img src="/web/images/snapchat.png" alt="Maps" />
+                    <img src="/web/images/snapchat.png" alt="snapchat" />
                   </button>
                   <p>Snapchat</p>
                 </div>
                 <div class="app-ic" draggable="true" data-app="instagram">
                   <span class="delete-icon">×</span>
                   <button>
-                    <img src="/web/images/instagram.png" alt="Maps" />
+                    <img src="/web/images/instagram.png" alt="instagram" />
                   </button>
                   <p>Instagram</p>
+                </div>
+                <div class="app-ic" draggable="true" data-app="youtube">
+                  <span class="delete-icon">×</span>
+                  <button>
+                    <img src="/web/images/youtube.png" alt="youtube" />
+                  </button>
+                  <p>Youtube</p>
                 </div>
 
 <!-- pma call -->
@@ -221,7 +228,6 @@
                   <div class="menu-item" onclick="switchTab('dialSection', this)">Dial</div>
               </div>
               </div>
-            
               <div style="display: none;" class="safari">
                 <div class="safari-search-container">
                   <div class="search-bar">
@@ -606,7 +612,6 @@
                   
                 </div>
               </div>
-              </div>
               <div style="display: none;" class="snapchat">
                 <div class="snapchat-container" id="screenshotContainer">
                       <div class="snapchat-content">
@@ -622,6 +627,119 @@
                       </div>
                   </div>
               </div>
+              <div style="display: none;" class="settings">
+                 <div class="setting-head">
+                  <img src="./images/Settings_Black.png" alt="" id="setting-black" style="display: none;">
+                  <img src="./images/Settings_White.png" alt="" id="setting-white" style="display: none;">
+                <p>Setting</p> 
+                </div>
+                <div class="setting-body">
+                  <div class="toast" id="toast" style="right: -300px;">
+
+                  </div>
+                  <ul>
+                    <li onclick="openWallPaperModal()">
+                      <div class="img-sec"  >
+                        <img src="./images/White_Paint_Palette.png" alt="" width="45px" id="white-plate" style="display: none;">
+                        <img src="./images/Black_Paint_Palette.png" alt="" width="45px" id="black-plate" style="display: none;">
+                      </div>
+                      <div class="txt-sec">
+                        <h4>Background</h4>
+                        <p id="bg-name">Default</p>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="img-sec"><img src="./images/user.png" alt="" width="45px"></div>
+                      <div class="txt-sec">
+                        <h4>Avatar</h4>
+                        <p>Default</p>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="img-sec">
+                        <img src="./images/cl-btn.png" alt="" width="45px" class="white-call" style="display: none;">
+                        <img src="./images/Phone_black.png" alt="" width="45px" class="black-call" style="display: none;">
+                      </div>
+                      <div class="txt-sec">
+                        <h4>My Phone Number</h4>
+                        <p id="ph-num">Default</p>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="img-sec">
+                        <img src="./images/cl-btn.png" alt="" width="45px" class="white-call" style="display: none;">
+                        <img src="./images/Phone_black.png" alt="" width="45px" class="black-call" style="display: none;">
+                      </div>
+                      <div class="txt-sec">
+                        <h4>Serial Number</h4>
+                        <p id="sr-num">Default</p>
+                      </div>
+                    </li>
+                    <!-- <li>
+                      <div class="img-sec"></div>
+                      <div class="txt-sec"></div>
+                    </li> -->
+                    <div class="wall-paper-modal" id="wallpapers" style="bottom: -500px;">
+                      <div class="top-slider" id="top-slider"></div>
+                      <div class="inner-Wp" id="inner-Wp"></div>
+                    </div>
+                  </ul>
+                </div>
+              </div>
+              <div style="display: none;" class="youtube">
+                <div class="youtube-feed" id="upload" style="display: block;">
+                  <div class="search-youtube">
+                    <input type="text" name="" id="youtube-search" placeholder="Search ...">
+                    <button onclick="searchYoutubeVideo()">
+                      <img src="./images/search.png" alt="Search"  style="cursor: pointer;" />
+                    </button>
+                  </div>
+                  <div class="video-feed" id="video-feed">
+                    <div class="all-videos" id="all-videos"></div>
+                    
+                  </div>
+                </div>
+                <div class="youtube-upload" id="video" style="display: none;">
+                <!-- Upload Button -->
+                  <button id="openUploadModal" class="upl-btn-inpage">
+                  Upload
+                  </button>
+
+                  <!-- Modal -->
+                  <div id="uploadModal" class="upload-youtube-modal">
+                    <div class="youtube-modal-header">
+                      <h2>Upload Video Link</h2>
+                      
+                      <input type="text" placeholder="Paste YouTube link..." id="youtubeInput" />
+                      <br />
+                      <input type="text" placeholder="Paste Caption link..." id="captionInput" />
+                      <br /><br />
+                    
+                      <button onclick="uploadYoutubeLink()">
+                        Upload
+                      </button>
+                      <button onclick="closeUploadModal()" class="btn-s2">
+                        Cancel
+                      </button>
+                    </div>
+                    
+                  </div>
+
+                </div>
+                <div class="youtube-bottom-nav">
+                  <button onclick="SwitchYoutubeTab('upload')" class="yt-vid-btn active" id="up-btn">Upload</button>
+                  <button onclick="SwitchYoutubeTab('videos')" class="yt-vid-btn" id="vid-btn">Videos</button>
+                </div>
+                <div class="video-play" id="video-play">
+                    <div class="back-youtube" id="back-youtube">←</div>
+                    <div class="full-video">
+                      <iframe src="" frameborder="0" id="iframe-youtube-video"></iframe>
+                      <p id="youtube-caption"></p>
+                      <span id="youtube-time"></span>
+                    </div>
+                </div>
+              </div>
+            </div>
               
               <!-- Preview UI -->
               <div class="snapchat-preview-container snapchat-hidden" id="previewContainer">
@@ -655,9 +773,9 @@
               <img src="./images/phone-icon.png" alt="" width="40px" />
               <p style="display: none;">Call</p>
             </button>
-            <button data-app="safari" class="app-ic ap-ic-second">
-              <img src="./images/safari.png" alt="" width="40px" />
-              <p style="display: none;">Safari</p>
+            <button data-app="settings" class="app-ic ap-ic-second">
+              <img src="./images/setting.png" alt="" width="40px" />
+              <p style="display: none;">Settings</p>
             </button>
             <button data-app="messages" class="app-ic ap-ic-second">
               <img src="./images/message.png" alt="" width="40px" />

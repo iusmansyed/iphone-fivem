@@ -386,36 +386,20 @@ function StopPhoneCamera()
     })
 end
 
-
-
-
-
-
-
 -------------------appplications
-RegisterNUICallback("maps",function(data)
+RegisterNUICallback("maps", function(data)
     print(json.encode(data))
-    
+
 end)
-RegisterNUICallback("music",function(data)
+RegisterNUICallback("music", function(data)
     print(json.encode(data))
-    
+
 end)
-RegisterNUICallback("safari",function(data)
+RegisterNUICallback("safari", function(data)
     print(json.encode(data))
-    
+
 end)
 -------------------appplications
-
-
-
-
-
-
-
-
-
-
 
 ----------------save data-----------------------------------------------
 local contacts = {}
@@ -771,12 +755,12 @@ AddEventHandler("insta:loadPosts", function(posts)
         insta_posts = posts
     })
 end)
-RegisterNUICallback("getUserUploadPost",function(data)
-    TriggerServerEvent("insta:getMyPosts",data)
+RegisterNUICallback("getUserUploadPost", function(data)
+    TriggerServerEvent("insta:getMyPosts", data)
 end)
 
 RegisterNetEvent("insta:postFetched")
-AddEventHandler("insta:postFetched",function(data)
+AddEventHandler("insta:postFetched", function(data)
     SendNUIMessage({
         type = "ownPostFetched",
         ownPosts = data
@@ -813,18 +797,15 @@ RegisterNUICallback("viewComment", function(data, cb)
     cb("ok")
 end)
 RegisterNUICallback("getAllInstagramUserDetails", function(data, cb)
-    TriggerServerEvent("insta:GetAllUsersInfo", 
-        data
-    )
+    TriggerServerEvent("insta:GetAllUsersInfo", data)
     cb("ok")
 end)
-RegisterNetEvent("instagram:loadInstaAllUsers",function(users)
+RegisterNetEvent("instagram:loadInstaAllUsers", function(users)
     SendNUIMessage({
         type = "loadInstaAllUsers",
         users = users
     })
 end)
-
 
 RegisterNetEvent("insta:sendComments", function(postId, comments)
 
@@ -911,11 +892,10 @@ AddEventHandler("instagram:receiveFollowerData", function(followersCount, follow
     })
 end)
 
-
 ----follower    
 ---update profile
 RegisterNUICallback("updateProfile", function(data, cb)
-    TriggerServerEvent("insta:updateProfile",data)
+    TriggerServerEvent("insta:updateProfile", data)
     cb({})
 end)
 ---update profile
@@ -979,7 +959,6 @@ RegisterNUICallback("phone:getContacts", function(data, cb)
     TriggerServerEvent("phone:getContactInfo")
 end)
 
-
 RegisterNetEvent("phone:sendContactInfo", function(contacts)
     SendNUIMessage({
         action = "showRecentContacts",
@@ -987,3 +966,36 @@ RegisterNetEvent("phone:sendContactInfo", function(contacts)
     })
 end)
 -------------------pma
+
+-----------------my details
+RegisterNUICallback("Client:MyDetails", function(_, cb)
+    TriggerServerEvent("user:MyDetails")
+    cb({})
+end)
+RegisterNetEvent("phone:SerialAndPhone")
+AddEventHandler("phone:SerialAndPhone", function(data)
+    SendNUIMessage({
+        type = "Mob-info",
+        data = data
+    })
+
+end)
+-----------------my details
+
+-----youtube videos
+RegisterNUICallback("sendYoutubeVideo", function(data)
+    TriggerServerEvent("youtube:saveVideo", data)
+end)
+RegisterNUICallback("youtube:search", function(data)
+
+    TriggerServerEvent("youtube:searchVideos", data)
+end)
+RegisterNetEvent("youtube:searchResults")
+AddEventHandler("youtube:searchResults", function(data)
+    SendNUIMessage({
+        type = "YoutubeVideosResults",
+        data = data
+    })
+
+end)
+-----youtube videos

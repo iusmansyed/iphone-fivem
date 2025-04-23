@@ -316,7 +316,6 @@ AddEventHandler('qb-core:phone:getMessages', function(chatUser)
     local recievername = chatUser.sender
     local cleanedReceiverName = json.decode(recievername)
 
-
     MySQL.Async.fetchAll(
         "SELECT * FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
         {
@@ -631,7 +630,6 @@ AddEventHandler("insta:getAllPosts", function(src)
 
             post.likeCount = likes
             post.commentCount = comments
-          
 
             table.insert(updatedPosts, post)
         end
@@ -849,9 +847,10 @@ AddEventHandler("insta:getMyPosts", function(data)
                 ["@post_id"] = postId
             }) or 0
 
-            local comments = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_comments WHERE post_id = @post_id", {
-                ["@post_id"] = postId
-            }) or 0
+            local comments = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM instagram_comments WHERE post_id = @post_id",
+                {
+                    ["@post_id"] = postId
+                }) or 0
 
             -- Add counts to post
             post.likeCount = likes
@@ -863,7 +862,6 @@ AddEventHandler("insta:getMyPosts", function(data)
         TriggerClientEvent("insta:postFetched", src, updatedPosts)
     end)
 end)
-
 
 -- update proflie
 
@@ -934,3 +932,63 @@ AddEventHandler('phone:getContactInfo', function(contactNumber)
 end)
 
 ------------------calll
+
+-------------------my Details---
+RegisterServerEvent("user:MyDetails")
+AddEventHandler("user:MyDetails", function()
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local userObje = {
+        phone = xPlayer.PlayerData.charinfo.phone,
+        serialNumber = xPlayer.PlayerData.metadata.phonedata.SerialNumber
+    }
+    TriggerClientEvent("phone:SerialAndPhone", src, userObje) -- ← src add kiya
+end)
+
+-------------------my Details---
+
+-----youtube
+RegisterServerEvent("youtube:saveVideo")
+AddEventHandler("youtube:saveVideo", function(data)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+    local time = os.date("%Y-%m-%d %H:%M:%S")
+    if data and data.videoLink and data.caption then
+        MySQL.Async.execute(
+            "INSERT INTO youtube_videos (citizenid, youtube_link, caption_link, created_at) VALUES (?, ?, ?, ?)",
+            {citizenid, data.videoLink, data.caption, time}, function(rowsChanged)
+                print("✅ Video saved for " .. citizenid)
+                TriggerClientEvent("youtube:uploadSuccess", src)
+            end)
+    else
+        print("❌ Invalid data received")
+    end
+end)
+RegisterServerEvent("youtube:searchVideos")
+AddEventHandler("youtube:searchVideos", function(searchText)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    MySQL.Async.fetchAll(
+        [[
+            SELECT youtube_link, caption_link, created_at 
+            FROM youtube_videos 
+            WHERE citizenid = ? 
+            AND (youtube_link LIKE ? OR caption_link LIKE ?)
+        ]],
+        {
+            citizenid,
+            "%" .. searchText .. "%",
+            "%" .. searchText .. "%"
+        },
+        function(results)
+            -- Send results to client with time
+            TriggerClientEvent("youtube:searchResults", src, results)
+        end
+    )
+end)
+
+
+-----youtube

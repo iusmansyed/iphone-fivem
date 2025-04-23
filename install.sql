@@ -108,3 +108,11 @@ CREATE TABLE
         time DATETIME,
         status VARCHAR(20)
     );
+
+CREATE TABLE IF NOT EXISTS `youtube_videos` (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  citizenid VARCHAR(50),
+  youtube_link TEXT,
+  caption_link TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
