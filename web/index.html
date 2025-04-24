@@ -629,61 +629,103 @@
               </div>
               <div style="display: none;" class="settings">
                  <div class="setting-head">
-                  <img src="./images/Settings_Black.png" alt="" id="setting-black" style="display: none;">
-                  <img src="./images/Settings_White.png" alt="" id="setting-white" style="display: none;">
-                <p>Setting</p> 
+                  <div class="user-profile">
+                    <img src="./images/user.png" alt="" width="45px" id="avatar" onclick="openAvatarModal()">
+                  </div>
+                <h4 id="username"></h4>
+                <p id="citizenId"></p> 
                 </div>
                 <div class="setting-body">
                   <div class="toast" id="toast" style="right: -300px;">
-
                   </div>
                   <ul>
                     <li onclick="openWallPaperModal()">
                       <div class="img-sec"  >
-                        <img src="./images/White_Paint_Palette.png" alt="" width="45px" id="white-plate" style="display: none;">
-                        <img src="./images/Black_Paint_Palette.png" alt="" width="45px" id="black-plate" style="display: none;">
+                        <img src="./images/White_Paint_Palette.png" alt="" width="25px" id="white-plate" ">
+                        <h4>Wallpapers</h4>
                       </div>
                       <div class="txt-sec">
-                        <h4>Background</h4>
-                        <p id="bg-name">Default</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="img-sec"><img src="./images/user.png" alt="" width="45px"></div>
-                      <div class="txt-sec">
-                        <h4>Avatar</h4>
-                        <p>Default</p>
+                        <p><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                        </svg>
+                        </p>
                       </div>
                     </li>
                     <li>
                       <div class="img-sec">
-                        <img src="./images/cl-btn.png" alt="" width="45px" class="white-call" style="display: none;">
-                        <img src="./images/Phone_black.png" alt="" width="45px" class="black-call" style="display: none;">
+                        <img src="./images/cl-btn.png" alt="" width="25px" class="white-call" >
+                        <h4>Phone Number</h4>
                       </div>
                       <div class="txt-sec">
-                        <h4>My Phone Number</h4>
                         <p id="ph-num">Default</p>
                       </div>
                     </li>
                     <li>
                       <div class="img-sec">
-                        <img src="./images/cl-btn.png" alt="" width="45px" class="white-call" style="display: none;">
-                        <img src="./images/Phone_black.png" alt="" width="45px" class="black-call" style="display: none;">
+                        <img src="./images/cl-btn.png" alt="" width="25px" class="white-call">
+                        <h4>Serial Number</h4>
                       </div>
                       <div class="txt-sec">
-                        <h4>Serial Number</h4>
                         <p id="sr-num">Default</p>
                       </div>
                     </li>
-                    <!-- <li>
-                      <div class="img-sec"></div>
-                      <div class="txt-sec"></div>
-                    </li> -->
-                    <div class="wall-paper-modal" id="wallpapers" style="bottom: -500px;">
-                      <div class="top-slider" id="top-slider"></div>
-                      <div class="inner-Wp" id="inner-Wp"></div>
-                    </div>
+                    <li>
+                      <div class="img-sec">
+                        <img src="./images/White_Airport.png" alt="" width="25px" class="white-call">
+                        <h4>Airplane</h4>
+                      </div>
+                      <div class="txt-sec">
+                        <label class="switch">
+                          <input type="checkbox" id="toggleSwitch">
+                          <span class="slider-th"></span>
+                        </label>
+                      </div>
+                    </li>
                   </ul>
+                  <h4 class="set-head">Display</h4>
+                  <ul>
+                    <li>
+                      <div class="img-sec">
+                        <img src="./images/White_Moon.png" alt="" width="25px" class="black-call" >
+                        <h4>Dark Mode</h4>
+                      </div>
+                      <div class="txt-sec">
+                        <label class="switch">
+                          <input type="checkbox" id="toggleSwitchThemes">
+                          <span class="slider-th"></span>
+                        </label>
+                      </div>
+                    </li>
+                    <li onclick="openBrightness()">
+                      <div class="img-sec" >
+                        <img src="./images/Sun.png" alt="" width="25px" id="white-plate" ">
+                        <h4>Brightness</h4>
+                      </div>
+                      <div class="txt-sec">
+                        <p><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                        </svg>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+             <!-- ////modals -->
+                  <div class="set-brightness" id="set-brightness" style="bottom: -400px;">
+                    <div class="bright-slid" id="bright-slid"></div>
+                  </div>
+                  <div class="avatar-modal" id="avatar-modal" style="display: none;">
+                    <div class="innerDiv">
+                      <p>Update Avatar</p>
+                    <input type="text" id="update-avatar-inp" placeholder="Enter Avatar Link"/>
+                    <button class="updateBtn" onclick="updateAvatar()">Update</button>
+                    <button class="cancelButton" onclick="closeAvatarModal()">Cancel</button>
+                    </div>
+                  </div>
+                  <div class="wall-paper-modal" id="wallpapers" style="bottom: -500px;">
+                    <div class="top-slider" id="top-slider"></div>
+                    <div class="inner-Wp" id="inner-Wp"></div>
+                  </div>
+             <!-- ////modals -->
                 </div>
               </div>
               <div style="display: none;" class="youtube">
@@ -696,7 +738,6 @@
                   </div>
                   <div class="video-feed" id="video-feed">
                     <div class="all-videos" id="all-videos"></div>
-                    
                   </div>
                 </div>
                 <div class="youtube-upload" id="video" style="display: none;">
@@ -726,9 +767,15 @@
                   </div>
 
                 </div>
+                <div class="my-videos" id="myVideos" style="display: none;">
+                  <div class="my-upload-video" id="my-upload-video">
+                    <div class="all-myVideos" id="all-myVideos"></div>
+                  </div>
+                </div>
                 <div class="youtube-bottom-nav">
-                  <button onclick="SwitchYoutubeTab('upload')" class="yt-vid-btn active" id="up-btn">Upload</button>
-                  <button onclick="SwitchYoutubeTab('videos')" class="yt-vid-btn" id="vid-btn">Videos</button>
+                  <button onclick="SwitchYoutubeTab('upload')" class="yt-vid-btn active" id="up-btn"><img src="./images/Home.png" alt="" width="25px" /></button>
+                  <button onclick="SwitchYoutubeTab('videos')" class="yt-vid-btn" id="vid-btn"><img src="./images/UploadVid.png" alt="" width="25px"/></button>
+                  <button onclick="SwitchYoutubeTab('myVideos')" class="yt-vid-btn" id="myvid-btn"><img src="./images/Account.png" alt="" width="25px"/></button>
                 </div>
                 <div class="video-play" id="video-play">
                     <div class="back-youtube" id="back-youtube">←</div>

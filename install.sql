@@ -3,7 +3,8 @@ CREATE TABLE
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(50) NOT NULL,
         phone VARCHAR(10) NOT NULL,
-        citizen_id VARCHAR(50) NOT NULL UNIQUE
+        citizen_id VARCHAR(50) NOT NULL UNIQUE,
+        avatar TEXT NOT NULL
     );
 
 CREATE TABLE

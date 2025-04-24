@@ -666,15 +666,15 @@ function initializeAppOpening() {
         body: JSON.stringify("safari"),
       });
     }
-    if (appName === "settings") {
-      fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(),
-      });
-    }
+    // if (appName === "settings") {
+    //   fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(),
+    //   });
+    // }
     // if (appName === "maps") {
     //   header.style.display = "none";
     // }else{
@@ -1260,7 +1260,7 @@ if (contactList) {
     `;
 
     contactDiv.addEventListener("click", () => openWhatsAppChat(contact));
-    contactList.appendChild(contactDiv);
+    contactList?.appendChild(contactDiv);
   });
 } else {
   console.error("❌ contactList element not found!");
@@ -2593,7 +2593,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ).innerText = ` @${event?.data?.users[0]?.username}`;
 
       var pfp = document.getElementById("prf-pic");
-      pfp.src = event.data.users[0].image;
+      pfp.src = event?.data?.users[0]?.image;
     }
   });
   if (i) {
@@ -3421,26 +3421,6 @@ function fetchFollowStats() {
 
 fetchFollowStats();
 
-function themeForSetting() {
-  if (localStorage.getItem("theme") === "dark") {
-    document.getElementById("setting-white").style.display = "block";
-    document.getElementById("white-plate").style.display = "block";
-
-    document.querySelectorAll(".white-call").forEach((el) => {
-      el.style.display = "block";
-    });
-  } else {
-    document.getElementById("setting-black").style.display = "block";
-    document.getElementById("black-plate").style.display = "block";
-
-    document.querySelectorAll(".black-call").forEach((el) => {
-      el.style.display = "block";
-    });
-  }
-}
-
-themeForSetting();
-
 window.addEventListener("message", function (event) {
   if (event.data.type === "Mob-info") {
     document.getElementById("ph-num").innerText = event.data.data.phone;
@@ -3475,7 +3455,7 @@ function showWallpapers(param) {
     img.style.borderRadius = "10px";
     img.addEventListener("click", () => {
       localStorage.setItem("selectedWallpaper", item.wallpaper);
-      localStorage.setItem("selectedWallpaperName", item.wallpaper);
+      localStorage.setItem("selectedWallpaperName", item.name);
       document.getElementById("wallpapers").style.bottom = "-500px";
       showToast("Wallpaper Updated");
       document.getElementById(
@@ -3496,13 +3476,82 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("bg-name").innerText = wallPName;
   }
 });
+const wallP = localStorage.getItem("selectedWallpaper");
+const wallPName = localStorage.getItem("selectedWallpaperName");
+function openBrightness() {
+  document.getElementById("set-brightness").style.bottom = "0px";
+}
 
+document.getElementById("bright-slid").addEventListener("click", function () {
+  document.getElementById("set-brightness").style.bottom = "-400px";
+});
 function openWallPaperModal() {
   document.getElementById("wallpapers").style.bottom = "0px";
 }
 
 document.getElementById("top-slider").addEventListener("click", function () {
   document.getElementById("wallpapers").style.bottom = "-500px";
+});
+
+function openAvatarModal() {
+  document.getElementById("avatar-modal").style.display = "flex";
+}
+function closeAvatarModal() {
+  document.getElementById("avatar-modal").style.display = "none";
+}
+
+function updateAvatar() {
+  var inputValue = document.getElementById("update-avatar-inp").value;
+  if (inputValue.trim() === "") {
+    return showToast("Please Fill the Field");
+  }
+  fetch(`https://${GetParentResourceName()}/updateAvatar`, {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify({
+      avatar: inputValue,
+    }),
+  });
+  document.getElementById("avatar-modal").style.display = "none";
+}
+window.addEventListener("message", function (event) {
+  if (event.data.type === "ReceiveMyDetails") {
+    document.getElementById("avatar").src = event.data.data.avatar;
+    document.getElementById("username").innerText = event.data.data.username;
+    document.getElementById("citizenId").innerText = event.data.data.citizen_id;
+  }
+});
+const toggleSwitch = document.getElementById("toggleSwitch");
+
+toggleSwitch.addEventListener("change", function () {
+  if (this.checked) {
+    console.log("Toggle ON");
+    // koi aur action ya fetch trigger yahan likho
+  } else {
+    console.log("Toggle OFF");
+  }
+});
+const toggleSwitchTheme = document.getElementById("toggleSwitchThemes");
+
+// ✅ Check localStorage on page load
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+  document.documentElement.setAttribute("data-theme", "dark");
+  toggleSwitchTheme.checked = true; // ✅ Keep toggle ON
+} else {
+  document.documentElement.removeAttribute("data-theme");
+  toggleSwitchTheme.checked = false; // ✅ Keep toggle OFF
+}
+
+// ✅ Listen for toggle changes
+toggleSwitchTheme.addEventListener("change", function () {
+  if (this.checked) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("theme", "light");
+  }
 });
 
 function showToast(params) {
@@ -3518,13 +3567,30 @@ function SwitchYoutubeTab(div) {
   if (div === "upload") {
     document.getElementById("upload").style.display = "block";
     document.getElementById("video").style.display = "none";
+    document.getElementById("video").style.display = "none";
+    document.getElementById("myVideos").style.display = "none";
+    document.getElementById("myvid-btn").classList.remove("active");
     document.getElementById("up-btn").classList.add("active");
     document.getElementById("vid-btn").classList.remove("active");
   } else if (div === "videos") {
     document.getElementById("video").style.display = "flex";
     document.getElementById("upload").style.display = "none"; // <-- Fixed this line
+    document.getElementById("myVideos").style.display = "none";
+    document.getElementById("myvid-btn").classList.remove("active");
     document.getElementById("up-btn").classList.remove("active");
     document.getElementById("vid-btn").classList.add("active");
+  } else if (div === "myVideos") {
+    document.getElementById("video").style.display = "none";
+    document.getElementById("upload").style.display = "none"; // <-- Fixed this line
+    document.getElementById("myVideos").style.display = "flex";
+    document.getElementById("myvid-btn").classList.add("active");
+    document.getElementById("up-btn").classList.remove("active");
+    document.getElementById("vid-btn").classList.remove("active");
+    fetch(`https://${GetParentResourceName()}/getMyVideo`, {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
   }
 }
 
@@ -3645,8 +3711,8 @@ function OpenVideo(element) {
   videoContainer.style.display = "block";
   var video = document.getElementById("iframe-youtube-video");
   var time = document.getElementById("youtube-time");
-  var timeAgo = getTimeAgo(element.created_at)
-  time.innerText = timeAgo
+  var timeAgo = getTimeAgo(element.created_at);
+  time.innerText = timeAgo;
   var caption = document.getElementById("youtube-caption");
   var videoId = extractYouTubeVideoId(element.youtube_link);
   if (videoId) {
@@ -3655,8 +3721,124 @@ function OpenVideo(element) {
   caption.innerText = element.caption_link;
 }
 
-
-document.getElementById("back-youtube").addEventListener('click',function(){
+document.getElementById("back-youtube").addEventListener("click", function () {
   var videoContainer = document.getElementById("video-play");
   videoContainer.style.display = "none";
-})
+});
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "myYoutubeVideosResults") {
+    const data = event.data.data;
+    const VideoFeed = document.getElementById("all-myVideos");
+
+    VideoFeed.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      const noVideosMessage = document.createElement("p");
+      noVideosMessage.classList.add("not-found");
+      noVideosMessage.textContent = "No videos found";
+      VideoFeed.appendChild(noVideosMessage);
+      return;
+    }
+
+    data.forEach((element) => {
+      const div = document.createElement("div");
+      div.classList.add("video-box");
+      div.addEventListener("click", () => OpenVideo(element));
+
+      const iframe = document.createElement("iframe");
+      if (element.youtube_link) {
+        const videoId = extractYouTubeVideoId(element.youtube_link);
+        iframe.src = videoId
+          ? `https://www.youtube.com/embed/${videoId}`
+          : element.youtube_link;
+      }
+
+      iframe.width = "100%";
+      iframe.height = "200";
+      iframe.frameBorder = "0";
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
+
+      const txtBody = document.createElement("div");
+      txtBody.classList.add("tsxtDiv");
+
+      const caption = document.createElement("p");
+      caption.textContent = element.caption_link;
+
+      const timeStamps = document.createElement("p");
+      timeStamps.classList.add("time-ago");
+      timeStamps.textContent = getTimeAgo(element.created_at);
+
+      const Delete = document.createElement("span");
+      Delete.innerText = "⋮";
+      Delete.style.cursor = "pointer";
+
+      Delete.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showDeleteModal(element.id);
+      });
+
+      txtBody.appendChild(Delete);
+      txtBody.appendChild(caption);
+      txtBody.appendChild(timeStamps);
+
+      div.appendChild(iframe);
+      div.appendChild(txtBody);
+      VideoFeed.appendChild(div);
+    });
+  }
+});
+
+function showDeleteModal(videoId) {
+  const existingModal = document.querySelector(".delete-modal-container");
+  if (existingModal) existingModal.remove();
+  const mondalContain = document.getElementById("my-upload-video");
+  const modalContainer = document.createElement("div");
+  modalContainer.classList.add("delete-modal-container");
+
+  modalContainer.innerHTML = `
+    <div class="delete-modal">
+      <p>Are you sure you want to delete this video?</p>
+      <button class="delete-confirm">Delete</button>
+      <button class="delete-cancel">Cancel</button>
+    </div>
+  `;
+
+  mondalContain.appendChild(modalContainer);
+
+  modalContainer
+    .querySelector(".delete-confirm")
+    .addEventListener("click", () => {
+      fetch(`https://${GetParentResourceName()}/deleteVideo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({ videoId }),
+      });
+      fetch(`https://${GetParentResourceName()}/getMyVideo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({}),
+      });
+
+      modalContainer.remove();
+    });
+
+  modalContainer
+    .querySelector(".delete-cancel")
+    .addEventListener("click", () => {
+      modalContainer.remove();
+    });
+
+  document.addEventListener("click", function handler(e) {
+    if (!modalContainer.contains(e.target)) {
+      modalContainer.remove();
+      document.removeEventListener("click", handler);
+    }
+  });
+}

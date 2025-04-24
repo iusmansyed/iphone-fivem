@@ -9,7 +9,7 @@ server_scripts {
 }
 lua54 "yes"
 ui_page "web/index.html"
-files {'web/index.html', 'web/styles.css', "web/css/all.min.css",'web/app.js', "web/fonts/*", "web/images/*"}
+files {'web/index.html', 'web/styles.css', 'web/settings.css' , "web/css/all.min.css",'web/app.js','web/settings.js', "web/fonts/*", "web/images/*"}
 dependencies {
     'qb-core',
     'oxmysql'

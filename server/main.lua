@@ -186,16 +186,15 @@ end)
 --------------------------------------------------
 
 RegisterNetEvent("saveUserData")
-AddEventHandler("saveUserData", function(username, citizen_id)
+AddEventHandler("saveUserData", function(username)
     local src = source
     local Player = QBCore.Functions.GetPlayer(source)
     local contact = Player.PlayerData.charinfo.phone
-
+    local citizen_id = Player.PlayerData.citizenid
     MySQL.Async.fetchScalar("SELECT COUNT(*) FROM mobile_user WHERE citizen_id = @citizen_id", {
         ["@citizen_id"] = citizen_id
     }, function(count)
         if count > 0 then
-
         else
             -- ✅ Save new user if not already saved
             MySQL.Async.execute(
@@ -971,24 +970,72 @@ AddEventHandler("youtube:searchVideos", function(searchText)
     local xPlayer = QBCore.Functions.GetPlayer(src)
     local citizenid = xPlayer.PlayerData.citizenid
 
-    MySQL.Async.fetchAll(
-        [[
+    MySQL.Async.fetchAll([[
             SELECT youtube_link, caption_link, created_at 
             FROM youtube_videos 
             WHERE citizenid = ? 
             AND (youtube_link LIKE ? OR caption_link LIKE ?)
-        ]],
-        {
-            citizenid,
-            "%" .. searchText .. "%",
-            "%" .. searchText .. "%"
-        },
-        function(results)
-            -- Send results to client with time
-            TriggerClientEvent("youtube:searchResults", src, results)
-        end
-    )
+        ]], {citizenid, "%" .. searchText .. "%", "%" .. searchText .. "%"}, function(results)
+        -- Send results to client with time
+        TriggerClientEvent("youtube:searchResults", src, results)
+    end)
 end)
 
+RegisterNetEvent("youtube:getMyVideos")
+AddEventHandler("youtube:getMyVideos", function()
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    MySQL.Async.fetchAll("SELECT youtube_link, caption_link ,created_at,id FROM youtube_videos WHERE citizenid = ?",
+        {citizenid}, function(results)
+            TriggerClientEvent("youtube:resultsMyVideos", src, results)
+        end)
+end)
+RegisterNetEvent("youtube:deleteMyVideos")
+AddEventHandler("youtube:deleteMyVideos", function(data)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    MySQL.Async.fetchAll("DELETE FROM youtube_videos WHERE id = ?", {data}, function(results)
+        -- print("deleted")
+    end)
+end)
 
 -----youtube
+
+-----avatar
+RegisterNetEvent("user:UpdateAvatar")
+AddEventHandler("user:UpdateAvatar", function(data)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    MySQL.Async.execute("UPDATE mobile_user SET avatar = @avatar WHERE citizen_id = @citizenid", {
+        ["@avatar"] = data.avatar,
+        ["@citizenid"] = citizenid
+    }, function(avatarupdate)
+
+    end)
+end)
+
+RegisterNetEvent("user:GetMyDetailsFromDB")
+AddEventHandler("user:GetMyDetailsFromDB", function()
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    MySQL.Async.fetchAll("SELECT * FROM mobile_user WHERE citizen_id = @citizenid LIMIT 1", {
+        ["@citizenid"] = citizenid
+    }, function(result)
+        if result[1] then
+            TriggerClientEvent("user:ReceiveMyDetails", src, result[1])
+        else
+            print("No data found for citizen_id:", citizenid)
+            TriggerClientEvent("user:ReceiveMyDetails", src, nil)
+        end
+    end)
+end)
+
+-----avatar

@@ -970,7 +970,15 @@ end)
 -----------------my details
 RegisterNUICallback("Client:MyDetails", function(_, cb)
     TriggerServerEvent("user:MyDetails")
+    TriggerServerEvent("user:GetMyDetailsFromDB")
     cb({})
+end)
+RegisterNetEvent("user:ReceiveMyDetails")
+AddEventHandler("user:ReceiveMyDetails", function(data)
+    SendNUIMessage({
+        type = "ReceiveMyDetails",
+        data = data
+    })
 end)
 RegisterNetEvent("phone:SerialAndPhone")
 AddEventHandler("phone:SerialAndPhone", function(data)
@@ -978,7 +986,6 @@ AddEventHandler("phone:SerialAndPhone", function(data)
         type = "Mob-info",
         data = data
     })
-
 end)
 -----------------my details
 
@@ -998,4 +1005,30 @@ AddEventHandler("youtube:searchResults", function(data)
     })
 
 end)
+RegisterNUICallback("getMyVideo", function()
+    TriggerServerEvent("youtube:getMyVideos")
+end)
+
+RegisterNetEvent("youtube:resultsMyVideos")
+AddEventHandler("youtube:resultsMyVideos", function(data)
+    SendNUIMessage({
+        type = "myYoutubeVideosResults",
+        data = data
+    })
+
+end)
+RegisterNUICallback("deleteVideo", function(data, cb)
+    local videoId = data.videoId
+    TriggerServerEvent("youtube:deleteMyVideos", videoId)
+    cb({
+        success = true
+    })
+end)
+RegisterNUICallback("updateAvatar", function(data, cb)
+    TriggerServerEvent("user:UpdateAvatar", data)
+    cb({
+        success = true
+    })
+end)
+
 -----youtube videos
