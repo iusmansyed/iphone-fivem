@@ -1,885 +1,1138 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iPhone Simulation</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="./css/all.min.css">
-  </head>
-  <body>
-    <div class="mobile">
-      <div class="frame" id="frame">
-        <div class="subDiv" id="subDiv">
-          <div class="notch">
-            <p id="clock"></p>
-            <img src="/web/images/notch.png" alt="" />
-            <div id="mobile-signal">
-              <div class="mobile-signal" >
-                <div class="signal-bars">
-                  <span class="bar"></span>
-                  <span class="bar"></span>
-                  <span class="bar"></span>
-                  <span class="bar"></span>
-                </div>
-                <span class="carrier">5G</span>
-              </div>
-              <div id="battery-container">
-                <div id="battery-level"></div>
-                <div id="charging-icon">⚡</div>
-              </div>
-            </div>
-          </div>
-          <div class="startup-screen" id="startup-screen">
-            <div class="apple-logo">
-              <img src="/web/images/logoo.png" alt="Apple Logo" />
-            </div>
-            <div class="loader-container">
-              <div class="loader"></div>
-            </div>
-          </div>
-          <div class="language-selection" id="language-selection">
-            <h1>Welcome</h1>
-            <p>Choose your language</p>
-            <div class="language-options">
-              <button class="language-btn" data-lang="en">English</button>
-              <button class="language-btn" data-lang="es">Español</button>
-              <button class="language-btn" data-lang="fr">Français</button>
-              <button class="language-btn" data-lang="de">Deutsch</button>
-              <button class="language-btn" data-lang="zh">中文</button>
-            </div>
-            <button class="continue-btn">Continue</button>
-          </div>
-          <div class="language-selection" id="greeting">
-            <h1 id="greetText">Hello !</h1>
-          </div>
-
-          <div class="apps">
-            <div class="apps-wrapper">
-              <div class="app-screen">
-                <div class="app-ic" draggable="true" data-app="phone">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/phone-icon.png" alt="Phone" />
-                  </button>
-                  <p>Phone</p>
-                </div>
-
-                <div class="app-ic" draggable="true" data-app="safari">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/safari.png" alt="Safari" />
-                  </button>
-                  <p>Safari</p>
-                </div>
-
-                <div class="app-ic" draggable="true" data-app="messages">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/message.png" alt="Messages" />
-                  </button>
-                  <p>Messages</p>
-                </div>
-
-                <div class="app-ic" draggable="true" data-app="music">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/music.png" alt="Music" />
-                  </button>
-                  <p>Music</p>
-                </div>
-            
-                <div class="app-ic" draggable="true" data-app="maps">
-                  <span class="delete-icon">×</span>
-                  <button><img src="/web/images/maps.png" alt="Maps" /></button>
-                  <p>Maps</p>
-                </div>
-                <div class="app-ic" draggable="true" data-app="snapchat">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/snapchat.png" alt="snapchat" />
-                  </button>
-                  <p>Snapchat</p>
-                </div>
-                <div class="app-ic" draggable="true" data-app="instagram">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/instagram.png" alt="instagram" />
-                  </button>
-                  <p>Instagram</p>
-                </div>
-                <div class="app-ic" draggable="true" data-app="youtube">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/youtube.png" alt="youtube" />
-                  </button>
-                  <p>Youtube</p>
-                </div>
-
-<!-- pma call -->
-
-<!-- pma call -->
-             
-             
-              <!-- <div class="app-ic" draggable="true" data-app="whatsapp">
-                  <span class="delete-icon">×</span>
-                  <button>
-                    <img src="/web/images/whatsapp.png" alt="Maps" />
-                  </button>
-                  <p>Whatsapp</p>
-                </div> -->
-              </div>
-            
-              <div class="app-screen">
-                <!-- Second screen for dragged apps -->
-              </div>
-            </div>
-
-            <div class="screen-indicators">
-              <div class="screen-indicator active"></div>
-              <div class="screen-indicator"></div>
-            </div>
-          </div>
-          <div class="call-cotainer" id="callUI">
-            <div class="caller-info">
-              <p id="caller-number">📞 Calling...</p>
-            </div>
-            <div class="call-buttons">
-              <button onclick="acceptCall()"><img src="./images/accept.png" alt=""></button>
-              <button onclick="rejectCall()"><img src="./images/decline.png" alt=""></button>
-            </div>
-          </div>
-          <!-- App Container -->
-          <div class="app-container">
-            <div class="app-header" id="hder">
-              <button class="app-back-button">←</button>
-              <h1 class="app-title">App Name</h1>
-            </div>
-            <div class="app-content">
-              <div style="padding: 20px; display: none;" class="phones">
-                <div class="phone-section active-section" id="favSection">
-                  <div class="phone-tab">
-                      <ul>
-                        Loading...
-                          <!-- <li class="contact-item">⭐ John Doe</li>
-                          <li class="contact-item">⭐ Jane Smith</li> -->
-                      </ul>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>iPhone Simulation</title>
+      <link rel="stylesheet" href="styles.css" />
+      <link rel="stylesheet" href="./css/all.min.css">
+   </head>
+   <body>
+      <div class="mobile">
+         <div class="frame" id="frame">
+            <img src="/web/images/notch.png" alt="" class="notch-imag"/>
+            <div class="subDiv" id="subDiv">
+               <div class="notch">
+                  <p id="clock"></p>
+                  <div id="mobile-signal">
+                     <div class="mobile-signal" >
+                        <div class="signal-bars">
+                           <span class="bar"></span>
+                           <span class="bar"></span>
+                           <span class="bar"></span>
+                           <span class="bar"></span>
+                        </div>
+                        <span class="carrier">5G</span>
+                     </div>
+                     <div id="battery-container">
+                        <div id="battery-level"></div>
+                        <div id="charging-icon">⚡</div>
+                     </div>
                   </div>
-              </div>
-          
-              <!-- Recents Page -->
-              <div class="phone-section" id="recentsSection">
-                  <div class="phone-tab">
-                      <ul>
-                          <li class="contact-item">📞 Alex - 5 min ago</li>
-                          <li class="contact-item">📞 Michael - 20 min ago</li>
-                      </ul>
+               </div>
+               <div class="startup-screen" id="startup-screen">
+                  <div class="apple-logo">
+                     <img src="/web/images/logoo.png" alt="Apple Logo" />
                   </div>
-              </div>
-          
-              <!-- Dial Pad Page -->
-              <div class="phone-section" id="dialSection">
-                <div class="num-type">
-                  <div class="display" id="dialDisplay">Enter Number</div>
-                  <span class="clear-btn" id="clearNumberBtn">X</span>
-                </div>
-                <div id="contactDropdown" class="dropdown hidden"></div> <!-- Dropdown for matches -->
-                <button id="saveNumberBtn" class="hidden">Save Number</button>
-                
-                <div class="dial-grid">
-                  <div class="dial-btn">1</div>
-                  <div class="dial-btn">2</div>
-                  <div class="dial-btn">3</div>
-                  <div class="dial-btn">4</div>
-                  <div class="dial-btn">5</div>
-                  <div class="dial-btn">6</div>
-                  <div class="dial-btn">7</div>
-                  <div class="dial-btn">8</div>
-                  <div class="dial-btn">9</div>
-                  <div class="dial-btn">*</div>
-                  <div class="dial-btn">0</div>
-                  <div class="dial-btn">#</div>
-                </div>
-                <button class="dial-btn call-button" id="callButton">
-                  <img src="/web/images/cl-btn.png" alt="" width="30px">
-                </button>
-                <div class="calling-screen" id="callingScreen" style="display: none;">
-                  <div class="calling-header">
-                    <h1 class="caller-name" id="callerName">+265235498415</h1>
-                    <h1 class="calling-name" id="callingName">Calling...</h1>
-                    <span id="callTimer">00:00</span>
+                  <div class="loader-container">
+                     <div class="loader"></div>
                   </div>
-                  <div class="calling-options">
-                    <!-- <div class="action-btns">
-                      <button class="mute-button" id="muteButton">Mute</button>
-                    <button class="speaker-button" id="speakerButton">Speaker</button>
-                    <button class="video-button" id="videoButton">Video</button>
-                    </div> -->
-                    <button class="end-call-button" id="endCallButton"><img src="/web/images/cl-btn.png" alt="" width="30px"></button>
+               </div>
+               <div class="language-selection" id="language-selection">
+                  <h1>Welcome</h1>
+                  <p>Choose your language</p>
+                  <div class="language-options">
+                     <button class="language-btn" data-lang="en">English</button>
+                     <button class="language-btn" data-lang="es">Español</button>
+                     <button class="language-btn" data-lang="fr">Français</button>
+                     <button class="language-btn" data-lang="de">Deutsch</button>
+                     <button class="language-btn" data-lang="zh">中文</button>
                   </div>
-                </div>
-              </div>
-              
-          
-              <!-- Bottom Navigation -->
-              <div class="bottom-menu">
-                  <div class="menu-item active-menu" onclick="switchTab('favSection', this)">Favorites</div>
-                  <div class="menu-item" onclick="switchTab('recentsSection', this);getRecentTabs()">Recents</div>
-                  <div class="menu-item" onclick="switchTab('dialSection', this)">Dial</div>
-              </div>
-              </div>
-              <div style="display: none;" class="safari">
-                <div class="safari-search-container">
-                  <div class="search-bar">
-                      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="11" cy="11" r="8"></circle>
-                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      </svg>
-                      <input type="text" id="searchInput" placeholder="Search">
-                      <svg id="clearIcon" class="clear-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18"></line>
-                          <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
+                  <button class="continue-btn">Continue</button>
+               </div>
+               <div class="language-selection" id="greeting">
+                  <h1 id="greetText">Hello !</h1>
+               </div>
+               <div class="apps">
+                  <div class="apps-wrapper">
+                     <div class="app-screen">
+                        <div class="app-ic" draggable="true" data-app="phone">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/phone-icon.png" alt="Phone" />
+                           </button>
+                           <p>Phone</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="safari">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/safari.png" alt="Safari" />
+                           </button>
+                           <p>Safari</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="messages">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/message.png" alt="Messages" />
+                           </button>
+                           <p>Messages</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="music">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/music.png" alt="Music" />
+                           </button>
+                           <p>Music</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="maps">
+                           <span class="delete-icon">×</span>
+                           <button><img src="/web/images/maps.png" alt="Maps" /></button>
+                           <p>Maps</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="snapchat">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/snapchat.png" alt="snapchat" />
+                           </button>
+                           <p>Snapchat</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="instagram">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/instagram.png" alt="instagram" />
+                           </button>
+                           <p>Instagram</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="youtube">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/youtube.png" alt="youtube" />
+                           </button>
+                           <p>Youtube</p>
+                        </div>
+                        <div class="app-ic" draggable="true" data-app="app-store">
+                           <span class="delete-icon">×</span>
+                           <button>
+                           <img src="/web/images/app-store.png" alt="app store" />
+                           </button>
+                           <p>App Store</p>
+                        </div>
+                     </div>
+                     <div class="app-screen">
+                        <!-- Second screen for dragged apps -->
+                     </div>
                   </div>
-                  <div class="suggested-searches">
-                      <div class="suggested-searches-header">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                              <line x1="3" y1="9" x2="21" y2="9"></line>
-                              <line x1="9" y1="21" x2="9" y2="9"></line>
-                          </svg>
-                          <span>Suggested Searches</span>
-                      </div>
-                      <div class="suggested-search-items" id="suggestedSearches">
-                          <div class="suggested-search-item">Apple</div>
-                          <div class="suggested-search-item">MacBook Pro</div>
-                          <div class="suggested-search-item">iPhone 15</div>
-                          <div class="suggested-search-item">Safari Browser</div>
-                          <div class="suggested-search-item">WWDC 2024</div>
-                      </div>
+                  <div class="screen-indicators">
+                     <div class="screen-indicator active"></div>
+                     <div class="screen-indicator"></div>
                   </div>
-              </div>
-              </div>
-              <div id="messages-main" class="messages">
-                <!-- Messages Section -->
-                <div id="messagesSection" class="message-section">
-                  <div id="messageList" class="chat-box">
-                    <p style="color: #fff; padding: 5px;" class="loading">Loading ... </p>
-                    <!-- Individual chats will be inserted here dynamically -->
+               </div>
+               <div class="call-cotainer" id="callUI">
+                  <div class="caller-info">
+                     <p id="caller-number">📞 Calling...</p>
                   </div>
-                </div>
-
-                <!-- Groups Section -->
-                <div id="groupsSection" class="groups-section" style="display: none;">
-                  <div id="groupList" class="group-list">
-                    <button>
-                      groups
-                    </button>
-                    <!-- Groups will be inserted here dynamically -->
+                  <div class="call-buttons">
+                     <button onclick="acceptCall()"><img src="./images/accept.png" alt=""></button>
+                     <button onclick="rejectCall()"><img src="./images/decline.png" alt=""></button>
                   </div>
-                </div>
-
-                <!-- Group Chat Screen -->
-                <div id="groupChatScreen" class="group-chat-screen" style="display: none;">
-                  <div class="group-chat-header">
-                    <button class="group-chat-back">←</button>
-                    <div class="group-chat-name" id="gc-name">Group Name</div>
-                    <button class="add-members">+</button>
+               </div>
+               <!-- App Container -->
+               <div class="app-container">
+                  <div class="app-header" id="hder">
+                     <button class="app-back-button">←</button>
+                     <h1 class="app-title">App Name</h1>
                   </div>
-                  <div id="addMemberModal" style="display: none;">
-                    <h3>Manage Group Members</h3>
-                    <div id="memberWarning" class="member-warning" style="display: none;"></div>
-                    <div class="member-sections">
-                      <div class="existing-members-section">
-                        <h4>Current Members</h4>
-                        <div id="existingMembersList"></div>
-                      </div>
-                      <div class="add-members-section">
-                        <h4>Add New Members</h4>
-                        <div id="addMemberUserList"></div>
-                      </div>
-                    </div>
-                    <button id="confirmAddMembersButton">Add Selected Members</button>
-                    <button id="closeMemberModal" class="close-modal">×</button>
-                  </div>
-                  <div class="group-chat-messages">
-                    <!-- Group messages will be inserted here dynamically -->
-                  </div>
-                  <div class="group-chat-input">
-                    <input id="messageInput" type="text" placeholder="Type a message..." />
-                    <button id="sendBtn">
-                      <img src="./images/send.png" alt="" width="20px" />
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Group Creation Modal -->
-                <div id="groupModal" class="group-modal" style="display: none;">
-                  <div class="group-modal-content">
-                    <h3>Create Group</h3>
-                    <input type="text" id="groupNameInput" placeholder="Enter group name" />
-                    <div id="groupUserList" class="user-list">
-                      <!-- Users with checkboxes will be injected here -->
-                    </div>
-                    <div class="group-modal-buttons">
-                      <button id="cancelGroupButton">Cancel</button>
-                      <button id="createGroupButton">Create Group</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Create Group Button -->
-                <button id="openGroupModalButton" class="group-add-button">+</button>
-
-                <!-- Navigation Buttons -->
-                <div class="gcmsg-btmNb" id="nav-sn2">
-                  <button onclick="switchTabCht('chat')">Chat</button>
-                  <button onclick="switchTabCht('groups')">Groups</button>
-                </div>
-              </div>
-            
-            <!-- Individual Chat Screen -->
-            <div id="chatScreen" class="chat-screen" style="display: none;">
-                <div class="chat-header">
-                    <button class="back-btn" onclick="closeMesChat()">⬅ <span id="chatName"></span></button>
-                </div>
-                <div class="chat-messages" id="phoneMessageList">
-                    <!-- Messages will be inserted here dynamically -->
-                </div>
-                <div class="chat-input">
-                    <input type="text" id="messageInputPhone" placeholder="Type a message..." />
-                    <button id="sendMessageButton" onclick="sendMessageToServer()">
-                        <img src="./images/send.png" alt="" width="20px" />
-                    </button>
-                </div>
-            </div>
-            
-              <div style="display: none;" class="musics">
-                <div class="music-container-iphone">
-                  <div class="music-header">
-                      
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="1"></circle>
-                          <circle cx="12" cy="5" r="1"></circle>
-                          <circle cx="12" cy="19" r="1"></circle>
-                      </svg>
-                  </div>
-          
-                  <div class="music-album-art">
-                      <img id="albumArtwork" src="/api/placeholder/300/300" alt="Album Artwork">
-                  </div>
-          
-                  <div class="music-track-info">
-                      <div class="music-track-title" id="trackTitle">Bohemian Rhapsody</div>
-                      <div class="music-track-artist" id="trackArtist">Queen</div>
-                  </div>
-          
-                  <div class="music-progress">
-                      <div class="music-progress-bar">
-                          <div class="music-progress-filled"></div>
-                      </div>
-                      <div class="music-time">
-                          <span id="currentTime">2:35</span>
-                          <span id="totalTime">-1:24</span>
-                      </div>
-                  </div>
-          
-                  <div class="music-controls">
-                      <button class="music-btn" id="shuffleBtn">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M11 5L6 9H2v6h4l5 4z"></path>
-                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                          </svg>
-                      </button>
-                      <button class="music-btn" id="prevBtn">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <polygon points="19 20 9 12 19 4 19 20"></polygon>
-                              <line x1="5" y1="19" x2="5" y2="5"></line>
-                          </svg>
-                      </button>
-                      <button class="music-btn-play" id="playPauseBtn">
-                          <svg width="36" height="36" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                      </button>
-                      <button class="music-btn" id="nextBtn">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <polygon points="5 4 15 12 5 20 5 4"></polygon>
-                              <line x1="19" y1="5" x2="19" y2="19"></line>
-                          </svg>
-                      </button>
-                      <button class="music-btn" id="repeatBtn">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
-                              <path d="M13 2v7h7"></path>
-                          </svg>
-                      </button>
-                  </div>
-              </div>
-              </div>
-              <div style=" display: none;" class="maps">
-                <div class="map-container-iphone">
-                  <div class="map-view" id="mapContainer">
-                      <div class="map-search-bar">
-                          <svg class="map-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <circle cx="11" cy="11" r="8"></circle>
-                              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                          </svg>
-                          <input type="text" placeholder="Search for a location">
-                      </div>
-                      <div class="map-location-buttons">
-                          <button class="map-location-btn" id="currentLocationBtn">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <circle cx="12" cy="12" r="10"></circle>
-                                  <circle cx="12" cy="12" r="3"></circle>
+                  <div class="app-content">
+                     <div style="display: none;" class="phones">
+                        <div class="phone-section active-section" id="favSection">
+                           <div class="phone-tab">
+                              <ul>
+                                 Loading...
+                                 <!-- <li class="contact-item">⭐ John Doe</li>
+                                    <li class="contact-item">⭐ Jane Smith</li> -->
+                              </ul>
+                           </div>
+                        </div>
+                        <!-- Recents Page -->
+                        <div class="phone-section" id="recentsSection">
+                           <div class="phone-tab">
+                              <ul>
+                                 <li class="contact-item">📞 Alex - 5 min ago</li>
+                                 <li class="contact-item">📞 Michael - 20 min ago</li>
+                              </ul>
+                           </div>
+                        </div>
+                        <!-- Dial Pad Page -->
+                        <div class="phone-section" id="dialSection">
+                           <div class="num-type">
+                              <div class="display" id="dialDisplay">Enter Number</div>
+                              <span class="clear-btn" id="clearNumberBtn">X</span>
+                           </div>
+                           <div id="contactDropdown" class="dropdown hidden"></div>
+                           <!-- Dropdown for matches -->
+                           <button id="saveNumberBtn" class="hidden">Save Number</button>
+                           <div class="dial-grid">
+                              <div class="dial-btn">1</div>
+                              <div class="dial-btn">2</div>
+                              <div class="dial-btn">3</div>
+                              <div class="dial-btn">4</div>
+                              <div class="dial-btn">5</div>
+                              <div class="dial-btn">6</div>
+                              <div class="dial-btn">7</div>
+                              <div class="dial-btn">8</div>
+                              <div class="dial-btn">9</div>
+                              <div class="dial-btn">*</div>
+                              <div class="dial-btn">0</div>
+                              <div class="dial-btn">#</div>
+                           </div>
+                           <button class="dial-btn call-button" id="callButton">
+                           <img src="/web/images/cl-btn.png" alt="" width="30px">
+                           </button>
+                           <div class="calling-screen" id="callingScreen" style="display: none;">
+                              <div class="calling-header">
+                                 <h1 class="caller-name" id="callerName">+265235498415</h1>
+                                 <h1 class="calling-name" id="callingName">Calling...</h1>
+                                 <span id="callTimer">00:00</span>
+                              </div>
+                              <div class="calling-options">
+                                 <button class="end-call-button" id="endCallButton"><img src="/web/images/cl-btn.png" alt="" width="30px"></button>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- Bottom Navigation -->
+                        <div class="bottom-menu">
+                           <div class="menu-item active-menu" onclick="switchTab('favSection', this)">All</div>
+                           <div class="menu-item" onclick="switchTab('recentsSection', this);getRecentTabs()">Recents</div>
+                           <div class="menu-item" onclick="switchTab('dialSection', this)">Dial</div>
+                        </div>
+                     </div>
+                     <div style="display: none;" class="safari">
+                        <div class="safari-search-container">
+                           <div class="search-bar">
+                              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <circle cx="11" cy="11" r="8"></circle>
+                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                               </svg>
-                          </button>
-                          <button class="map-location-btn" id="directionsBtn">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <path d="M12 22l10-10-10-10"></path>
-                                  <path d="M2 12l10-10 10 10"></path>
+                              <input type="text" id="searchInput" placeholder="Search">
+                              <svg id="clearIcon" class="clear-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <line x1="18" y1="6" x2="6" y2="18"></line>
+                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                               </svg>
-                          </button>
-                      </div>
-                      <div class="map-overlay"></div>
-                  </div>
-              </div>
-              </div>
-              <div style="display: none;" class="instagram">
-                <div class="instagram-auth" id="instagram-auth">
-                  <div class="instagram-logo">
-                    <h1>Instagram</h1>
-                  </div>
-                  
-                  <!-- Login Form -->
-                  <div class="auth-form" id="login-form">
-                    <input type="text" id="login-username" placeholder="Username">
-                    <input type="password" id="login-password" placeholder="Password">
-                    <button id="login-btn">Log In</button>
-                    <p class="auth-switch" id="auth-switch">Don't have an account? <span id="show-signup">Sign up</span></p>
-                  </div>
-
-                  <!-- Signup Form -->
-                  <div class="auth-form" id="signup-form" style="display: none;">
-                    <input type="text" id="signup-username" placeholder="Username">
-                    <input type="email" id="signup-email" placeholder="Email">
-                    <input type="password" id="signup-password" placeholder="Password">
-                    <input type="password" id="signup-confirm-password" placeholder="Confirm Password">
-                    <button id="signup-btn">Sign Up</button>
-                    <p class="auth-switch">Already have an account? <span id="show-login">Log in</span></p>
-                  </div>
-                </div>
-
-                <!-- Main Instagram Content (hidden initially) -->
-                <div class="instagram-main" id="instagram-main" style="display: none;">
-                  <div class="insta-notch" id="insta-notch">
-                    <p class="insta-back-button" >←</p>
-                    <h1> Instagram</h1>
-                   <div></div>
-                  </div>
-                <!-- //----------------------------------story-------------------------------     -->
-
-              <div class="main-feed-section" id="main-feed-section" style="display: block;">
-                <div id="story-section" class="instagram-story-section">
-                  <div class="all-stories">
-                    <div class="your-story" id="myStoriesBar">
-                      <img src="./images/user.png" alt="">
-                      <div id="myStoriesBar" class="my-stories-bar"></div> <!-- 💡 add this div to hold user stories -->
-                    </div>
-                    
-                    <button class="modal-update-btn" id="openModal">+</button>
-                    <div class="story-bar" id="storyBar">
-                      <!-- Baqi logon ki stories -->
-                    </div>
-                    
-                  </div>
-                  <div class="story-upload" id="story-upload" style="display: none;">
-                    <div class="innerModal-story-upload">
-                      <button class="close-story-modal" id="close-story-modal" style="width: 30px;">x</button>
-                    <h3>Upload Your Story</h3>
-                    <input type="text" id="story-image-url" placeholder="Enter Image URL" />
-                    <button id="upload-story">Upload Story</button>
-                    </div>
-                  </div>
-                
-                  <!-- Story Bar -->
-                  
-                </div>
-                
-                <!-- Story Viewer -->
-                <div id="storyViewer" style="display:none;">
-                  <div id="storyContent"></div>
-                  <button id="closeViewer">×</button>
-                </div>
-                
-                  <div class="overlay" id="upload-overlay"></div>
-                  <div id="upload-post-section">
-                    <button class="modal-close-btn" onclick="closeUploadSection()">×</button>
-                    <div class="upload-header">
-                      <h3>Share Link</h3>
-                    </div>
-                    <div class="link-input-container">
-                      <textarea id="link-input" placeholder="Paste a link to share..." rows="3"></textarea>
-                      <textarea id="caption-input" placeholder="Write a caption..." rows="4"></textarea>
-                    </div>
-                    <button class="upload-btn" id="share-link-btn">Share</button>
-                    <button class="cancel-btn" onclick="closeUploadSection()">Cancel</button>
-                  </div>
-                  <div id="instagram-feed" class="feed-section"></div>
-              </div>
-
-
-                   <div class="follower-section" id="follower-section" style="display:none;">
-                  
-                  </div>
-                   <div class="Profile-section" id="Profile-Ig-section" style="display:none;">
-                   <div class="profile-header-name">
-                    <p id="user-name-pfp">Instagram User</p>
-                   </div>
-                    <div class="imagesNfollower">
-                      <div class="img-name">
-                        <img src="./images/user.png" alt="Profile Picture" width="100%" id="prf-pic">
-                      </div>
-                      <div class="user-pff-details">
-                        <div class="user-pff-detail">
-                          <p id="user-posts">0</p>
-                          <p>Posts</p>
+                           </div>
+                           <div class="suggested-searches">
+                              <div class="suggested-searches-header">
+                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                 </svg>
+                                 <span>Suggested Searches</span>
+                              </div>
+                              <div class="suggested-search-items" id="suggestedSearches">
+                                 <div class="suggested-search-item">Apple</div>
+                                 <div class="suggested-search-item">MacBook Pro</div>
+                                 <div class="suggested-search-item">iPhone 15</div>
+                                 <div class="suggested-search-item">Safari Browser</div>
+                                 <div class="suggested-search-item">WWDC 2024</div>
+                              </div>
+                           </div>
                         </div>
-                        <div class="user-pff-detail">
-                          <p id="followers-count">0</p>
-                          <p>Followers</p>
+                     </div>
+                     <div id="messages-main" class="messages">
+                        <!-- Messages Section -->
+                        <div id="messagesSection" class="message-section">
+                           <div id="messageList" class="chat-box">
+                              <p style="color: #fff; padding: 5px;" class="loading" >Loading ... </p>
+                           </div>
                         </div>
-                        <div class="user-pff-detail">
-                          <p id="following-count">0</p>
-                          <p>Following</p>
+                        <!-- Groups Section -->
+                        <div id="groupsSection" class="groups-section" style="display: none;">
+                           <div id="groupList" class="group-list">
+                              <button>
+                              groups
+                              <img src="./images/right.png" alt="" width="15px">
+                              </button>
+                              <!-- Groups will be inserted here dynamically -->
+                           </div>
                         </div>
-                      </div>
-                    </div>
-                      <div class="edit-pfp-section">
-                        <button onclick="openEditModal()">Edit Profile Image</button>
-                      </div>
-                        <div class="edit-pfp-modal" id="edit-pfp-modal" style="display: none;">
-                         <div class="innerEdit-Pfp">
-                          <button class="close-edit-pfp-modal" id="close-edit-pfp-modal" onclick="closeEditModal()">×</button>
-                          <h3>Edit Profile</h3>
-                          <input type="text" id="profile-photo" placeholder="Upload Image">
-                          <button id="save-profile-btn" onclick="updateProfile()">Save</button>
+                        <!-- Group Chat Screen -->
+                        <div id="groupChatScreen" class="group-chat-screen" style="display: none;">
+                           <div class="group-chat-header">
+                              <button class="group-chat-back">←</button>
+                              <div class="group-chat-name" id="gc-name">Group Name</div>
+                              <button class="add-members">+</button>
+                           </div>
+                           <div id="addMemberModal" style="display: none;">
+                              <h3>Manage Group Members</h3>
+                              <div id="memberWarning" class="member-warning" style="display: none;"></div>
+                              <div class="member-sections">
+                                 <div class="existing-members-section">
+                                    <h4>Current Members</h4>
+                                    <div id="existingMembersList"></div>
+                                 </div>
+                                 <div class="add-members-section">
+                                    <h4>Add New Members</h4>
+                                    <div id="addMemberUserList"></div>
+                                 </div>
+                              </div>
+                              <button id="confirmAddMembersButton">Add Selected Members</button>
+                              <button id="closeMemberModal" class="close-modal">×</button>
+                           </div>
+                           <div class="group-chat-messages">
+                              <!-- Group messages will be inserted here dynamically -->
+                           </div>
+                           <div class="group-chat-input">
+                              <input id="messageInput" type="text" placeholder="Type a message..." />
+                              <button id="sendBtn">
+                              <img src="./images/send.png" alt="" width="20px" />
+                              </button>
+                           </div>
+                        </div>
+                        <!-- Group Creation Modal -->
+                        <div id="groupModal" class="group-modal" style="display: none;">
+                           <div class="group-modal-content">
+                              <h3>Create Group</h3>
+                              <input type="text" id="groupNameInput" placeholder="Enter group name" />
+                              <div id="groupUserList" class="user-list">
+                                 <!-- Users with checkboxes will be injected here -->
+                              </div>
+                              <div class="group-modal-buttons">
+                                 <button id="cancelGroupButton">Cancel</button>
+                                 <button id="createGroupButton">Create Group</button>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- Create Group Button -->
+                        <button id="openGroupModalButton" class="group-add-button">+</button>
+                        <!-- Navigation Buttons -->
+                        <div class="gcmsg-btmNb" id="nav-sn2">
+                           <button onclick="switchTabCht('chat')" class="chat-button active">Chat</button>
+                           <button onclick="switchTabCht('groups')" class="group-button">Groups</button>
+                         </div>
+                         
+                     </div>
+                     <!-- Individual Chat Screen -->
+                     <div id="chatScreen" class="chat-screen" style="display: none;">
+                        <div class="chat-header">
+                           <button class="back-btn" onclick="closeMesChat()">⬅ </button>
+                           <div class="pfp-msg">
+                              <img src="" alt="" id="pfp-msg-img">
+                              <span id="chatName"></span>
+                           </div>
+                        </div>
+                        <div class="chat-messages" id="phoneMessageList">
+                           <!-- Messages will be inserted here dynamically -->
+                        </div>
+                        <div class="chat-input">
+                         <div class="inp-msg">
+                           <input type="text" id="messageInputPhone" placeholder="Type a message..." />
+                           <button id="sendMessageButton" onclick="sendMessageToServer()">
+                           <img src="./images/send.png" alt="" width="20px" />
+                           </button>
                          </div>
                         </div>
-
-                        <div class="post-grid" id="postGrid">
-                              <!-- all post will render here -->
+                     </div>
+                     <div style="display: none;" class="musics">
+                        <div class="music-container-iphone">
+                           <div class="music-header">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <circle cx="12" cy="12" r="1"></circle>
+                                 <circle cx="12" cy="5" r="1"></circle>
+                                 <circle cx="12" cy="19" r="1"></circle>
+                              </svg>
+                           </div>
+                           <div class="music-album-art">
+                              <img id="albumArtwork" src="/api/placeholder/300/300" alt="Album Artwork">
+                           </div>
+                           <div class="music-track-info">
+                              <div class="music-track-title" id="trackTitle">Bohemian Rhapsody</div>
+                              <div class="music-track-artist" id="trackArtist">Queen</div>
+                           </div>
+                           <div class="music-progress">
+                              <div class="music-progress-bar">
+                                 <div class="music-progress-filled"></div>
+                              </div>
+                              <div class="music-time">
+                                 <span id="currentTime">2:35</span>
+                                 <span id="totalTime">-1:24</span>
+                              </div>
+                           </div>
+                           <div class="music-controls">
+                              <button class="music-btn" id="shuffleBtn">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 5L6 9H2v6h4l5 4z"></path>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                 </svg>
+                              </button>
+                              <button class="music-btn" id="prevBtn">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                                    <line x1="5" y1="19" x2="5" y2="5"></line>
+                                 </svg>
+                              </button>
+                              <button class="music-btn-play" id="playPauseBtn">
+                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                 </svg>
+                              </button>
+                              <button class="music-btn" id="nextBtn">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                    <line x1="19" y1="5" x2="19" y2="19"></line>
+                                 </svg>
+                              </button>
+                              <button class="music-btn" id="repeatBtn">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M13 2v7h7"></path>
+                                 </svg>
+                              </button>
+                           </div>
                         </div>
-                        <div class="profile-view" id="profileView" style="display: none;">
-
+                     </div>
+                     <div style=" display: none;" class="maps">
+                        <div class="map-container-iphone">
+                           <div class="map-view" id="mapContainer">
+                              <div class="map-search-bar">
+                                 <svg class="map-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                 </svg>
+                                 <input type="text" placeholder="Search for a location">
+                              </div>
+                              <div class="map-location-buttons">
+                                 <button class="map-location-btn" id="currentLocationBtn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                       <circle cx="12" cy="12" r="10"></circle>
+                                       <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                 </button>
+                                 <button class="map-location-btn" id="directionsBtn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                       <path d="M12 22l10-10-10-10"></path>
+                                       <path d="M2 12l10-10 10 10"></path>
+                                    </svg>
+                                 </button>
+                              </div>
+                              <div class="map-overlay"></div>
+                           </div>
                         </div>
-                   </div>
-                  <div class="insta-bottom-nav">
-                    <!-- Existing Buttons -->
-                    <button onclick="openFollowers()">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.7 0-8 1.3-8 4v3h8v-3c0-1 .2-2 .6-2.8C8.9 13.9 9.4 13 10 13h1.1c.6 0 1.1.9 1.4 1.2.4.8.6 1.8.6 2.8v3h8v-3c0-2.7-5.3-4-8-4H8z"/>
-                      </svg>
-                    </button>
-                    <button onclick="openFeed()">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 4h18v2H3V4zm0 5h18v2H3V9zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
-                      </svg>
-                    </button>
-                    <button onclick="openUploadSection()" id="up-sc">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                    </button>
-                    <!-- New: Profile Button -->
-                    <button onclick="goToIgProfile()">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
-                      </svg>
-                    </button>
+                     </div>
+                     <div style="display: none;" class="instagram">
+                        <div class="instagram-auth" id="instagram-auth">
+                           <div class="instagram-logo">
+                              <h1>Instagram</h1>
+                           </div>
+                           <!-- Login Form -->
+                           <div class="auth-form" id="login-form">
+                              <input type="text" id="login-username" placeholder="Username">
+                              <input type="password" id="login-password" placeholder="Password">
+                              <button id="login-btn">Log In</button>
+                              <p class="auth-switch" id="auth-switch">Don't have an account? <span id="show-signup">Sign up</span></p>
+                           </div>
+                           <!-- Signup Form -->
+                           <div class="auth-form" id="signup-form" style="display: none;">
+                              <input type="text" id="signup-username" placeholder="Username">
+                              <input type="email" id="signup-email" placeholder="Email">
+                              <input type="password" id="signup-password" placeholder="Password">
+                              <input type="password" id="signup-confirm-password" placeholder="Confirm Password">
+                              <button id="signup-btn">Sign Up</button>
+                              <p class="auth-switch">Already have an account? <span id="show-login">Log in</span></p>
+                           </div>
+                        </div>
+                        <!-- Main Instagram Content (hidden initially) -->
+                        <div class="instagram-main" id="instagram-main" style="display: none;">
+                           <div class="insta-notch" id="insta-notch">
+                              <p class="insta-back-button" >←</p>
+                              <h1> Instagram</h1>
+                              <div></div>
+                           </div>
+                           <!-- //----------------------------------story-------------------------------     -->
+                           <div class="main-feed-section" id="main-feed-section" style="display: block;">
+                              <div id="story-section" class="instagram-story-section">
+                                 <div class="all-stories">
+                                    <div class="your-story" id="myStoriesBar">
+                                       <img src="./images/user.png" alt="">
+                                       <div id="myStoriesBar" class="my-stories-bar"></div>
+                                       <!-- 💡 add this div to hold user stories -->
+                                    </div>
+                                    <button class="modal-update-btn" id="openModal">+</button>
+                                    <div class="story-bar" id="storyBar">
+                                       <!-- Baqi logon ki stories -->
+                                    </div>
+                                 </div>
+                                 <div class="story-upload" id="story-upload" style="display: none;">
+                                    <div class="innerModal-story-upload">
+                                       <button class="close-story-modal" id="close-story-modal" style="width: 30px;">x</button>
+                                       <h3>Upload Your Story</h3>
+                                       <input type="text" id="story-image-url" placeholder="Enter Image URL" />
+                                       <button id="upload-story">Upload Story</button>
+                                    </div>
+                                 </div>
+                                 <!-- Story Bar -->
+                              </div>
+                              <!-- Story Viewer -->
+                              <div id="storyViewer" style="display:none;">
+                                 <div id="storyContent"></div>
+                                 <button id="closeViewer">×</button>
+                              </div>
+                              <div class="overlay" id="upload-overlay"></div>
+                              <div id="upload-post-section">
+                                 <button class="modal-close-btn" onclick="closeUploadSection()">×</button>
+                                 <div class="upload-header">
+                                    <h3>Share Link</h3>
+                                 </div>
+                                 <div class="link-input-container">
+                                    <textarea id="link-input" placeholder="Paste a link to share..." rows="3"></textarea>
+                                    <textarea id="caption-input" placeholder="Write a caption..." rows="4"></textarea>
+                                 </div>
+                                 <button class="upload-btn" id="share-link-btn">Share</button>
+                                 <button class="cancel-btn" onclick="closeUploadSection()">Cancel</button>
+                              </div>
+                              <div id="instagram-feed" class="feed-section"></div>
+                           </div>
+                           <div class="follower-section" id="follower-section" style="display:none;">
+                           </div>
+                           <div class="Profile-section" id="Profile-Ig-section" style="display:none;">
+                              <div class="profile-header-name">
+                                 <p id="user-name-pfp">Instagram User</p>
+                              </div>
+                              <div class="imagesNfollower">
+                                 <div class="img-name">
+                                    <img src="./images/user.png" alt="Profile Picture" width="100%" id="prf-pic">
+                                 </div>
+                                 <div class="user-pff-details">
+                                    <div class="user-pff-detail">
+                                       <p id="user-posts">0</p>
+                                       <p>Posts</p>
+                                    </div>
+                                    <div class="user-pff-detail">
+                                       <p id="followers-count">0</p>
+                                       <p>Followers</p>
+                                    </div>
+                                    <div class="user-pff-detail">
+                                       <p id="following-count">0</p>
+                                       <p>Following</p>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="edit-pfp-section">
+                                 <button onclick="openEditModal()">Edit Profile Image</button>
+                              </div>
+                              <div class="edit-pfp-modal" id="edit-pfp-modal" style="display: none;">
+                                 <div class="innerEdit-Pfp">
+                                    <button class="close-edit-pfp-modal" id="close-edit-pfp-modal" onclick="closeEditModal()">×</button>
+                                    <h3>Edit Profile</h3>
+                                    <input type="text" id="profile-photo" placeholder="Upload Image">
+                                    <button id="save-profile-btn" onclick="updateProfile()">Save</button>
+                                 </div>
+                              </div>
+                              <div class="post-grid" id="postGrid">
+                                 <!-- all post will render here -->
+                              </div>
+                              <div class="profile-view" id="profileView" style="display: none;">
+                              </div>
+                           </div>
+                           <div class="insta-bottom-nav">
+                              <!-- Existing Buttons -->
+                              <button onclick="openFollowers()">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.7 0-8 1.3-8 4v3h8v-3c0-1 .2-2 .6-2.8C8.9 13.9 9.4 13 10 13h1.1c.6 0 1.1.9 1.4 1.2.4.8.6 1.8.6 2.8v3h8v-3c0-2.7-5.3-4-8-4H8z"/>
+                                 </svg>
+                              </button>
+                              <button onclick="openFeed()">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 4h18v2H3V4zm0 5h18v2H3V9zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+                                 </svg>
+                              </button>
+                              <button onclick="openUploadSection()" id="up-sc">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                 </svg>
+                              </button>
+                              <!-- New: Profile Button -->
+                              <button onclick="goToIgProfile()">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                                 </svg>
+                              </button>
+                              <button onclick="logout()">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                    <polyline points="16 17 21 12 16 7" />
+                                    <line x1="21" y1="12" x2="9" y2="12" />
+                                 </svg>
+                              </button>
+                              <!-- New: Followers Button -->
+                           </div>
+                        </div>
+                     </div>
+                     <div style="display: none;" class="snapchat">
+                        <div class="snapchat-container" id="screenshotContainer">
+                           <div class="snapchat-content">
+                              <div class="snapchat-filter-options">
+                                 <div class="snapchat-filter-option active" data-filter="normal">Normal</div>
+                                 <div class="snapchat-filter-option" data-filter="vintage">Vintage</div>
+                                 <div class="snapchat-filter-option" data-filter="noir">Noir</div>
+                                 <div class="snapchat-filter-option" data-filter="vivid">Vivid</div>
+                              </div>
+                              <div class="snapchat-buttons">
+                                 <button class="primary" id="captureButton"></button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div style="display: none;" class="settings">
+                        <h2 class="man-heading">Settings</h2>
+                        <div class="setting-head">
+                           <div class="user-profile">
+                              <img src="./images/user.png" alt="" width="45px" id="avatar" onclick="openAvatarModal()">
+                           </div>
+                          <div class="user-det">
+                           <h4 id="username">username</h4>
+                           <p >Set up iCloud, the App Store, and more.</p>
+                          </div>
+                        </div>
+                        <div class="setting-body">
+                           <div class="toast" id="toast" style="right: -300px;">
+                           </div>
+                           <ul>
+                              <li onclick="openWallPaperModal()">
+                                 <div class="img-sec"  >
+                                    <img src="./images/White_Paint_Palette.png" alt="" width="35px" id="white-plate" ">
+                                    <h4>Wallpapers</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                       </svg>
+                                    </p>
+                                 </div>
+                              </li>
+                              <li>
+                                 <div class="img-sec">
+                                    <img src="./images/call.png" alt="" width="35px" class="white-call" >
+                                    <h4>Phone Number</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p id="ph-num">Default</p>
+                                 </div>
+                              </li>
+                              <li>
+                                 <div class="img-sec">
+                                    <img src="./images/serial.png" alt="" width="25px" class="white-call">
+                                    <h4>Serial Number</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p id="sr-num">Default</p>
+                                 </div>
+                              </li>
+                              <li>
+                                 <div class="img-sec">
+                                    <img src="./images/White_Airport.png" alt="" width="25px" class="white-call">
+                                    <h4>Airplane</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <label class="switch">
+                                    <input type="checkbox" id="toggleSwitch">
+                                    <span class="slider-th"></span>
+                                    </label>
+                                 </div>
+                              </li>
+                           </ul>
+                           <ul>
+                              <li>
+                                 <div class="img-sec">
+                                    <img src="./images/White_Moon.png" alt="" width="25px" class="black-call" >
+                                    <h4>Dark Mode</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <label class="switch">
+                                    <input type="checkbox" id="toggleSwitchThemes">
+                                    <span class="slider-th"></span>
+                                    </label>
+                                 </div>
+                              </li>
+                              <li onclick="openBrightness()">
+                                 <div class="img-sec" >
+                                    <img src="./images/display.png" alt="" width="25px" id="white-plate" ">
+                                    <h4>Brightness</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                       </svg>
+                                    </p>
+                                 </div>
+                              </li>
+                           </ul>
+                           <ul>
+                              <li onclick="openSound()">
+                                 <div class="img-sec" >
+                                    <img src="./images/Speaker.png" alt="" width="25px" id="white-plate" "> 
+                                    <h4>Sound</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                       </svg>
+                                    </p>
+                                 </div>
+                              </li>
+                              <li onclick="openAbout()">
+                                 <div class="img-sec" >
+                                    <img src="./images/About.png" alt="" width="25px" id="white-plate" "> 
+                                    <h4>About</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                       </svg>
+                                    </p>
+                                 </div>
+                              </li>
+                              <li onclick="openSecurity()">
+                                 <div class="img-sec" >
+                                    <img src="./images/Security.png" alt="" width="25px" id="white-plate" "> 
+                                    <h4>Security</h4>
+                                 </div>
+                                 <div class="txt-sec">
+                                    <p>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                       </svg>
+                                    </p>
+                                 </div>
+                              </li>
+                           </ul>
 
-                    <button onclick="logout()">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                      </svg>
-                    </button>
-                    <!-- New: Followers Button -->
+                           <!-- ////modals -->
+                            <div class="set-security" id="set-security">
+                              <div class="set-about-header">
+                                <div class="back"  onclick="goBackSettings()">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#007bff" style="color:#007bff ;" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left">
+                                      <polyline points="15 18 9 12 15 6" />
+                                   </svg>
+                                   <p>Settings</p>
+                                </div>
+                                <div class="about-heading">
+                                   <h4>Security</h4>
+                                </div>
+                                <div style="width: 30%;"></div>
+                             </div>
+                              <div class="set-security-body">
+                                <div class="opening-button-dial">
+                                  <button id="open-dial-pad" onclick="openDialPad()"><p>Set Password</p>  
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
+                                   </svg>
+                                  </button>
+                                  <div class="saved-password" id="saved-password">
+
+                                  </div>
+                                </div>
+                               
+                               
+                                <div class="container-pad" id="container-pad">
+                                <div class="set-about-header">
+                                  <div class="back"  onclick="goBackSecurity()">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#007bff" style="color:#007bff ;" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left">
+                                        <polyline points="15 18 9 12 15 6" />
+                                     </svg>
+                                     <p>Back</p>
+                                  </div>
+                                  <div class="about-heading">
+                                     <h4></h4>
+                                  </div>
+                                  <div style="width: 30%;"></div>
+                               </div>
+                                <div class="password-pad" id="p-pad">
+                                  <input type="password" id="pass-input" maxlength="6" readonly />
+                                  <div class="pad-grid">
+                                    <button onclick="addDigit('1')">1</button>
+                                    <button onclick="addDigit('2')">2</button>
+                                    <button onclick="addDigit('3')">3</button>
+                                    <button onclick="addDigit('4')">4</button>
+                                    <button onclick="addDigit('5')">5</button>
+                                    <button onclick="addDigit('6')">6</button>
+                                    <button onclick="addDigit('7')">7</button>
+                                    <button onclick="addDigit('8')">8</button>
+                                    <button onclick="addDigit('9')">9</button>
+                                    <button onclick="clearDigit()">⌫</button>
+                                    <button onclick="addDigit('0')">0</button>
+                                    <button onclick="submitPassword()">✔</button>
+                                  </div>
+                                </div>
+                               </div>  
+                              </div>
+                            </div>
+                           <div class="set-about" id="set-about">
+                              <div class="set-about-header">
+                                 <div class="back"  onclick="goBackSettings()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#007bff" style="color:#007bff ;" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left">
+                                       <polyline points="15 18 9 12 15 6" />
+                                    </svg>
+                                    <p>Settings</p>
+                                 </div>
+                                 <div class="about-heading">
+                                    <h4>About</h4>
+                                 </div>
+                                 <div style="width: 30%;"></div>
+                              </div>
+                              <div class="set-about-body">
+                                 <ul>
+                                    <li>
+                                       <div class="img-sec" >
+                                          <h4>Name</h4>
+                                       </div>
+                                       <div class="txt-sec">
+                                          <p id="name-ab">
+                                          </p>
+                                       </div>
+                                    </li>
+                                    <li>
+                                       <div class="img-sec" >
+                                          <h4>IOS Version</h4>
+                                       </div>
+                                       <div class="txt-sec">
+                                          <p>
+                                             17.4.1 
+                                          </p>
+                                       </div>
+                                    </li>
+                                    <li>
+                                       <div class="img-sec" >
+                                          <h4>Model Name</h4>
+                                       </div>
+                                       <div class="txt-sec">
+                                          <p>
+                                             Iphone 16 pro
+                                          </p>
+                                       </div>
+                                    </li>
+                                    <li>
+                                       <div class="img-sec" >
+                                          <h4>Serial Number</h4>
+                                       </div>
+                                       <div class="txt-sec">
+                                          <p id="serial">
+                                          </p>
+                                       </div>
+                                    </li>
+                                 </ul>
+                              </div>
+                           </div>
+                           <div class="set-brightness" id="set-brightness" style="bottom: -400px;">
+                              <div class="bright-slid" id="bright-slid"></div>
+                              <div class="brightness-slider" id="brightnessSlider">
+                                 <div class="brightness-fill" id="brightnessFill">
+                                    <div class="brightness-thumb">
+                                       <span class="sun-icon">🔆</span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="set-volume" id="set-volume" style="bottom: -400px;">
+                              <div class="bright-slid" id="vol-slid"></div>
+                              <div class="volume-slider" id="customVolumeSlider">
+                                 <div class="volume-fill" id="customVolumeFill">
+                                    <div class="volume-thumb">
+                                       <span class="volume-icon">🔊</span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="avatar-modal" id="avatar-modal" style="display: none;">
+                              <div class="innerDiv">
+                                 <p>Update Avatar</p>
+                                 <input type="text" id="update-avatar-inp" placeholder="Enter Avatar Link"/>
+                                 <button class="updateBtn" onclick="updateAvatar()">Update</button>
+                                 <button class="cancelButton" onclick="closeAvatarModal()">Cancel</button>
+                              </div>
+                           </div>
+                           <div class="wall-paper-modal" id="wallpapers" style="bottom: -500px;">
+                              <div class="top-slider" id="top-slider"></div>
+                              <div class="inner-Wp" id="inner-Wp"></div>
+                           </div>
+                           <!-- ////modals -->
+                        </div>
+                     </div>
+                     <div style="display: none;" class="youtube">
+                        <div class="youtube-feed" id="upload" style="display: block;">
+                           <div class="search-youtube">
+                              <input type="text" name="" id="youtube-search" placeholder="Search ...">
+                              <button onclick="searchYoutubeVideo()">
+                              <img src="./images/search.png" alt="Search"  style="cursor: pointer;" />
+                              </button>
+                           </div>
+                           <div class="video-feed" id="video-feed">
+                              <div class="all-videos" id="all-videos"></div>
+                           </div>
+                        </div>
+                        <div class="youtube-upload" id="video" style="display: none;">
+                           <!-- Upload Button -->
+                           <button id="openUploadModal" class="upl-btn-inpage">
+                           Upload
+                           </button>
+                           <!-- Modal -->
+                           <div id="uploadModal" class="upload-youtube-modal">
+                              <div class="youtube-modal-header">
+                                 <h2>Upload Video Link</h2>
+                                 <input type="text" placeholder="Paste YouTube link..." id="youtubeInput" />
+                                 <br />
+                                 <input type="text" placeholder="Paste Caption link..." id="captionInput" />
+                                 <br /><br />
+                                 <button onclick="uploadYoutubeLink()">
+                                 Upload
+                                 </button>
+                                 <button onclick="closeUploadModal()" class="btn-s2">
+                                 Cancel
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="my-videos" id="myVideos" style="display: none;">
+                           <div class="my-upload-video" id="my-upload-video">
+                              <div class="all-myVideos" id="all-myVideos"></div>
+                           </div>
+                        </div>
+                        <div class="youtube-bottom-nav">
+                           <button onclick="SwitchYoutubeTab('upload')" class="yt-vid-btn active" id="up-btn"><img src="./images/Home.png" alt="" width="25px" /></button>
+                           <button onclick="SwitchYoutubeTab('videos')" class="yt-vid-btn" id="vid-btn"><img src="./images/UploadVid.png" alt="" width="25px"/></button>
+                           <button onclick="SwitchYoutubeTab('myVideos')" class="yt-vid-btn" id="myvid-btn"><img src="./images/Account.png" alt="" width="25px"/></button>
+                        </div>
+                        <div class="video-play" id="video-play">
+                           <div class="back-youtube" id="back-youtube">←</div>
+                           <div class="full-video">
+                              <iframe src="" frameborder="0" id="iframe-youtube-video"></iframe>
+                              <p id="youtube-caption"></p>
+                              <span id="youtube-time"></span>
+                           </div>
+                        </div>
+                     </div>
+                     <div style="display: none;" class="app-store">
+                         <div class="app-list">
+                           <div class="store-app" onclick="handleAppClick(event, 'TikTok', './images/tiktok.png', 'tiktok')">
+                             <img src="/web/images/tiktok.png" alt="TikTok" />
+                             <div class="store-app-info">
+                               <h3>TikTok</h3>
+                               <button data-app="tiktok" onclick="installAppWithLoading('TikTok', './images/tiktok.png', 'tiktok')">Install</button>
+                             </div>
+                           </div>
+                         
+                           <div class="store-app" onclick="handleAppClick(event, 'Facebook', './images/facebook.png', 'facebook')">
+                             <img src="/web/images/facebook.png" alt="Facebook" />
+                             <div class="store-app-info">
+                               <h3>Facebook</h3>
+                               <button data-app="facebook" onclick="installAppWithLoading('Facebook', './images/facebook.png', 'facebook')">Install</button>
+                             </div>
+                           </div>
+                         
+                           <div class="store-app" onclick="handleAppClick(event, 'Spotify', './images/spotify.png', 'spotify')">
+                             <img src="/web/images/spotify.png" alt="Spotify" />
+                             <div class="store-app-info">
+                               <h3>Spotify</h3>
+                               <button data-app="spotify" onclick="installAppWithLoading('Spotify', './images/spotify.png', 'spotify')">Install</button>
+                             </div>
+                           </div>
+                         
+                           <div class="store-app" onclick="handleAppClick(event, 'Twitter', './images/twitter.png', 'twitter')">
+                             <img src="/web/images/twitter.png" alt="Twitter" />
+                             <div class="store-app-info">
+                               <h3>Twitter</h3>
+                               <button data-app="twitter"  onclick="installAppWithLoading('Twitter', './images/twitter.png', 'twitter')">Install</button>
+                             </div>
+                           </div>
+                         </div>
+                     </div>
+                     <div style="display: none;" class="tiktok">
+                        <h1>tiktok</h1>
+                     </div>
+                     <div style="display: none;" class="facebook">
+                        <div class="login-page-facebook" id="login-facebook" style="display: flex;">
+                           <div class="facebook-login-form">
+                              <h1>Login</h1>
+                             <form action="">
+                              <input type="text" name="" id="">
+                              <input type="password" name="" id="">
+                              <button>Login</button>
+                             </form>
+                             <p>Dont have a account? <span>Signup</span></p>
+                           </div>
+                        </div>
+                        <div class="signup-page-facebook" id="signup-facebook"></div>
+                     </div>
+                     <div style="display: none;" class="spotify">
+                        <h1>spotify</h1>
+                     </div>
+                     <div style="display: none;" class="twitter">
+                        <h1>twitter</h1>
+                     </div>
+                  </div>
+                  <div id="appPreviewModal" class="modal" style="transform: translateX(-300px);">
+                     <div class="modal-content">
+                       <span class="close-btn-pre" onclick="closePreviewModal()">&times;</span>
+                       <div class="app-pre-contain">
+                        <div class="app-img-name">
+                           <img id="previewMainImage" src="" alt="Main Preview" class="main-preview-img" />
+                          <h2 id="previewAppTitle">App Name</h2>
+                          </div>
+                          <button id="previewInstallBtn">Install</button>
+                      
+                       </div>
+                       <div class="preview-gallery" id="previewGallery">
+                         <!-- Screenshots will be inserted here -->
+                       </div>
                    
+                     </div>
+                   </div>
+                   
+                  <!-- Preview UI -->
+                  <div class="snapchat-preview-container snapchat-hidden" id="previewContainer">
+                     <img class="snapchat-preview-image" id="previewImage" src="" alt="Screenshot preview">
+                     <div class="snapchat-preview-controls">
+                        <button id="discardButton">Discard</button>
+                        <button class="primary" id="saveButton">Save</button>
+                        <button id="shareButton">Share</button>
+                        <button id="backButton">Back</button> <!-- Back Button -->
+                     </div>
+                  </div>
+                  <!-- Flash effect -->
+                  <div class="snapchat-capture-flash" id="captureFlash"></div>
+                  <!-- Notification -->
+                  <div class="snapchat-notification" id="notification">Screenshot saved successfully!</div>
+               </div>
+               <div class="bottom-nav" id="b-nav">
+                  <button data-app="phone" class="app-ic ap-ic-second">
+                     <img src="./images/phone-icon.png" alt="" width="40px" />
+                     <p style="display: none;">Call</p>
+                  </button>
+                  <button data-app="settings" class="app-ic ap-ic-second">
+                     <img src="./images/setting.png" alt="" width="40px" />
+                     <p style="display: none;">Settings</p>
+                  </button>
+                  <button data-app="messages" class="app-ic ap-ic-second">
+                     <img src="./images/message.png" alt="" width="40px" />
+                     <p style="display: none;">message</p>
+                  </button>
+                  <button data-app="music" class="app-ic ap-ic-second"">
+                     <img src="./images/music.png" alt="" width="40px" />
+                     <p style="display: none;">music</p>
+                  </button>
+               </div>
+               <div class="iphone-lock-screen">
+                  <div class="time">12:45</div>
+                  <div class="date">Friday, March 8</div>
+                  <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
+               </div>
+               <div class="iphone-lock-pass-screen">
+                  <div class="lock-screen-header">
+                    <h2>Enter Passcode</h2>
                   </div>
                   
-                </div>
-              </div>
-              <div style="display: none;" class="snapchat">
-                <div class="snapchat-container" id="screenshotContainer">
-                      <div class="snapchat-content">
-                          <div class="snapchat-filter-options">
-                              <div class="snapchat-filter-option active" data-filter="normal">Normal</div>
-                              <div class="snapchat-filter-option" data-filter="vintage">Vintage</div>
-                              <div class="snapchat-filter-option" data-filter="noir">Noir</div>
-                              <div class="snapchat-filter-option" data-filter="vivid">Vivid</div>
-                          </div>              
-                          <div class="snapchat-buttons">
-                              <button class="primary" id="captureButton"></button>
-                          </div>
-                      </div>
+                  <div class="password-display">
+                    <div id="password-dots" class="dots-container"></div>
                   </div>
-              </div>
-              <div style="display: none;" class="settings">
-                 <div class="setting-head">
-                  <div class="user-profile">
-                    <img src="./images/user.png" alt="" width="45px" id="avatar" onclick="openAvatarModal()">
-                  </div>
-                <h4 id="username"></h4>
-                <p id="citizenId"></p> 
-                </div>
-                <div class="setting-body">
-                  <div class="toast" id="toast" style="right: -300px;">
-                  </div>
-                  <ul>
-                    <li onclick="openWallPaperModal()">
-                      <div class="img-sec"  >
-                        <img src="./images/White_Paint_Palette.png" alt="" width="25px" id="white-plate" ">
-                        <h4>Wallpapers</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <p><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
-                        </svg>
-                        </p>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="img-sec">
-                        <img src="./images/cl-btn.png" alt="" width="25px" class="white-call" >
-                        <h4>Phone Number</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <p id="ph-num">Default</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="img-sec">
-                        <img src="./images/cl-btn.png" alt="" width="25px" class="white-call">
-                        <h4>Serial Number</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <p id="sr-num">Default</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="img-sec">
-                        <img src="./images/White_Airport.png" alt="" width="25px" class="white-call">
-                        <h4>Airplane</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <label class="switch">
-                          <input type="checkbox" id="toggleSwitch">
-                          <span class="slider-th"></span>
-                        </label>
-                      </div>
-                    </li>
-                  </ul>
-                  <h4 class="set-head">Display</h4>
-                  <ul>
-                    <li>
-                      <div class="img-sec">
-                        <img src="./images/White_Moon.png" alt="" width="25px" class="black-call" >
-                        <h4>Dark Mode</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <label class="switch">
-                          <input type="checkbox" id="toggleSwitchThemes">
-                          <span class="slider-th"></span>
-                        </label>
-                      </div>
-                    </li>
-                    <li onclick="openBrightness()">
-                      <div class="img-sec" >
-                        <img src="./images/Sun.png" alt="" width="25px" id="white-plate" ">
-                        <h4>Brightness</h4>
-                      </div>
-                      <div class="txt-sec">
-                        <p><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                          <path fill-rule="evenodd" d="M6.646 14.354a.5.5 0 0 1 0-.708L11.293 9 6.646 4.354a.5.5 0 1 1 .708-.708l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708 0z"/>
-                        </svg>
-                        </p>
-                      </div>
-                    </li>
-                  </ul>
-             <!-- ////modals -->
-                  <div class="set-brightness" id="set-brightness" style="bottom: -400px;">
-                    <div class="bright-slid" id="bright-slid"></div>
-                  </div>
-                  <div class="avatar-modal" id="avatar-modal" style="display: none;">
-                    <div class="innerDiv">
-                      <p>Update Avatar</p>
-                    <input type="text" id="update-avatar-inp" placeholder="Enter Avatar Link"/>
-                    <button class="updateBtn" onclick="updateAvatar()">Update</button>
-                    <button class="cancelButton" onclick="closeAvatarModal()">Cancel</button>
-                    </div>
-                  </div>
-                  <div class="wall-paper-modal" id="wallpapers" style="bottom: -500px;">
-                    <div class="top-slider" id="top-slider"></div>
-                    <div class="inner-Wp" id="inner-Wp"></div>
-                  </div>
-             <!-- ////modals -->
-                </div>
-              </div>
-              <div style="display: none;" class="youtube">
-                <div class="youtube-feed" id="upload" style="display: block;">
-                  <div class="search-youtube">
-                    <input type="text" name="" id="youtube-search" placeholder="Search ...">
-                    <button onclick="searchYoutubeVideo()">
-                      <img src="./images/search.png" alt="Search"  style="cursor: pointer;" />
+                  
+                  <div class="dial-pad">
+                    <button class="dial-button" onclick="addToPassword('1')">1</button>
+                    <button class="dial-button" onclick="addToPassword('2')">
+                      <span>2</span>
+                      <span class="button-letters">ABC</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('3')">
+                      <span>3</span>
+                      <span class="button-letters">DEF</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('4')">
+                      <span>4</span>
+                      <span class="button-letters">GHI</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('5')">
+                      <span>5</span>
+                      <span class="button-letters">JKL</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('6')">
+                      <span>6</span>
+                      <span class="button-letters">MNO</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('7')">
+                      <span>7</span>
+                      <span class="button-letters">PQRS</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('8')">
+                      <span>8</span>
+                      <span class="button-letters">TUV</span>
+                    </button>
+                    <button class="dial-button" onclick="addToPassword('9')">
+                      <span>9</span>
+                      <span class="button-letters">WXYZ</span>
+                    </button>
+                    <div class="empty-button"></div>
+                    <button class="dial-button" onclick="addToPassword('0')">0</button>
+                    <button class="delete-button" onclick="deleteLastChar()">
+                      <svg width="24" height="18" viewBox="0 0 24 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 0H7C6.31 0 5.77 0.35 5.41 0.88L0 9L5.41 17.11C5.77 17.64 6.31 18 7 18H22C23.1 18 24 17.1 24 16V2C24 0.9 23.1 0 22 0ZM19 12.59L17.59 14L14 10.41L10.41 14L9 12.59L12.59 9L9 5.41L10.41 4L14 7.59L17.59 4L19 5.41L15.41 9L19 12.59Z" fill="white"/>
+                      </svg>
                     </button>
                   </div>
-                  <div class="video-feed" id="video-feed">
-                    <div class="all-videos" id="all-videos"></div>
+                  
+                  <div class="emergency-call">
+                    <a href="#">Emergency</a>
                   </div>
                 </div>
-                <div class="youtube-upload" id="video" style="display: none;">
-                <!-- Upload Button -->
-                  <button id="openUploadModal" class="upl-btn-inpage">
-                  Upload
-                  </button>
-
-                  <!-- Modal -->
-                  <div id="uploadModal" class="upload-youtube-modal">
-                    <div class="youtube-modal-header">
-                      <h2>Upload Video Link</h2>
-                      
-                      <input type="text" placeholder="Paste YouTube link..." id="youtubeInput" />
-                      <br />
-                      <input type="text" placeholder="Paste Caption link..." id="captionInput" />
-                      <br /><br />
-                    
-                      <button onclick="uploadYoutubeLink()">
-                        Upload
-                      </button>
-                      <button onclick="closeUploadModal()" class="btn-s2">
-                        Cancel
-                      </button>
-                    </div>
-                    
-                  </div>
-
-                </div>
-                <div class="my-videos" id="myVideos" style="display: none;">
-                  <div class="my-upload-video" id="my-upload-video">
-                    <div class="all-myVideos" id="all-myVideos"></div>
-                  </div>
-                </div>
-                <div class="youtube-bottom-nav">
-                  <button onclick="SwitchYoutubeTab('upload')" class="yt-vid-btn active" id="up-btn"><img src="./images/Home.png" alt="" width="25px" /></button>
-                  <button onclick="SwitchYoutubeTab('videos')" class="yt-vid-btn" id="vid-btn"><img src="./images/UploadVid.png" alt="" width="25px"/></button>
-                  <button onclick="SwitchYoutubeTab('myVideos')" class="yt-vid-btn" id="myvid-btn"><img src="./images/Account.png" alt="" width="25px"/></button>
-                </div>
-                <div class="video-play" id="video-play">
-                    <div class="back-youtube" id="back-youtube">←</div>
-                    <div class="full-video">
-                      <iframe src="" frameborder="0" id="iframe-youtube-video"></iframe>
-                      <p id="youtube-caption"></p>
-                      <span id="youtube-time"></span>
-                    </div>
-                </div>
-              </div>
+              
             </div>
-              
-              <!-- Preview UI -->
-              <div class="snapchat-preview-container snapchat-hidden" id="previewContainer">
-                  <img class="snapchat-preview-image" id="previewImage" src="" alt="Screenshot preview">
-                  <div class="snapchat-preview-controls">
-                      <button id="discardButton">Discard</button>
-                      <button class="primary" id="saveButton">Save</button>
-                      <button id="shareButton">Share</button>
-                      <button id="backButton">Back</button> <!-- Back Button -->
-                  </div>
-              </div>
-              
-              <!-- Flash effect -->
-              <div class="snapchat-capture-flash" id="captureFlash"></div>
-              
-              <!-- Notification -->
-              <div class="snapchat-notification" id="notification">Screenshot saved successfully!</div>
-              
-              </div>
-            
-            </div>
-          </div>
-        
-          <div class="iphone-lock-screen">
-            <div class="time">12:45</div>
-            <div class="date">Friday, March 8</div>
-            <div class="swipe-up" id="swipe-upm">Swipe up to unlock</div>
-          </div>
-          <div class="bottom-nav" id="b-nav">
-            <button data-app="phone" class="app-ic ap-ic-second">
-              <img src="./images/phone-icon.png" alt="" width="40px" />
-              <p style="display: none;">Call</p>
-            </button>
-            <button data-app="settings" class="app-ic ap-ic-second">
-              <img src="./images/setting.png" alt="" width="40px" />
-              <p style="display: none;">Settings</p>
-            </button>
-            <button data-app="messages" class="app-ic ap-ic-second">
-              <img src="./images/message.png" alt="" width="40px" />
-              <p style="display: none;">message</p>
-            </button>
-            <button data-app="music" class="app-ic ap-ic-second"">
-              <img src="./images/music.png" alt="" width="40px" />
-              <p style="display: none;">music</p>
-            </button>
-          </div>
-          <div class="menuSection" id="menuSection">
+         </div>
+         <div class="menuSection" id="menuSection">
             <div class="control-center">
-              <!-- WiFi & Connectivity -->
-              <div class="control-box">
-                <div class="control-circle" onclick="toggleActive(this)">
-                  📶
-                </div>
-                <div class="control-circle" onclick="toggleActive(this)">
-                  🌐
-                </div>
-                <div class="control-circle" onclick="toggleActive(this)">
-                  🔵
-                </div>
-                <div class="control-circle" onclick="toggleActive(this)">
-                  🟢
-                </div>
-              </div>
-
-              <!-- Empty Box -->
-              <div class="control-box"></div>
-
-              <!-- Flashlight & Night Mode -->
-              <div class="control-box">
-                <div class="control-circle" id="modeToggle" onclick="toggleActive(this)">
-                  🌙
-                </div>
-                <div class="control-circle" onclick="toggleActive(this)">
-                  🔦
-                </div>
-              </div>
-              <div class="slider-container">
-                <div class="slider" id="brightnessSlider">
-                  <div class="slider-fill" id="brightnessFill"></div>
-                  <span>🔆</span>
-                </div>
-                <div class="slider" id="volumeSlider">
-                  <div class="slider-fill" id="volumeFill"></div>
-                  <span>🔊</span>
-                </div>
-              </div>              
+               <!-- WiFi & Connectivity -->
+               <div class="control-box">
+                  <div class="control-circle" onclick="toggleActive(this)">
+                     📶
+                  </div>
+                  <div class="control-circle" onclick="toggleActive(this)">
+                     🌐
+                  </div>
+                  <div class="control-circle" onclick="toggleActive(this)">
+                     🔵
+                  </div>
+                  <div class="control-circle" onclick="toggleActive(this)">
+                     🟢
+                  </div>
+               </div>
+               <!-- Empty Box -->
+               <div class="control-box"></div>
+               <!-- Flashlight & Night Mode -->
+               <div class="control-box">
+                  <div class="control-circle" id="modeToggle" onclick="toggleActive(this)">
+                     🌙
+                  </div>
+                  <div class="control-circle" onclick="toggleActive(this)">
+                     🔦
+                  </div>
+               </div>
+               <div class="slider-container">
+                  <div class="slider" id="brightnessSlider">
+                     <div class="slider-fill" id="brightnessFill"></div>
+                     <span>🔆</span>
+                  </div>
+                  <div class="slider" id="volumeSlider">
+                     <div class="slider-fill" id="volumeFill"></div>
+                     <span>🔊</span>
+                  </div>
+               </div>
             </div>
-          </div>
-
-          <div class="bottomSlide" id="bottomSlide"></div>
-        </div>
+         </div>
+         <div class="bottomSlide" id="bottomSlide"></div>
       </div>
-    </div>
-    <script  src="app.js"></script>
-  </body>
+      </div>
+      </div>
+      <script  src="app.js"></script>
+   </body>
 </html>

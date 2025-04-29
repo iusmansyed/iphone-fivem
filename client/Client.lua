@@ -1,5 +1,8 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+
+
+
 local batteryLevel = 50
 local charging = false
 
@@ -420,7 +423,6 @@ Citizen.CreateThread(function()
     local playerName = GetPlayerName(PlayerId())
     local citizenId = GetPlayerServerId(PlayerId())
 
-    print("🔹 Player spawned: " .. playerName)
     TriggerServerEvent("saveUserData", playerName, tostring(citizenId))
     TriggerServerEvent("requestContacts") -- Request contacts after saving user data
 end)
@@ -516,13 +518,17 @@ RegisterNUICallback('sendMessage', function(data, cb)
         status = "success"
     })
 end)
-RegisterNUICallback('getMessages', function(data, cb)
-    local sender = data.receiver
 
-    if sender then
-        -- This will trigger your server-side event handler
+RegisterNetEvent("qb-core:phone:messageSent")
+AddEventHandler("qb-core:phone:messageSent",function(data)
+   
+    TriggerServerEvent("qb-core:phone:getMessages",data[1])
+end)
+RegisterNUICallback('getMessages', function(data, cb)
+    local receiver = data.receiver
+    if receiver then
         TriggerServerEvent('qb-core:phone:getMessages', {
-            sender = json.encode(sender)
+            receiver = receiver
         })
     else
         print("❌ Missing receiver or empty message!")
@@ -553,7 +559,6 @@ end)
 -- client.lua
 RegisterNetEvent('qb-core:phone:receiveMessages')
 AddEventHandler('qb-core:phone:receiveMessages', function(messages)
-    -- print("Received messages: " .. json.encode(messages))
     local name = GetPlayerName(PlayerId())
     SendNUIMessage({
         type = 'receiveMessages',
@@ -562,17 +567,6 @@ AddEventHandler('qb-core:phone:receiveMessages', function(messages)
     })
 end)
 
-RegisterCommand("viewMessages", function()
-    if currentChatUser and chatHistory[currentChatUser] then
-        for _, msg in ipairs(chatHistory[currentChatUser]) do
-            print(msg.sender .. ": " .. msg.message)
-        end
-    else
-        print("📭 No messages with this user yet.")
-    end
-end)
-
--- NUI callback to load messages
 RegisterNUICallback("loadChat", function(data, cb)
     currentChatUser = data.username
     TriggerServerEvent('qb-core:phone:getMessages', GetPlayerName(PlayerId()))
@@ -613,7 +607,9 @@ AddEventHandler("group:receiveGroupList", function(groups)
 end)
 
 -- Requesting the group list from the server
-TriggerServerEvent("group:getList")
+RegisterNUICallback("groups:requestBserver",function ()
+    TriggerServerEvent("group:getList")
+end)
 
 RegisterNetEvent("group:receiveGroupMembers")
 AddEventHandler("group:receiveGroupMembers", function(members)
@@ -884,7 +880,7 @@ end)
 RegisterNetEvent("instagram:receiveFollowerData")
 AddEventHandler("instagram:receiveFollowerData", function(followersCount, followingCount)
     -- NUI ko bhejna
-    print("Followers: ")
+
     SendNUIMessage({
         type = "updateFollowStats",
         followers = followersCount,
@@ -926,9 +922,7 @@ end)
 
 RegisterNUICallback("acceptCall", function(data, cb)
     local src = source
-    print("📞 Call Accepted by:", data)
     local phoneNumber = data.number
-    print("📞 Call Accepted by:", src, "for number:", phoneNumber)
     exports['pma-voice']:setCallChannel(1)
     SendNUIMessage({
         type = "hideCallUI"

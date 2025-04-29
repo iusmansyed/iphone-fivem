@@ -115,7 +115,6 @@ AddEventHandler('screenshot:share', function(imageData)
 
     -- Debug logging
     print("Sending to Discord webhook:", Config.DiscordWebhook)
-    print("Message payload:", json.encode(message))
 
     -- Send to Discord with proper error handling
     PerformHttpRequest(Config.DiscordWebhook, function(err, text, headers)
@@ -216,7 +215,7 @@ end)
 RegisterNetEvent("requestContacts")
 AddEventHandler("requestContacts", function()
     local src = source
-    MySQL.Async.fetchAll("SELECT username, phone FROM mobile_user", {}, function(users)
+    MySQL.Async.fetchAll("SELECT * FROM mobile_user", {}, function(users)
         TriggerClientEvent("receiveContacts", src, users)
     end)
 end)
@@ -293,10 +292,7 @@ AddEventHandler('qb-core:phone:sendMessage', function(data)
             ["@message"] = message
         }, function(rowsChanged)
             if rowsChanged > 0 then
-                -- Trigger event to notify message sent
-                TriggerClientEvent('qb-core:phone:messageSent', src)
-                -- Send the message to the clients
-                TriggerClientEvent('qb-core:phone:receiveMessages', -1, {{
+                TriggerClientEvent('qb-core:phone:messageSent', -1, {{
                     sender = sender,
                     receiver = receiver,
                     message = message
@@ -312,14 +308,13 @@ RegisterNetEvent('qb-core:phone:getMessages')
 AddEventHandler('qb-core:phone:getMessages', function(chatUser)
     local src = source
     local username = GetPlayerName(src)
-    local recievername = chatUser.sender
+    local recievername = chatUser.receiver 
     local cleanedReceiverName = json.decode(recievername)
-
     MySQL.Async.fetchAll(
         "SELECT * FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
         {
             ["@user"] = username,
-            ["@chatUser"] = cleanedReceiverName
+            ["@chatUser"] = recievername
         }, function(results)
             if results and #results > 0 then
                 TriggerClientEvent('qb-core:phone:receiveMessages', src, results)
@@ -361,7 +356,6 @@ AddEventHandler("group:create", function(data)
                                 ['@phone'] = member.phone
                             })
                     end
-                    print("✅ Group and members saved!")
                 else
                     print("❌ Could not fetch group ID")
                 end
@@ -421,7 +415,6 @@ AddEventHandler("group:removeMember", function(data)
         ['@username'] = username
     }, function(rowsChanged)
         if rowsChanged > 0 then
-            print("✅ Member removed from group!")
             TriggerClientEvent("group:memberRemoved", src, true, "Member removed successfully")
 
             -- Refresh the group members list for all clients
@@ -446,7 +439,6 @@ AddEventHandler("group:getList", function()
     local src = source -- ✅ correct way to get the source player ID
 
     MySQL.Async.fetchAll("SELECT id, name, timestamp FROM groups", {}, function(groups)
-        print("✅ Server: Sending group list to", src)
         TriggerClientEvent("group:receiveGroupList", src, groups)
     end)
 end)
@@ -455,7 +447,6 @@ RegisterServerEvent("getGroupMembers")
 AddEventHandler("getGroupMembers", function(data)
     local src = source
     local groupId = data.groupId
-    print("gropup members data , " .. groupId)
 
     MySQL.Async.fetchAll("SELECT username, phone FROM group_members WHERE group_id = @group_id", {
         ['@group_id'] = groupId
@@ -479,7 +470,6 @@ AddEventHandler("group:sendMessage", function(data)
             ["@message"] = message
         }, function(rowsChanged)
             if rowsChanged > 0 then
-                print("💾 Message saved from", sender)
 
                 -- Send message to all players (you can filter by group if needed)
                 TriggerClientEvent("group:receiveMessage", -1, {
@@ -554,7 +544,6 @@ AddEventHandler("insta:loginUser", function(data)
 
             -- ✅ Match both username and password
             if user.username == username and user.password == password then
-                print("✅ Login successful for: " .. username)
 
                 TriggerClientEvent("instagram:loginSuccess", src, {
                     id = user.id,
@@ -603,7 +592,6 @@ AddEventHandler("insta:uploadPost", function(data)
             ["@image"] = image,
             ["@caption"] = caption
         }, function(rowsChanged)
-            print("✅ Post uploaded by: " .. username)
             TriggerClientEvent("instagram:postUploaded", src)
         end)
 end)
@@ -640,7 +628,6 @@ end)
 RegisterServerEvent("insta:likePost")
 AddEventHandler("insta:likePost", function(data)
     local src = source
-    print("likes post", json.encode(data.postId))
 
     MySQL.Async.fetchScalar("SELECT COUNT(*) FROM instagram_likes WHERE post_id = @post_id AND username = @username", {
         ['@post_id'] = data.postId,
@@ -653,7 +640,6 @@ AddEventHandler("insta:likePost", function(data)
                 ['@username'] = data.username
             }, function(rowsChanged)
                 if rowsChanged > 0 then
-                    print("❌ Post unliked by: " .. data.username)
                     TriggerClientEvent("insta:postUnliked", -1, data.postId)
 
                 end
@@ -665,7 +651,6 @@ AddEventHandler("insta:likePost", function(data)
                 ['@username'] = data.username
             }, function(rowsChanged)
                 if rowsChanged > 0 then
-                    print("✅ Post liked by: " .. data.username)
                     TriggerClientEvent("insta:postLiked", -1, data.postId)
                 end
             end)
@@ -688,7 +673,6 @@ RegisterServerEvent("insta:addComment")
 AddEventHandler("insta:addComment", function(data)
     local src = source
     local username = GetPlayerName(src)
-    print("comment post", json.encode(data))
     MySQL.Async.execute(
         "INSERT INTO instagram_comments (post_id, comment, username) VALUES (@post_id, @comment, @username)", {
             ['@post_id'] = data.post_id,
@@ -781,7 +765,6 @@ AddEventHandler("instagram:getFollowerData", function(userId)
     }, function(followers)
         local followersIds = {}
         for i, row in ipairs(followers) do
-            print("followers", json.encode(row.follower_id))
             table.insert(followersIds, row.follower_id)
         end
 
@@ -791,7 +774,6 @@ AddEventHandler("instagram:getFollowerData", function(userId)
         }, function(followings)
             local followingIds = {}
             for i, row in ipairs(followings) do
-                print("followeing", json.encode(row.following_id))
                 table.insert(followingIds, row.following_id)
             end
 
@@ -806,7 +788,6 @@ end)
 -- update proflie
 RegisterServerEvent("insta:updateProfile")
 AddEventHandler("insta:updateProfile", function(data)
-    print("Updating profile data: " .. json.encode(data))
     local src = source
 
     local image = data.image
@@ -818,7 +799,6 @@ AddEventHandler("insta:updateProfile", function(data)
     }
     MySQL.Async.execute(query, params, function(rowsChanged)
         if rowsChanged > 0 then
-            print("✅ Profile updated for user ID: " .. data.userId)
             TriggerClientEvent("insta:profileUpdated", src, true)
         else
             print("❌ Failed to update profile for user ID: " .. data.userId)
@@ -830,7 +810,6 @@ end)
 
 RegisterServerEvent("insta:getMyPosts")
 AddEventHandler("insta:getMyPosts", function(data)
-    print(json.encode(data))
     local src = source
 
     MySQL.Async.fetchAll("SELECT * FROM instagram_posts WHERE username = @username", {
@@ -877,7 +856,6 @@ AddEventHandler('phone:call', function(targetNumber)
 
     if Player.Offline == false then
         local targetSrc = Player.PlayerData.source
-        print("📞 Target player is online. Src: " .. targetSrc)
 
         -- You can pass the caller's phone number or name
         TriggerClientEvent('phone:incomingCall', targetSrc, xPlayer.PlayerData.charinfo.phone, src)
@@ -891,10 +869,8 @@ end)
 
 -- Dummy function: replace this with your own logic to get citizenid from phone number
 function GetCitizenIdFromPhoneNumber(phone)
-    print("🔍 Looking up citizen ID for phone number: " .. tostring(phone))
     local result = MySQL.Sync.fetchAll('SELECT citizen_id FROM mobile_user WHERE phone = ?', {phone})
     if result[1] then
-        print("✅ Citizen ID found: " .. json.encode(result[1].citizen_id))
         return result[1].citizen_id
     else
         print("❌ No citizen ID found for phone number: " .. tostring(phone))
@@ -922,7 +898,6 @@ AddEventHandler('phone:getContactInfo', function(contactNumber)
 
     MySQL.Async.fetchAll('SELECT * FROM phone_call_logs WHERE caller = ?', {sender}, function(result)
         if result and #result > 0 then
-            print("📞 Call logs found for caller: " .. json.encode(result))
             TriggerClientEvent('phone:sendContactInfo', src, result) -- send full result
         else
             TriggerClientEvent('phone:sendContactInfo', src, nil)
@@ -957,7 +932,6 @@ AddEventHandler("youtube:saveVideo", function(data)
         MySQL.Async.execute(
             "INSERT INTO youtube_videos (citizenid, youtube_link, caption_link, created_at) VALUES (?, ?, ?, ?)",
             {citizenid, data.videoLink, data.caption, time}, function(rowsChanged)
-                print("✅ Video saved for " .. citizenid)
                 TriggerClientEvent("youtube:uploadSuccess", src)
             end)
     else

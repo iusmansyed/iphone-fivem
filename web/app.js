@@ -16,11 +16,123 @@ const translations = {
   },
 };
 
+// JavaScript functionality
+let currentPassword = "";
+const PASSWORD_LENGTH = localStorage.getItem("savedpassword").length; // Standard iPhone password length
+
+function addToPassword(digit) {
+  if (currentPassword.length < PASSWORD_LENGTH) {
+    currentPassword += digit;
+    updatePasswordDots();
+
+    // Auto-validate when password reaches full length
+    if (currentPassword.length === PASSWORD_LENGTH) {
+      setTimeout(() => validatePassword(), 200); // Short delay for better UX
+    }
+  }
+}
+
+function updatePasswordDots() {
+  const dotsContainer = document.getElementById("password-dots");
+  dotsContainer.innerHTML = "";
+
+  // Create filled and empty dots
+  for (let i = 0; i < PASSWORD_LENGTH; i++) {
+    const dot = document.createElement("div");
+    dot.className = i < currentPassword.length ? "dot filled" : "dot";
+    dotsContainer.appendChild(dot);
+  }
+}
+
+function deleteLastChar() {
+  if (currentPassword.length > 0) {
+    currentPassword = currentPassword.slice(0, -1);
+    updatePasswordDots();
+
+    // Remove error state if present
+    document.getElementById("password-dots").classList.remove("password-error");
+  }
+}
+
+function validatePassword() {
+  // Get saved password (for demo, hardcode a test password)
+  const savedPassword = localStorage.getItem("savedpassword") || "123456";
+
+  // Check if password matches
+  if (savedPassword === currentPassword) {
+    // Password matches, transition screens with translateX
+    const lockScreenPass = document.querySelector(".iphone-lock-pass-screen");
+    lockScreenPass.style.transition = "transform 0.5s ease-in-out";
+    lockScreenPass.style.transform = "translateX(-100%)"; // Slide out to the left
+
+    setTimeout(() => {
+      lockScreenPass.style.display = "none";
+      // Show home screen or apps
+      const apps = document.querySelector(".apps");
+      if (apps) {
+        apps.style.display = "flex";
+        const bottomNav = document.getElementById("b-nav");
+        if (bottomNav) bottomNav.style.display = "flex";
+        const subDiv = document.getElementById("subDiv");
+        if (subDiv) subDiv.classList.add("active");
+      }
+    }, 500);
+  } else {
+    // Password incorrect, show error animation
+    showPasswordError();
+  }
+}
+
+function showPasswordError() {
+  const passwordDots = document.getElementById("password-dots");
+
+  // Add error class for visual feedback
+  passwordDots.classList.add("password-error");
+
+  // Shake animation
+  passwordDots.style.animation = "shake 0.5s";
+
+  // Clear password after a short delay
+  setTimeout(() => {
+    currentPassword = "";
+    updatePasswordDots();
+    passwordDots.classList.remove("password-error");
+    passwordDots.style.animation = "";
+  }, 800);
+}
+
+// Initialize password dots when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
+  updatePasswordDots();
+});
+
+// Add this to your CSS
+function addPasswordErrorStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .password-error {
+      color: #ff3b30 !important;
+      background-color: rgba(255, 59, 48, 0.1);
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Add password error styles
+  addPasswordErrorStyles();
+
   // Get all UI elements
   const startupScreen = document.getElementById("startup-screen");
   const languageSelection = document.getElementById("language-selection");
   const lockScreen = document.querySelector(".iphone-lock-screen");
+  const lockScreenPass = document.querySelector(".iphone-lock-pass-screen");
   const greeting = document.getElementById("greeting");
   const greetingText = document.getElementById("greetText");
   const apps = document.querySelector(".apps");
@@ -31,6 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Hide all screens except startup initially
   languageSelection.style.display = "none";
   lockScreen.style.display = "none";
+  lockScreenPass.style.display = "none";
   greeting.style.display = "none";
   apps.style.display = "none";
   bottomNav.style.display = "none";
@@ -75,34 +188,46 @@ document.addEventListener("DOMContentLoaded", function () {
       .querySelector(".continue-btn")
       .addEventListener("click", function () {
         if (selectedLanguage) {
-          // Hide language selection
-          languageSelection.style.display = "none";
+          // Hide language selection with translateX
+          languageSelection.style.transition = "transform 0.5s ease-in-out";
+          languageSelection.style.transform = "translateX(-100%)";
 
-          // 3. GREETING SCREEN
-          greeting.style.display = "flex";
-
-          // Set token in localStorage
-          localStorage.setItem("key", "stored");
-
-          // Setup greeting animation
-          greetingText.style.opacity = "0";
-          greetingText.style.transform = "translateY(20px)";
-          greetingText.style.transition = "opacity 1s ease, transform 1s ease";
-          greetingText.innerText = translations[selectedLanguage].heading;
-
-          // Animate greeting
           setTimeout(() => {
-            greetingText.style.opacity = "1";
-            greetingText.style.transform = "translateY(0)";
-          }, 100);
+            languageSelection.style.display = "none";
 
-          // Hide greeting after 3 seconds & show lock screen
-          setTimeout(() => {
-            greeting.style.display = "none";
-            lockScreen.style.display = "flex";
-          }, 3000);
+            // 3. GREETING SCREEN
+            greeting.style.display = "flex";
+            greeting.style.transform = "translateX(0)"; // Reset transform
 
-          console.log("Selected language:", selectedLanguage);
+            // Set token in localStorage
+            localStorage.setItem("key", "stored");
+
+            // Setup greeting animation
+            greetingText.style.opacity = "0";
+            greetingText.style.transform = "translateY(20px)";
+            greetingText.style.transition =
+              "opacity 1s ease, transform 1s ease";
+            greetingText.innerText = translations[selectedLanguage].heading;
+
+            // Animate greeting
+            setTimeout(() => {
+              greetingText.style.opacity = "1";
+              greetingText.style.transform = "translateY(0)";
+            }, 100);
+
+            // Hide greeting after 3 seconds & show lock screen with translateX
+            setTimeout(() => {
+              greeting.style.transition = "transform 0.5s ease-in-out";
+              greeting.style.transform = "translateX(-100%)";
+
+              setTimeout(() => {
+                greeting.style.display = "none";
+                lockScreen.style.display = "flex";
+                lockScreen.style.transform = "translateX(0)"; // Reset transform
+              }, 500);
+            }, 3000);
+
+          }, 500);
         } else {
           console.log("Please select a language to continue");
         }
@@ -111,6 +236,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // TOKEN EXISTS: Skip to lock screen directly
     startupScreen.style.display = "none";
     lockScreen.style.display = "flex";
+    lockScreen.style.transform = "translateX(0)"; // Ensure it's positioned correctly
 
     // Set appropriate styles for lock screen
     if (apps.style.display == "flex") {
@@ -122,16 +248,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Lock screen unlock functionality
   document.getElementById("swipe-upm").addEventListener("click", function () {
+    // Start the transition using translateX
     lockScreen.style.transition = "transform 0.5s ease-in-out";
-    lockScreen.style.transform = "translateY(-100%)";
+    lockScreen.style.transform = "translateX(-100%)"; // Slide out to the left
 
-    // Show apps
     setTimeout(() => {
       lockScreen.style.display = "none";
-      apps.style.display = "flex";
-      bottomNav.style.display = "flex";
-      subDiv.classList.add("active");
-    }, 500);
+
+      // Check if there's a saved password
+      const savedPassword = localStorage.getItem("savedpassword");
+
+      if (savedPassword) {
+        // Show password screen if password is set
+        lockScreenPass.style.display = "flex";
+        lockScreenPass.style.transform = "translateX(0)"; // Initial position (visible)
+        currentPassword = ""; // Reset current password when showing lock screen
+        document.getElementById("password-input").value = "";
+      } else {
+        // No password set, go directly to apps with translateX
+        apps.style.display = "flex";
+        apps.style.transform = "translateX(0)"; // Ensure it's positioned correctly
+        bottomNav.style.display = "flex";
+        subDiv.classList.add("active");
+      }
+    }, 500); // Wait for 500ms (to match the duration of the transition)
   });
 
   // Clock functionality
@@ -564,6 +704,11 @@ function initializeAppOpening() {
   const snapchatApp = document.querySelector(".snapchat");
   const settings = document.querySelector(".settings");
   const youtube = document.querySelector(".youtube");
+  const appStore = document.querySelector(".app-store");
+  const tiktok = document.querySelector(".tiktok");
+  const facebook = document.querySelector(".facebook");
+  const spotify = document.querySelector(".spotify");
+  const twitter = document.querySelector(".twitter");
 
   // Array of all app content divs
   const allAppDivs = [
@@ -577,16 +722,18 @@ function initializeAppOpening() {
     snapchatApp,
     settings,
     youtube,
+    appStore,
+    tiktok,
   ];
 
-  // Handle app clicks
   document.querySelectorAll(".app-ic").forEach((app) => {
     app.addEventListener("click", function (e) {
       if (isEditMode || e.target.closest(".delete-icon")) return;
 
-      const appName = this.getAttribute("data-app");
-      const appTitleText = this.querySelector("p").textContent;
-      openApp(appName, appTitleText);
+      const clickedAppName = this.getAttribute("data-app");
+      const clickedAppTitleText =
+        this.querySelector("p")?.textContent || "Unknown App";
+      openApp(clickedAppName, clickedAppTitleText);
     });
   });
 
@@ -595,7 +742,7 @@ function initializeAppOpening() {
 
   instabackButton?.addEventListener("click", closeApp);
 
-  function openApp(appName, title) {
+  window.openApp = function (appName, title) {
     // Update app title
     appTitle.textContent = title;
 
@@ -633,6 +780,21 @@ function initializeAppOpening() {
       case "youtube":
         if (youtube) youtube.style.display = "block";
         break;
+      case "app-store":
+        if (appStore) appStore.style.display = "block";
+        break;
+      case "tiktok":
+        if (tiktok) tiktok.style.display = "block";
+        break;
+      case "facebook":
+        if (facebook) facebook.style.display = "block";
+        break;
+      case "spotify":
+        if (spotify) spotify.style.display = "block";
+        break;
+      case "twitter":
+        if (twitter) twitter.style.display = "block";
+        break;
       default:
         // If no matching app, show default content
         appContent.innerHTML =
@@ -656,6 +818,7 @@ function initializeAppOpening() {
         },
         body: JSON.stringify("music"),
       });
+      console.log("hellow rodllask")
     }
     if (appName === "safari") {
       fetch(`https://${GetParentResourceName()}/safari`, {
@@ -666,25 +829,27 @@ function initializeAppOpening() {
         body: JSON.stringify("safari"),
       });
     }
-    // if (appName === "settings") {
-    //   fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(),
-    //   });
-    // }
+    if (appName === "settings") {
+      fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(),
+      });
+      header.style.display = "none";
+    } else {
+      header.style.display = "flex";
+    }
     // if (appName === "maps") {
     //   header.style.display = "none";
     // }else{
-    //   header.style.display = "flex";
     // }
     // Show app container with animation
     appContainer.classList.remove("closing");
     appContainer.style.display = "flex";
     setTimeout(() => appContainer.classList.add("opening"), 10);
-  }
+  };
 
   function closeApp() {
     appContainer.classList.remove("opening");
@@ -700,6 +865,7 @@ function initializeAppOpening() {
       });
     }, 300);
   }
+
   document.getElementById("bottomSlide").addEventListener("click", function () {
     closeApp();
   });
@@ -727,7 +893,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   bottomSlide?.addEventListener("click", function () {
     // Fixed ID
-    menu.style.top = "-602px";
+    menu.style.top = "-610px";
   });
 });
 
@@ -738,22 +904,43 @@ function toggleActive(element) {
 function setupSlider(sliderId, fillId, cssProperty, minValue, maxValue) {
   const slider = document.getElementById(sliderId);
   const fill = document.getElementById(fillId);
+  const container = document.getElementById("subDiv");
+
+  // Load saved value from localStorage
+  const savedPercent = localStorage.getItem(`${cssProperty}Percent`);
+  if (savedPercent !== null) {
+    const percent = parseFloat(savedPercent);
+    const value = minValue + percent * (maxValue - minValue);
+    fill.style.height = `${percent * 100}%`;
+
+    if (cssProperty === "brightness") {
+      container.style.filter = `brightness(${value}%)`;
+    } else if (cssProperty === "volume") {
+    }
+  }
+
   slider.addEventListener("click", function (e) {
     let rect = slider.getBoundingClientRect();
     let percent = 1 - (e.clientY - rect.top) / rect.height;
     percent = Math.max(0, Math.min(1, percent)); // Clamp between 0 and 1
     let value = minValue + percent * (maxValue - minValue);
     fill.style.height = `${percent * 100}%`;
+
     if (cssProperty === "brightness") {
-      document.getElementById("subDiv").style.filter = `brightness(${value}%)`;
+      container.style.filter = `brightness(${value}%)`;
     } else if (cssProperty === "volume") {
       console.log("Volume set to:", value);
     }
+
+    // Save to localStorage
+    localStorage.setItem(`${cssProperty}Percent`, percent.toString());
   });
 }
 
+// Usage
 setupSlider("brightnessSlider", "brightnessFill", "brightness", 30, 100);
 setupSlider("volumeSlider", "volumeFill", "volume", 0, 100);
+
 function switchTab(tabId, element) {
   // Remove active section from all phone sections
   document.querySelectorAll(".phone-section").forEach((tab) => {
@@ -1263,7 +1450,6 @@ if (contactList) {
     contactList?.appendChild(contactDiv);
   });
 } else {
-  console.error("❌ contactList element not found!");
 }
 function loadNavigate(page) {
   const pages = ["contactList", "statusPage"];
@@ -1715,7 +1901,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const cameraContainer = document.getElementById("cameraContainer");
 
     if (data.type === "showCamera") {
-      console.log("Received Event:", JSON.stringify(data)); // Debugging ke liye
       if (data.show) {
         cameraContainer.style.display = "block";
         console.log("Camera UI SHOWN");
@@ -1747,18 +1932,38 @@ function showContactsUI(contacts) {
   contacts.forEach((contact) => {
     const chatItem = document.createElement("div");
     chatItem.classList.add("chat-item");
-    chatItem.setAttribute("onclick", `openChatTextUser('${contact.username}')`);
+    chatItem.setAttribute(
+      "onclick",
+      `openChatTextUser(${JSON.stringify(contact)})`
+    );
 
+    // Profile image
+    const profileImg = document.createElement("img");
+    profileImg.src = contact.avatar || "./images/default-profile.png"; // Use default if not available
+    profileImg.classList.add("profile-image");
+    profileImg.width = 40; // Profile image size
+    profileImg.height = 40;
+    profileImg.style.borderRadius = "50%"; // Make it circular
+
+    // Chat name
     const chatName = document.createElement("div");
     chatName.classList.add("chat-name");
     chatName.innerText = contact.username;
 
-    const chatDetails = document.createElement("div");
-    chatDetails.classList.add("chat-details");
-    chatDetails.innerText = `+${contact.phone} • ${getRandomTime()}`;
+    // Right arrow image
+    const rightArrow = document.createElement("img");
+    rightArrow.src = "./images/right.png";
+    rightArrow.width = 15;
 
-    chatItem.appendChild(chatName);
-    chatItem.appendChild(chatDetails);
+    // Create a container for name + right arrow (for better layout)
+    const nameAndArrow = document.createElement("div");
+    nameAndArrow.classList.add("name-arrow-container");
+    nameAndArrow.appendChild(chatName);
+    nameAndArrow.appendChild(rightArrow);
+
+    // Now assemble everything
+    chatItem.appendChild(profileImg);
+    chatItem.appendChild(nameAndArrow);
     messageList.appendChild(chatItem);
   });
 }
@@ -1771,7 +1976,7 @@ function openGroupModal() {
 
   allContacts.forEach((contact, index) => {
     const userItem = document.createElement("div");
-
+    userItem.classList.add("checkbox-labels");
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.value = contact.username; // only username in value
@@ -1820,7 +2025,6 @@ function createGroup() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Group Created:", data);
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -1844,30 +2048,28 @@ document
 let selectedChatUser = null; // To store the selected user's username
 
 // Show the chat screen and hide the user list
-function openChatTextUser(username) {
-  selectedChatUser = username; // Store the selected user's name
+function openChatTextUser(data) {
+  selectedChatUser = data.username;
 
-  // Show the chat screen and hide other sections
   document.getElementById("chatScreen").style.display = "flex";
   document.getElementById("hder").style.display = "none";
   document.getElementById("messages-main").style.display = "none";
 
-  // Update the chat header with the selected user's name
+  document.getElementById("pfp-msg-img").src = data.avatar;
   document.getElementById("chatName").innerText = selectedChatUser;
 
-  // Fetch messages for the selected user
   fetch(`https://${GetParentResourceName()}/getMessages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      receiver: selectedChatUser, // Pass the selected user's name to the server
+      receiver: selectedChatUser,
     }),
   })
     .then((response) => response.json())
     .then((data) => {
-      // You can now process the 'data' to update the UI as needed
+      // process messages
     })
     .catch((error) => {
       console.error("Error fetching messages:", error);
@@ -1914,11 +2116,12 @@ let lastMessageId = 0; // Track last message shown
 
 window.addEventListener("message", function (event) {
   const data = event.data;
-
   if (data.type === "receiveMessages") {
+    localStorage.setItem("myUserName", data.name);
+
     const messages = data.messages;
     const messageList = document.getElementById("phoneMessageList");
-    const currentPlayer = data.name || "AsyncPc1";
+    const currentPlayer = localStorage.getItem("myUserName");
 
     messages.forEach((msg) => {
       // Only append messages newer than lastMessageId
@@ -2127,7 +2330,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const groupName = groupNameInput.value.trim();
     if (groupName) {
       // Here you can add your group creation logic
-      console.log("Creating group:", groupName);
       groupModal.style.display = "none";
       groupNameInput.value = ""; // Clear input
     } else {
@@ -2141,7 +2343,9 @@ window.addEventListener("message", function (event) {
   if (event.data.action === "displayGroups") {
     const groupContainer = document.getElementById("groupList");
     groupContainer.innerHTML = "";
-
+    const imageContainer = document.createElement("img");
+    imageContainer.src = "./images/right.png";
+    imageContainer.width = 15;
     event.data.groups.forEach((group) => {
       const btn = document.createElement("button");
       btn.innerText = group.name;
@@ -2159,6 +2363,7 @@ window.addEventListener("message", function (event) {
         document.getElementById("openGroupModalButton").style.display = "none";
         document.getElementById("nav-sn2").style.display = "none";
       };
+      btn.appendChild(imageContainer);
       groupContainer.appendChild(btn);
     });
   }
@@ -2243,12 +2448,24 @@ function switchTabCht(tab) {
   const chatScreen = document.getElementById("messageList");
   const groupSection = document.getElementById("groupList").parentElement; // message-olma containing groupList + groupChatScreen
 
+  const chatButton = document.querySelector(".chat-button");
+  const groupButton = document.querySelector(".group-button");
+
   if (tab === "chat") {
     chatScreen.style.display = "block";
     groupSection.style.display = "none";
+    chatButton.classList.add("active");
+    groupButton.classList.remove("active");
   } else if (tab === "groups") {
     chatScreen.style.display = "none";
     groupSection.style.display = "block";
+    chatButton.classList.remove("active");
+    groupButton.classList.add("active");
+    fetch(`https://${GetParentResourceName()}/groups:requestBserver`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
   }
 }
 
@@ -2657,7 +2874,6 @@ function getUserUploadPosts() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("received data from server", JSON.stringify(data));
     })
     .catch((error) => {
       console.log("Error Fetching data", error);
@@ -2700,7 +2916,6 @@ window.addEventListener("message", function (event) {
 });
 
 function openPost(data) {
-  console.log("data", JSON.stringify(data));
   var profileView = document.getElementById("profileView");
   profileView.style.display = "block";
   profileView.innerHTML = `
@@ -2779,7 +2994,6 @@ document
     const caption = document.getElementById("caption-input").value.trim();
 
     if (!link) {
-      alert("⚠️ Please paste a link.");
       return;
     }
     var username = localStorage.getItem("userDetails");
@@ -2808,7 +3022,6 @@ document
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Received data from server:", data);
           // Update your UI with the received data (posts)
         })
         .catch((error) => {
@@ -2850,7 +3063,6 @@ function getTimeAgo(date) {
 window.addEventListener("message", function (event) {
   if (event.data.type === "sendComments") {
     renderPubComments(event.data.comments);
-    console.log(">>>>>>>>>>", JSON.stringify(event.data.comments));
   }
 });
 function renderFeed(posts) {
@@ -2923,7 +3135,6 @@ function setupPostInteractions() {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Received data from server:", data);
           // Update your UI with the received data (posts)
         })
         .catch((error) => {
@@ -3063,7 +3274,6 @@ function loadStories() {
   fetch(`https://${GetParentResourceName()}/getStories`)
     .then((res) => res.json())
     .then((data) => {
-      // console.log("Stories loaded:", data); // Debugging line
       stories = data;
     });
 }
@@ -3425,6 +3635,7 @@ window.addEventListener("message", function (event) {
   if (event.data.type === "Mob-info") {
     document.getElementById("ph-num").innerText = event.data.data.phone;
     document.getElementById("sr-num").innerText = event.data.data.serialNumber;
+    document.getElementById("serial").innerText = event.data.data.serialNumber;
   }
 });
 
@@ -3455,7 +3666,6 @@ function showWallpapers(param) {
     img.style.borderRadius = "10px";
     img.addEventListener("click", () => {
       localStorage.setItem("selectedWallpaper", item.wallpaper);
-      localStorage.setItem("selectedWallpaperName", item.name);
       document.getElementById("wallpapers").style.bottom = "-500px";
       showToast("Wallpaper Updated");
       document.getElementById(
@@ -3468,22 +3678,24 @@ function showWallpapers(param) {
 }
 window.addEventListener("DOMContentLoaded", () => {
   const wallP = localStorage.getItem("selectedWallpaper");
-  const wallPName = localStorage.getItem("selectedWallpaperName");
   if (wallP) {
     document.getElementById("subDiv").style.backgroundImage = `url(${wallP})`;
   }
-  if (wallPName) {
-    document.getElementById("bg-name").innerText = wallPName;
-  }
 });
 const wallP = localStorage.getItem("selectedWallpaper");
-const wallPName = localStorage.getItem("selectedWallpaperName");
 function openBrightness() {
   document.getElementById("set-brightness").style.bottom = "0px";
 }
 
 document.getElementById("bright-slid").addEventListener("click", function () {
   document.getElementById("set-brightness").style.bottom = "-400px";
+});
+function openSound() {
+  document.getElementById("set-volume").style.bottom = "0px";
+}
+
+document.getElementById("vol-slid").addEventListener("click", function () {
+  document.getElementById("set-volume").style.bottom = "-400px";
 });
 function openWallPaperModal() {
   document.getElementById("wallpapers").style.bottom = "0px";
@@ -3492,6 +3704,22 @@ function openWallPaperModal() {
 document.getElementById("top-slider").addEventListener("click", function () {
   document.getElementById("wallpapers").style.bottom = "-500px";
 });
+function openAbout() {
+  document.getElementById("set-about").classList.add("active");
+}
+function goBackSettings() {
+  document.getElementById("set-about").classList.remove("active");
+  document.getElementById("set-security").classList.remove("active");
+}
+function goBackSecurity() {
+  document.getElementById("container-pad").classList.remove("active");
+}
+function openSecurity() {
+  document.getElementById("set-security").classList.add("active");
+}
+function openDialPad() {
+  document.getElementById("container-pad").classList.add("active");
+}
 
 function openAvatarModal() {
   document.getElementById("avatar-modal").style.display = "flex";
@@ -3518,6 +3746,7 @@ window.addEventListener("message", function (event) {
   if (event.data.type === "ReceiveMyDetails") {
     document.getElementById("avatar").src = event.data.data.avatar;
     document.getElementById("username").innerText = event.data.data.username;
+    document.getElementById("name-ab").innerText = event.data.data.username;
     document.getElementById("citizenId").innerText = event.data.data.citizen_id;
   }
 });
@@ -3553,6 +3782,137 @@ toggleSwitchTheme.addEventListener("change", function () {
     localStorage.setItem("theme", "light");
   }
 });
+
+const slider = document.getElementById("brightnessSlider");
+const fill = document.getElementById("brightnessFill");
+const thumb = document.getElementById("thumb");
+const container = document.getElementById("subDiv");
+const bot_Nav = document.getElementById("b-nav");
+
+// Load saved brightness on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("brightnessPercent");
+  if (saved !== null) {
+    const percent = parseFloat(saved);
+    fill.style.width = `${percent * 100}%`;
+    container.style.filter = `brightness(${0.5 + percent * 0.5})`;
+  }
+});
+
+slider.addEventListener("click", function (e) {
+  const rect = slider.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  let percent = x / rect.width;
+  percent = Math.max(0, Math.min(1, percent));
+
+  fill.style.width = `${percent * 100}%`;
+
+  // Apply brightness
+  container.style.filter = `brightness(${0.5 + percent * 0.5})`;
+
+  // Save
+  localStorage.setItem("brightnessPercent", percent.toString());
+});
+
+// Load saved volume on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const savedVolume = localStorage.getItem("volumePercent");
+  if (savedVolume !== null) {
+    const percent = parseFloat(savedVolume);
+    document.getElementById("volumeFill").style.width = `${percent * 100}%`;
+
+    // Optional: Apply to volume element or console
+  }
+});
+
+const volumeSlider = document.getElementById("customVolumeSlider");
+const volumeFill = document.getElementById("customVolumeFill");
+
+volumeSlider.addEventListener("click", function (e) {
+  const rect = volumeSlider.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  let percent = x / rect.width;
+  percent = Math.max(0, Math.min(1, percent));
+
+  volumeFill.style.width = `${percent * 100}%`;
+
+  // Optional: Set actual audio volume or log
+
+  // Save to localStorage
+  localStorage.setItem("volumePercent", percent.toString());
+});
+
+//password setting
+function addDigit(digit) {
+  const input = document.getElementById("pass-input");
+  if (input.value.length < 6) {
+    input.value += digit;
+  }
+}
+
+function clearDigit() {
+  const input = document.getElementById("pass-input");
+  input.value = input.value.slice(0, -1);
+}
+
+// Function to handle saving the password
+function submitPassword() {
+  const password = document.getElementById("pass-input").value;
+  showToast("Password Updated");
+  localStorage.setItem("savedpassword", password);
+
+  // Clear input field after a short delay
+  setTimeout(() => {
+    document.getElementById("pass-input").value = "";
+  }, 1000);
+
+  // Update the UI with the new password immediately
+  updatePasswordUI();
+}
+
+// Function to handle updating the UI with the current password from localStorage
+function updatePasswordUI() {
+  const savedPassword = localStorage.getItem("savedpassword");
+  const savedPasswordContainer = document.getElementById("saved-password");
+  const openDialBtn = document.getElementById("open-dial-pad");
+
+  if (savedPassword) {
+    const hashedPassword = savedPassword.replace(/./g, "•"); // Mask the password with dots
+    openDialBtn.style.display = "none"; // Hide the dial button once password is saved
+    savedPasswordContainer.innerHTML = `
+      <ul>
+        <li>
+          <p>${hashedPassword}</p>
+          <button id="delete-password" onclick="deletePassword()">Delete</button>
+        </li>
+      </ul>
+    `; // Display the masked password
+  } else {
+    openDialBtn.style.display = "flex"; // Show the dial button if no password is saved
+  }
+}
+
+// Function to handle deleting the password
+function deletePassword() {
+  // Remove the password from localStorage
+  localStorage.removeItem("savedpassword");
+
+  // Reset the display to show no password
+  updatePasswordUI();
+
+}
+
+// Event listener for opening the dial pad (shows or hides the password and delete button)
+document.getElementById("open-dial-pad").addEventListener("click", function () {
+  updatePasswordUI(); // Ensure the password is fetched and displayed in real-time when opening the dial pad
+});
+
+// Initial check on page load to display the password if it exists in localStorage
+window.addEventListener("DOMContentLoaded", function () {
+  updatePasswordUI(); // Update the UI immediately when the page loads
+});
+
+//password setting
 
 function showToast(params) {
   var toastMessage = document.getElementById("toast");
@@ -3842,3 +4202,195 @@ function showDeleteModal(videoId) {
     }
   });
 }
+
+///installing app
+function installAppWithLoading(appName, imgSrc, appDataName) {
+  const installButton = event.target;
+  installButton.disabled = true;
+  installButton.innerText = "Installing...";
+
+  setTimeout(() => {
+    addAppToHomeScreen(appName, imgSrc, appDataName);
+
+    installButton.innerText = "Installed";
+    installButton.style.backgroundColor = "gray"; // Change button color
+  }, 2000); // 2 seconds delay for "installing" feel
+}
+
+function addAppToHomeScreen(appName, imgSrc, appDataName) {
+  const appScreens = document.querySelectorAll('.app-screen');
+  const appsWrapper = document.querySelector('.apps-wrapper');
+  const screenIndicators = document.querySelector('.screen-indicators');
+  
+  // Count total apps in first screen
+  const firstScreenApps = appScreens[0].querySelectorAll('.app-ic').length;
+  
+  // Create new app element
+  const newApp = document.createElement("div");
+  newApp.classList.add("app-ic");
+  newApp.setAttribute("draggable", "true");
+  newApp.setAttribute("data-app", appDataName);
+
+  newApp.innerHTML = `
+    <span class="delete-icon">×</span>
+    <button>
+      <img src="${imgSrc}" alt="${appName}" />
+    </button>
+    <p>${appName}</p>
+  `;
+
+  // Add click event handler to the new app
+  newApp.addEventListener("click", function (e) {
+    if (window.isEditMode || e.target.closest(".delete-icon")) return;
+    const clickedAppName = this.getAttribute("data-app");
+    const clickedAppTitleText = this.querySelector("p")?.textContent || "Unknown App";
+    openApp(clickedAppName, clickedAppTitleText);
+  });
+
+  // Check if we need to create a new screen
+  if (firstScreenApps >= 15) {
+    // Check if second screen exists, if not create it
+    if (appScreens.length === 1) {
+      const newScreen = document.createElement('div');
+      newScreen.classList.add('app-screen');
+      appsWrapper.appendChild(newScreen);
+      
+      // Add new screen indicator
+      const newIndicator = document.createElement('div');
+      newIndicator.classList.add('screen-indicator');
+      screenIndicators.appendChild(newIndicator);
+      
+      // Add click event to new indicator
+      newIndicator.addEventListener('click', () => {
+        if (!isEditMode) {
+          currentScreen = 1;
+          updateScreenPosition(true);
+        }
+      });
+    }
+    
+    // Add app to second screen
+    appScreens[1].appendChild(newApp);
+  } else {
+    // Add to first screen if less than 15 apps
+    appScreens[0].appendChild(newApp);
+  }
+
+  // Save to localStorage
+  saveAppsToStorage(appName, imgSrc, appDataName);
+}
+function saveAppsToStorage(appName, imagesrc, appDataName) {
+  let apps = JSON.parse(localStorage.getItem("installedApps")) || [];
+
+  // Check if app already exists to avoid duplicates
+  const alreadyInstalled = apps.some(app => app.dataApp === appDataName);
+  if (!alreadyInstalled) {
+    apps.push({ name: appName, img: imagesrc, dataApp: appDataName });
+    localStorage.setItem("installedApps", JSON.stringify(apps));
+  }
+}
+
+function loadAppsFromStorage() {
+  const storedApps = JSON.parse(localStorage.getItem("installedApps"));
+  
+  if (storedApps && Array.isArray(storedApps)) {
+    storedApps.forEach((app) => {
+      addAppToHomeScreen(app.name, app.img, app.dataApp);
+    });
+  }
+}
+function updateInstalledButtons() {
+  const storedApps = JSON.parse(localStorage.getItem("installedApps")) || [];
+
+  // Get list of installed app identifiers
+  const installedAppNames = storedApps.map((app) => app.dataApp);
+
+  // Loop through all install buttons in the app store
+  document.querySelectorAll(".store-app-info button").forEach((button) => {
+    const appKey = button.getAttribute("data-app");
+
+    if (installedAppNames.includes(appKey)) {
+      button.innerText = "Installed";
+      button.disabled = true;
+      button.style.backgroundColor = "gray";
+    }
+  });
+}
+// // Jab page load ho to already installed apps dikh jayein
+document.addEventListener("DOMContentLoaded", () => {
+  updateInstalledButtons();
+  loadAppsFromStorage();
+});
+
+function handleAppClick(event, appName, imgSrc, appDataName) {
+  // Agar user ne button pe click nahi kiya
+
+  if (!event.target.closest("button")) {
+    openPreviewModal(appName, imgSrc, appDataName);
+  }
+}
+const appPreviews = {
+  spotify: [
+    "./images/spotify.png",
+    "./images/spotify_1.webp",
+    "./images/spotify_2.webp",
+  ],
+  facebook: [
+    "./images/facebook.png",
+    "./images/facebook_1.webp",
+    "./images/facebook_2.webp",
+  ],
+  tiktok: [
+    "./images/tiktok.png",
+    "./images/tiktok_1.webp",
+    "./images/tiktok_2.webp",
+  ],
+  twitter: [
+    "./images/twitter.png",
+    "./images/twitter_1.webp",
+    "./images/twitter_2.webp",
+  ],
+};
+function openPreviewModal(appName, imgSrc, appDataName) {
+
+  document.getElementById("previewMainImage").src = imgSrc;
+  document.getElementById("previewAppTitle").innerText = appName;
+
+  const gallery = document.getElementById("previewGallery");
+  gallery.innerHTML = "";
+
+  const screenshots = appPreviews[appDataName] || [imgSrc];
+  screenshots.forEach((src) => {
+    const galleryContainer = document.createElement("div");
+    galleryContainer.classList.add("galleryContainer");
+
+    const img = document.createElement("img");
+    img.src = src;
+
+    galleryContainer.appendChild(img);
+    gallery.appendChild(galleryContainer);
+  });
+  const btn = document.getElementById("previewInstallBtn");
+  const installedApps = JSON.parse(localStorage.getItem("installedApps")) || [];
+  const isInstalled = installedApps.some((app) => app.dataApp === appDataName);
+
+  if (isInstalled) {
+    btn.innerText = "Installed";
+    btn.disabled = true;
+    btn.style.backgroundColor = "gray";
+  } else {
+    btn.innerText = "Install";
+    btn.disabled = false;
+    btn.onclick = () => {
+      installAppWithLoading(appName, imgSrc, appDataName);
+      closePreviewModal();
+    };
+  }
+
+  document.getElementById("appPreviewModal").style.transform = "translateX(0)";
+}
+
+function closePreviewModal() {
+  document.getElementById("appPreviewModal").style.transform = "translateX(-300px)";
+}
+///installing app
