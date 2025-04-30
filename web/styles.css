@@ -354,7 +354,7 @@ button {
   transition: width 0.5s;
 }
 
-/* Charging Icon ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ (Blinking Animation) */
+/* Charging Icon ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ (Blinking Animation) */
 #charging-icon {
   display: none;
   color: yellow;
@@ -972,7 +972,7 @@ button {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-#favSection .contact-item ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â­Ãƒâ€šÃ‚Â {
+#favSection .contact-item ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {
   margin-right: 10px;
   color: #ffd700;
 }
@@ -2280,7 +2280,7 @@ button {
 }
 
 .music-btn-play.is-playing::before {
-  content: "▐▐ ";
+  content: "â–â– ";
   color: white;
   font-size: 24px;
   margin-left: -9px;
@@ -5309,7 +5309,7 @@ width: 19px;
 .facebook {
   background-color: var(--setting-bg);
   color: #1a1a1a;
-  padding: 20px 0px;
+  padding: 0px 0px;
   box-sizing: border-box;
   border-radius: 10px;
   /* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
@@ -5395,4 +5395,36 @@ width: 19px;
   top: 60px;
   z-index: 99999999999999999999999999;
   transition: all 1s ease-in-out;
+}
+.bottom-nav-facebook {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.bottom-nav-facebook button{
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 5px;
+  width: 40px;
+  border-radius: 50%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1877f259;
+  color: #fff !important;
+}
+.bottom-nav-facebook button svg{
+  width: 20px;
+  height: 20px;
+  fill: #fff !important;
 }

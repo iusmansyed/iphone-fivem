@@ -4342,5 +4342,6 @@ window.addEventListener("DOMContentLoaded", function () {
     document.getElementById("login-facebook").style.display = "none";
     document.getElementById("facebook-feed-page").style.display = "flex";
   }
+
 });
 //facebook login
