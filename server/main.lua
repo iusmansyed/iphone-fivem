@@ -308,7 +308,7 @@ RegisterNetEvent('qb-core:phone:getMessages')
 AddEventHandler('qb-core:phone:getMessages', function(chatUser)
     local src = source
     local username = GetPlayerName(src)
-    local recievername = chatUser.receiver 
+    local recievername = chatUser.receiver
     local cleanedReceiverName = json.decode(recievername)
     MySQL.Async.fetchAll(
         "SELECT * FROM mobile_messages WHERE (sender = @user AND receiver = @chatUser) OR (sender = @chatUser AND receiver = @user) ORDER BY id ASC",
@@ -1013,3 +1013,69 @@ AddEventHandler("user:GetMyDetailsFromDB", function()
 end)
 
 -----avatar
+
+-----facebook
+local function trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
+RegisterServerEvent("facebook:login")
+AddEventHandler("facebook:login", function(data)
+    local src = source
+
+    MySQL.Async.fetchAll("SELECT * FROM facebook_users WHERE email = @email", {
+        ["@email"] = data.email
+    }, function(result)
+        if result and result[1] then
+            local user = result[1]
+            if user.password == data.password and user.email == data.email then
+                local userId = user.id
+                TriggerClientEvent("facebook:loginResult", src, "Login successful", userId, true)
+            else
+                TriggerClientEvent("facebook:loginResult", src, "Invalid password", nil, false)
+            end
+
+        else
+            TriggerClientEvent("facebook:loginResult", src, "User not found", nil, false)
+        end
+    end)
+end)
+
+RegisterServerEvent("facebook:signup")
+AddEventHandler("facebook:signup", function(data)
+
+    local src = source
+
+    MySQL.Async.fetchScalar("SELECT COUNT(*) FROM facebook_users WHERE email = @email", {
+        ["@email"] = data.email
+    }, function(count)
+        if count and count > 0 then
+            print("User exists")
+            TriggerClientEvent("facebook:signupResult", src, "User already exists")
+        else
+            MySQL.Async.execute(
+                "INSERT INTO facebook_users (username, email, password) VALUES (@username, @email, @password)", {
+                    ["@username"] = data.username,
+                    ["@email"] = data.email,
+                    ["@password"] = data.password
+                }, function(rowsChanged)
+                    print("facebook:signup", rowsChanged)
+                    TriggerClientEvent("facebook:signupResult", src, "Signup successful")
+                end)
+        end
+    end)
+end)
+
+
+RegisterServerEvent("facebook:getUserDetails")
+AddEventHandler("facebook:getUserDetails", function(data)
+    local src = source
+    MySQL.Async.fetchAll("SELECT * FROM facebook_users WHERE id = @id", {
+        ["@id"] = data.userId
+    }, function(result)
+        if result and result[1] then
+            TriggerClientEvent("facebook:getUserDetailsResult", src, result[1])
+        end
+    end)
+end)
+-----facebook

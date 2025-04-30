@@ -1,3 +1,21 @@
+$(document).ready(function () {
+  $(".owl-carousel").owlCarousel({
+    items: 1, // Show only one item at a time
+    loop: false,
+    margin: 10,
+    startPosition: 0, // Start with second div (index starts at 0)
+  });
+});
+
+function showGlobalAlert(message) {
+  const alertContent = document.querySelector(".globalAlert");
+  alertContent.innerText = message;
+  alertContent.style.right = "0px";
+  setTimeout(() => {
+    alertContent.style.right = "-300px";
+  }, 3000);
+}
+
 const translations = {
   en: {
     heading: "Hello, Welcome!",
@@ -226,7 +244,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 lockScreen.style.transform = "translateX(0)"; // Reset transform
               }, 500);
             }, 3000);
-
           }, 500);
         } else {
           console.log("Please select a language to continue");
@@ -365,33 +382,28 @@ document.addEventListener("DOMContentLoaded", function () {
 // App Management Variables
 let timer;
 let isEditMode = false;
-let draggedItem = null;
-let currentScreen = 0;
-let isDragging = false;
-let startX = 0;
-let currentX = 0;
+let draggingApp = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let originalPosition = null;
+let currentDropTarget = null;
 
 document.addEventListener("DOMContentLoaded", function () {
-  // ... existing code ...
-
   // Initialize app management
   initializeAppManagement();
 });
 
 function initializeAppManagement() {
-  const appsWrapper = document.querySelector(".apps-wrapper");
   const appScreens = document.querySelectorAll(".app-screen");
   const screenIndicators = document.querySelectorAll(".screen-indicator");
 
   // Mark first screen as active
   appScreens[0].classList.add("active");
 
-  // Enable Hold-to-Edit Mode
+  // Enable Hold-to-Edit Mode and drag functionality
   document.querySelectorAll(".app-ic").forEach((app) => {
     app.addEventListener("mousedown", handleAppHold);
     app.addEventListener("touchstart", handleAppHold, { passive: false });
-
-    // Make app draggable
     app.addEventListener("mousedown", handleDragStart);
     app.addEventListener("touchstart", handleDragStart, { passive: false });
   });
@@ -402,30 +414,7 @@ function initializeAppManagement() {
   document.addEventListener("mouseup", handleDragEnd);
   document.addEventListener("touchend", handleDragEnd);
 
-  // Screen navigation
-  appsWrapper.addEventListener("touchstart", handleScreenTouchStart);
-  appsWrapper.addEventListener("touchmove", handleScreenTouchMove);
-  appsWrapper.addEventListener("touchend", handleScreenTouchEnd);
-
-  // Mouse events for desktop screen sliding
-  appsWrapper.addEventListener("mousedown", (e) => {
-    if (!isEditMode && e.target.closest(".apps-wrapper")) {
-      handleScreenMouseDown(e);
-    }
-  });
-
-  document.addEventListener("mousemove", handleScreenMouseMove);
-  document.addEventListener("mouseup", handleScreenMouseUp);
-
   // Click indicators to switch screens
-  screenIndicators.forEach((indicator, index) => {
-    indicator.addEventListener("click", () => {
-      if (!isEditMode) {
-        currentScreen = index;
-        updateScreenPosition(true);
-      }
-    });
-  });
 
   // Delete functionality
   document.querySelectorAll(".delete-icon").forEach((icon) => {
@@ -436,25 +425,37 @@ function initializeAppManagement() {
   document.addEventListener("click", handleClickOutside);
 
   // Update screen indicators
-  updateScreenIndicators();
 }
-
-let draggingApp = null;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
 
 function handleAppHold(e) {
   if (e.type === "touchstart") {
     e.preventDefault();
   }
 
+  // Clear any existing timer
+  clearTimeout(timer);
+
+  // Set a new timer for 2 seconds
   timer = setTimeout(() => {
     if (!isEditMode) {
-      document.querySelector(".apps-wrapper").classList.add("edit-mode");
+      // Add edit mode class to apps wrapper
+      const appsWrapper = document.querySelector(".apps-wrapper");
+      appsWrapper.classList.add("edit-mode");
       isEditMode = true;
-    }
-  }, 1000);
 
+      // Show delete icons
+      document.querySelectorAll(".delete-icon").forEach((icon) => {
+        icon.style.display = "flex";
+      });
+
+      // Add wiggle animation to all apps
+      document.querySelectorAll(".app-ic").forEach((app) => {
+        app.style.animation = "wiggle 0.5s infinite alternate ease-in-out";
+      });
+    }
+  }, 2000); // 2 seconds hold time
+
+  // Cleanup function to clear timer if hold is released early
   const cleanup = () => {
     clearTimeout(timer);
     this.removeEventListener("mouseup", cleanup);
@@ -474,15 +475,26 @@ function handleDragStart(e) {
   const touch = e.type === "touchstart" ? e.touches[0] : e;
   draggingApp = this;
 
+  // Store original position
+  originalPosition = {
+    parent: draggingApp.parentNode,
+    nextSibling: draggingApp.nextSibling,
+  };
+
   // Calculate offset from app's top-left corner
   const rect = draggingApp.getBoundingClientRect();
   dragOffsetX = touch.clientX - rect.left;
   dragOffsetY = touch.clientY - rect.top;
 
   // Set initial position
-  draggingApp.style.position = "absolute";
+  draggingApp.style.position = "fixed";
   draggingApp.style.zIndex = "1000";
   draggingApp.classList.add("dragging");
+
+  // Create placeholder
+  const placeholder = document.createElement("div");
+  placeholder.classList.add("app-placeholder");
+  draggingApp.parentNode.insertBefore(placeholder, draggingApp);
 
   // Move to current position
   updateDragPosition(touch.clientX, touch.clientY);
@@ -490,41 +502,50 @@ function handleDragStart(e) {
 
 function handleDragMove(e) {
   if (!draggingApp) return;
-
   e.preventDefault();
+
   const touch = e.type === "touchmove" ? e.touches[0] : e;
   updateDragPosition(touch.clientX, touch.clientY);
 
-  // Check if we should switch screens
-  const appScreens = document.querySelectorAll(".app-screen");
-  const appsWrapper = document.querySelector(".apps-wrapper");
-  const wrapperRect = appsWrapper.getBoundingClientRect();
+  // Find the closest drop target
+  const dropTarget = findDropTarget(touch.clientX, touch.clientY);
 
-  if (touch.clientX < wrapperRect.left + 50 && currentScreen > 0) {
-    // Switch to previous screen
-    currentScreen--;
-    updateScreenPosition(true);
-  } else if (
-    touch.clientX > wrapperRect.right - 50 &&
-    currentScreen < appScreens.length - 1
-  ) {
-    // Switch to next screen
-    currentScreen++;
-    updateScreenPosition(true);
+  if (dropTarget !== currentDropTarget) {
+    if (currentDropTarget) {
+      currentDropTarget.classList.remove("drop-target");
+    }
+    if (dropTarget) {
+      dropTarget.classList.add("drop-target");
+    }
+    currentDropTarget = dropTarget;
   }
 }
 
+function findDropTarget(x, y) {
+  const apps = document.querySelectorAll(".app-screen .app-ic:not(.dragging)");
+  return Array.from(apps).find((app) => {
+    const rect = app.getBoundingClientRect();
+    return (
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    );
+  });
+}
+
 function updateDragPosition(x, y) {
-  const apps = document.querySelector(".apps");
-  const rect = apps.getBoundingClientRect();
+  if (!draggingApp) return;
 
-  // Calculate position within apps container
-  let left = x - rect.left - dragOffsetX;
-  let top = y - rect.top - dragOffsetY;
+  const frame = document.querySelector(".frame");
+  const frameRect = frame.getBoundingClientRect();
 
-  // Constrain to apps container
-  left = Math.max(0, Math.min(left, rect.width - draggingApp.offsetWidth));
-  top = Math.max(0, Math.min(top, rect.height - draggingApp.offsetHeight));
+  // Calculate position within frame boundaries
+  let left = Math.max(
+    frameRect.left,
+    Math.min(x - dragOffsetX, frameRect.right - draggingApp.offsetWidth)
+  );
+  let top = Math.max(
+    frameRect.top,
+    Math.min(y - dragOffsetY, frameRect.bottom - draggingApp.offsetHeight)
+  );
 
   draggingApp.style.left = left + "px";
   draggingApp.style.top = top + "px";
@@ -533,94 +554,34 @@ function updateDragPosition(x, y) {
 function handleDragEnd(e) {
   if (!draggingApp) return;
 
-  draggingApp.classList.remove("dragging");
-  draggingApp = null;
+  // Remove placeholder and drop target highlighting
+  const placeholder = document.querySelector(".app-placeholder");
+  if (placeholder) {
+    placeholder.remove();
+  }
 
-  // Optional: Snap to grid or nearest position
-  // You can add snapping logic here if desired
-}
-
-function handleScreenTouchStart(e) {
-  if (isEditMode) return;
-  startX = e.touches[0].clientX;
-  currentX = -currentScreen * document.querySelector(".app-screen").offsetWidth;
-}
-
-function handleScreenTouchMove(e) {
-  if (isEditMode) return;
-  e.preventDefault();
-
-  const touch = e.touches[0];
-  const diff = touch.clientX - startX;
-  const newPosition = currentX + diff;
-  const maxScreen = document.querySelectorAll(".app-screen").length - 1;
-  const appsWrapper = document.querySelector(".apps-wrapper");
-
-  // Add sliding class to disable transitions during drag
-  appsWrapper.classList.add("sliding");
-
-  // Calculate resistance at edges
-  let finalPosition;
-  if (currentScreen === 0 && diff > 0) {
-    finalPosition = diff * 0.3;
-  } else if (currentScreen === maxScreen && diff < 0) {
-    finalPosition = -maxScreen * 100 + diff * 0.3;
+  if (currentDropTarget) {
+    currentDropTarget.classList.remove("drop-target");
+    currentDropTarget.parentNode.insertBefore(draggingApp, currentDropTarget);
   } else {
-    finalPosition = newPosition;
+    // Return to original position if no valid drop target
+    originalPosition.parent.insertBefore(
+      draggingApp,
+      originalPosition.nextSibling
+    );
   }
 
-  appsWrapper.style.transform = `translateX(${finalPosition}px)`;
-}
+  // Reset dragging app styles
+  draggingApp.style.position = "";
+  draggingApp.style.left = "";
+  draggingApp.style.top = "";
+  draggingApp.style.zIndex = "";
+  draggingApp.classList.remove("dragging");
 
-function handleScreenTouchEnd(e) {
-  if (isEditMode) return;
-
-  const appsWrapper = document.querySelector(".apps-wrapper");
-  appsWrapper.classList.remove("sliding");
-
-  const diff = e.changedTouches[0].clientX - startX;
-  const threshold = window.innerWidth * 0.2;
-
-  if (Math.abs(diff) > threshold) {
-    currentScreen =
-      diff > 0
-        ? Math.max(0, currentScreen - 1)
-        : Math.min(
-            document.querySelectorAll(".app-screen").length - 1,
-            currentScreen + 1
-          );
-  }
-
-  updateScreenPosition(true);
-}
-
-function updateScreenIndicators() {
-  const indicators = document.querySelectorAll(".screen-indicator");
-  indicators.forEach((indicator, index) => {
-    indicator.classList.toggle("active", index === currentScreen);
-  });
-}
-
-function updateScreenPosition(animate = false) {
-  const appsWrapper = document.querySelector(".apps-wrapper");
-  const appScreens = document.querySelectorAll(".app-screen");
-
-  if (animate) {
-    appsWrapper.style.transition =
-      "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-    setTimeout(() => (appsWrapper.style.transition = ""), 300);
-  }
-
-  // Update transform
-  appsWrapper.style.transform = `translateX(-${currentScreen * 100}%)`;
-
-  // Update active screen
-  appScreens.forEach((screen, index) => {
-    screen.classList.toggle("active", index === currentScreen);
-  });
-
-  // Update indicators
-  updateScreenIndicators();
+  // Reset variables
+  draggingApp = null;
+  currentDropTarget = null;
+  originalPosition = null;
 }
 
 function handleAppDelete(e) {
@@ -631,60 +592,27 @@ function handleAppDelete(e) {
 }
 
 function handleClickOutside(e) {
-  const appsWrapper = document.querySelector(".apps-wrapper");
-  if (isEditMode && !appsWrapper.contains(e.target)) {
+  if (
+    isEditMode &&
+    !e.target.closest(".app-ic") &&
+    !e.target.closest(".delete-icon")
+  ) {
+    // Exit edit mode
+    const appsWrapper = document.querySelector(".apps-wrapper");
     appsWrapper.classList.remove("edit-mode");
     isEditMode = false;
+
+    // Hide delete icons
+    document.querySelectorAll(".delete-icon").forEach((icon) => {
+      icon.style.display = "none";
+    });
+
+    // Remove wiggle animation
+    document.querySelectorAll(".app-ic").forEach((app) => {
+      app.style.animation = "none";
+    });
   }
 }
-
-// Mouse event handlers for desktop support
-function handleScreenMouseDown(e) {
-  if (isEditMode) return;
-  isDragging = true;
-  startX = e.clientX;
-  currentX = -currentScreen * document.querySelector(".app-screen").offsetWidth;
-}
-
-function handleScreenMouseMove(e) {
-  if (!isDragging || isEditMode) return;
-
-  const diff = e.clientX - startX;
-  const newPosition = currentX + diff;
-  const appsWrapper = document.querySelector(".apps-wrapper");
-  const maxScreen = document.querySelectorAll(".app-screen").length - 1;
-
-  // Add resistance at edges
-  if (currentScreen === 0 && diff > 0) {
-    appsWrapper.style.transform = `translateX(${newPosition * 0.3}px)`;
-  } else if (currentScreen === maxScreen && diff < 0) {
-    appsWrapper.style.transform = `translateX(${currentX + diff * 0.3}px)`;
-  } else {
-    appsWrapper.style.transform = `translateX(${newPosition}px)`;
-  }
-}
-
-function handleScreenMouseUp(e) {
-  if (!isDragging || isEditMode) return;
-
-  isDragging = false;
-  const diff = e.clientX - startX;
-  const threshold = window.innerWidth * 0.2; // Reduced threshold for easier sliding
-
-  if (Math.abs(diff) > threshold) {
-    currentScreen =
-      diff > 0
-        ? Math.max(0, currentScreen - 1)
-        : Math.min(
-            document.querySelectorAll(".app-screen").length - 1,
-            currentScreen + 1
-          );
-  }
-
-  updateScreenPosition(true);
-  updateScreenIndicators();
-}
-
 // App Opening/Closing functionality
 function initializeAppOpening() {
   const appContainer = document.querySelector(".app-container");
@@ -818,7 +746,7 @@ function initializeAppOpening() {
         },
         body: JSON.stringify("music"),
       });
-      console.log("hellow rodllask")
+      console.log("hellow rodllask");
     }
     if (appName === "safari") {
       fetch(`https://${GetParentResourceName()}/safari`, {
@@ -2024,8 +1952,7 @@ function createGroup() {
     body: JSON.stringify(groupData),
   })
     .then((response) => response.json())
-    .then((data) => {
-    })
+    .then((data) => {})
     .catch((error) => {
       console.error("Error:", error);
     });
@@ -2086,15 +2013,6 @@ function sendMessageToServer() {
     return;
   }
 
-  // const messageList = document.getElementById("phoneMessageList");
-
-  // // Show message instantly in UI (temporary)
-  // const msgItem = document.createElement("div");
-  // msgItem.classList.add("message-item", "sent"); // Since it's sent by you
-  // msgItem.innerHTML = `${message}`;
-  // messageList.appendChild(msgItem);
-  // messageList.scrollTop = messageList.scrollHeight;
-
   // Clear input field
   messageInput.value = "";
 
@@ -2108,7 +2026,6 @@ function sendMessageToServer() {
     }),
   }).catch((err) => {
     console.error("Error sending message:", err);
-    // Optional: Show error message or remove the temporary message
   });
 }
 
@@ -2154,33 +2071,6 @@ function closeMesChat() {
   document.getElementById("messages-main").style.display = "block";
   document.getElementById("hder").style.display = "flex";
 }
-
-// Close the chat screen (go back to contacts list or home screen)
-
-// Add message to chat UI
-// function addMessageToUI(msg) {
-//   const chatBox = document.getElementById("chatBox");
-//   const div = document.createElement("div");
-//   div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-//   chatBox.appendChild(div);
-// }
-
-// When server sends previous or new messages
-window.addEventListener("message", function (event) {
-  if (event.data.action === "showMessages") {
-    showMessages(event.data.messages);
-  }
-});
-
-// function showMessages(messages) {
-//   const chatBox = document.getElementById("chatBox");
-//   chatBox.innerHTML = "";
-//   messages.forEach((msg) => {
-//     const msgDiv = document.createElement("div");
-//     msgDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-//     chatBox.appendChild(msgDiv);
-//   });
-// }
 
 function getRandomTime() {
   const times = ["5 mins ago", "Yesterday", "2 days ago", "3 hours ago"];
@@ -2795,7 +2685,6 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("user_id", event.data.id);
         instagramAuth.style.display = "none";
         instagramMain.style.display = "block";
-        renderStories();
         renderFeed();
       }
     }
@@ -2816,7 +2705,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (i) {
     instagramAuth.style.display = "none";
     instagramMain.style.display = "block";
-    renderStories();
     renderFeed();
   }
 
@@ -2873,8 +2761,7 @@ function getUserUploadPosts() {
     }),
   })
     .then((response) => response.json())
-    .then((data) => {
-    })
+    .then((data) => {})
     .catch((error) => {
       console.log("Error Fetching data", error);
     });
@@ -3899,7 +3786,6 @@ function deletePassword() {
 
   // Reset the display to show no password
   updatePasswordUI();
-
 }
 
 // Event listener for opening the dial pad (shows or hides the password and delete button)
@@ -4214,18 +4100,15 @@ function installAppWithLoading(appName, imgSrc, appDataName) {
 
     installButton.innerText = "Installed";
     installButton.style.backgroundColor = "gray"; // Change button color
-  }, 2000); // 2 seconds delay for "installing" feel
+  }, 2000);
 }
 
 function addAppToHomeScreen(appName, imgSrc, appDataName) {
-  const appScreens = document.querySelectorAll('.app-screen');
-  const appsWrapper = document.querySelector('.apps-wrapper');
-  const screenIndicators = document.querySelector('.screen-indicators');
-  
-  // Count total apps in first screen
-  const firstScreenApps = appScreens[0].querySelectorAll('.app-ic').length;
-  
-  // Create new app element
+  const appScreens = document.querySelectorAll(".app-screen");
+  const firstScreen = appScreens[0]; // Add to the first screen
+  const appsWrapper = document.querySelector(".apps-wrapper");
+  const screenIndicators = document.querySelector(".screen-indicators");
+
   const newApp = document.createElement("div");
   newApp.classList.add("app-ic");
   newApp.setAttribute("draggable", "true");
@@ -4239,73 +4122,43 @@ function addAppToHomeScreen(appName, imgSrc, appDataName) {
     <p>${appName}</p>
   `;
 
-  // Add click event handler to the new app
+  firstScreen.appendChild(newApp); // Corrected line
+
   newApp.addEventListener("click", function (e) {
     if (window.isEditMode || e.target.closest(".delete-icon")) return;
     const clickedAppName = this.getAttribute("data-app");
-    const clickedAppTitleText = this.querySelector("p")?.textContent || "Unknown App";
+    const clickedAppTitleText =
+      this.querySelector("p")?.textContent || "Unknown App";
     openApp(clickedAppName, clickedAppTitleText);
   });
 
-  // Check if we need to create a new screen
-  if (firstScreenApps >= 15) {
-    // Check if second screen exists, if not create it
-    if (appScreens.length === 1) {
-      const newScreen = document.createElement('div');
-      newScreen.classList.add('app-screen');
-      appsWrapper.appendChild(newScreen);
-      
-      // Add new screen indicator
-      const newIndicator = document.createElement('div');
-      newIndicator.classList.add('screen-indicator');
-      screenIndicators.appendChild(newIndicator);
-      
-      // Add click event to new indicator
-      newIndicator.addEventListener('click', () => {
-        if (!isEditMode) {
-          currentScreen = 1;
-          updateScreenPosition(true);
-        }
-      });
-    }
-    
-    // Add app to second screen
-    appScreens[1].appendChild(newApp);
-  } else {
-    // Add to first screen if less than 15 apps
-    appScreens[0].appendChild(newApp);
-  }
-
-  // Save to localStorage
   saveAppsToStorage(appName, imgSrc, appDataName);
 }
-function saveAppsToStorage(appName, imagesrc, appDataName) {
-  let apps = JSON.parse(localStorage.getItem("installedApps")) || [];
 
-  // Check if app already exists to avoid duplicates
-  const alreadyInstalled = apps.some(app => app.dataApp === appDataName);
+function saveAppsToStorage(appName, imgSrc, appDataName) {
+  let apps = JSON.parse(localStorage.getItem("installedApps")) || [];
+  const alreadyInstalled = apps.some((app) => app.dataApp === appDataName);
+
   if (!alreadyInstalled) {
-    apps.push({ name: appName, img: imagesrc, dataApp: appDataName });
+    apps.push({ name: appName, img: imgSrc, dataApp: appDataName });
     localStorage.setItem("installedApps", JSON.stringify(apps));
   }
 }
 
 function loadAppsFromStorage() {
   const storedApps = JSON.parse(localStorage.getItem("installedApps"));
-  
+
   if (storedApps && Array.isArray(storedApps)) {
     storedApps.forEach((app) => {
       addAppToHomeScreen(app.name, app.img, app.dataApp);
     });
   }
 }
+
 function updateInstalledButtons() {
   const storedApps = JSON.parse(localStorage.getItem("installedApps")) || [];
-
-  // Get list of installed app identifiers
   const installedAppNames = storedApps.map((app) => app.dataApp);
 
-  // Loop through all install buttons in the app store
   document.querySelectorAll(".store-app-info button").forEach((button) => {
     const appKey = button.getAttribute("data-app");
 
@@ -4316,6 +4169,7 @@ function updateInstalledButtons() {
     }
   });
 }
+
 // // Jab page load ho to already installed apps dikh jayein
 document.addEventListener("DOMContentLoaded", () => {
   updateInstalledButtons();
@@ -4352,7 +4206,6 @@ const appPreviews = {
   ],
 };
 function openPreviewModal(appName, imgSrc, appDataName) {
-
   document.getElementById("previewMainImage").src = imgSrc;
   document.getElementById("previewAppTitle").innerText = appName;
 
@@ -4391,6 +4244,103 @@ function openPreviewModal(appName, imgSrc, appDataName) {
 }
 
 function closePreviewModal() {
-  document.getElementById("appPreviewModal").style.transform = "translateX(-300px)";
+  document.getElementById("appPreviewModal").style.transform =
+    "translateX(-300px)";
 }
 ///installing app
+
+//facebook login
+document
+  .getElementById("signup-btn-facebook")
+  .addEventListener("click", function () {
+    document.getElementById("login-facebook").style.display = "none";
+    document.getElementById("signup-facebook").style.display = "flex";
+  });
+document
+  .getElementById("login-btn-facebook")
+  .addEventListener("click", function () {
+    document.getElementById("login-facebook").style.display = "flex";
+    document.getElementById("signup-facebook").style.display = "none";
+  });
+
+function facebookLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById("email-facebook-signin").value;
+  const password = document.getElementById("password-facebook-signin").value;
+
+  fetch(`https://${GetParentResourceName()}/facebookLogin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+}
+function facebookSignup(e) {
+  e.preventDefault();
+  const email = document.getElementById("email-facebook").value;
+  const password = document.getElementById("password-facebook").value;
+  const username = document.getElementById("username-facebook").value;
+  const confirmPassword = document.getElementById(
+    "confirm-password-facebook"
+  ).value;
+
+  if (password !== confirmPassword) {
+    showGlobalAlert("Passwords do not match");
+    return;
+  }
+
+  fetch(`https://${GetParentResourceName()}/facebookSignup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({ email, password, username }),
+  });
+}
+
+window.addEventListener("message", function (event) {
+  if (event.data.type === "facebookSignupResult") {
+    showGlobalAlert(event.data.message);
+  }
+});
+window.addEventListener("message", function (event) {
+  if (event.data.type === "facebookLoginResult") {
+    showGlobalAlert(event.data.message);
+    const data = event.data;
+    if (data.status === true) {
+      localStorage.setItem("facebookUserId", JSON.stringify(data.userId));
+     
+    } else {
+      showGlobalAlert(event.data.message);
+    }
+  }
+});
+
+function getUserDetails() {
+  const userId = localStorage.getItem("facebookUserId");
+  fetch(`https://${GetParentResourceName()}/facebookGetUserDetails`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({ userId }),
+  });
+  window.addEventListener("message", function (event) {
+    if (event.data.type === "facebookUserDetails") {
+      console.log(JSON.stringify(event.data.data));
+    }
+  });
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+  var userId = localStorage.getItem("facebookUserId");
+  if (userId) {
+    getUserDetails();
+  }
+  if (userId) {
+    document.getElementById("login-facebook").style.display = "none";
+    document.getElementById("facebook-feed-page").style.display = "flex";
+  }
+});
+//facebook login

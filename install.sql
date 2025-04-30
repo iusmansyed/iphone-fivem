@@ -117,3 +117,14 @@ CREATE TABLE IF NOT EXISTS `youtube_videos` (
   caption_link TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE
+    IF NOT EXISTS `facebook_users` (
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `username` VARCHAR(50) NOT NULL UNIQUE,
+        `email` VARCHAR(100),
+        `password` VARCHAR(100),
+        `image` TEXT,
+        PRIMARY KEY (`id`)
+    );

@@ -1,8 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-
-
-
 local batteryLevel = 50
 local charging = false
 
@@ -520,9 +517,9 @@ RegisterNUICallback('sendMessage', function(data, cb)
 end)
 
 RegisterNetEvent("qb-core:phone:messageSent")
-AddEventHandler("qb-core:phone:messageSent",function(data)
-   
-    TriggerServerEvent("qb-core:phone:getMessages",data[1])
+AddEventHandler("qb-core:phone:messageSent", function(data)
+
+    TriggerServerEvent("qb-core:phone:getMessages", data[1])
 end)
 RegisterNUICallback('getMessages', function(data, cb)
     local receiver = data.receiver
@@ -607,7 +604,7 @@ AddEventHandler("group:receiveGroupList", function(groups)
 end)
 
 -- Requesting the group list from the server
-RegisterNUICallback("groups:requestBserver",function ()
+RegisterNUICallback("groups:requestBserver", function()
     TriggerServerEvent("group:getList")
 end)
 
@@ -1026,3 +1023,44 @@ RegisterNUICallback("updateAvatar", function(data, cb)
 end)
 
 -----youtube videos
+
+-----facebook
+RegisterNUICallback("facebookLogin", function(data, cb)
+    TriggerServerEvent("facebook:login", data)
+    cb({})
+end)
+RegisterNUICallback("facebookSignup", function(data, cb)
+    TriggerServerEvent("facebook:signup", data)
+    cb({})
+end)
+RegisterNetEvent("facebook:signupResult")
+AddEventHandler("facebook:signupResult", function(message)
+    SendNUIMessage({
+        type = "facebookSignupResult",
+        message = message
+    })
+end)
+RegisterNetEvent("facebook:loginResult")
+AddEventHandler("facebook:loginResult", function(message, userId, status)
+    SendNUIMessage({
+        type = "facebookLoginResult",
+        message = message,
+        userId = userId,
+        status = status
+    })
+end)
+RegisterNUICallback("facebookGetUserDetails", function(data, cb)
+    print(json.encode(data))
+    TriggerServerEvent("facebook:getUserDetails", data)
+    cb({})
+end)
+
+RegisterNetEvent("facebook:getUserDetailsResult")
+AddEventHandler("facebook:getUserDetailsResult", function(data)
+    print(json.encode(data))
+    SendNUIMessage({
+        type = "facebookUserDetails",
+        data = data
+    })
+end)
+-----facebook

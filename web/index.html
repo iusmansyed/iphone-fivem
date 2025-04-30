@@ -5,7 +5,15 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>iPhone Simulation</title>
       <link rel="stylesheet" href="styles.css" />
-      <link rel="stylesheet" href="./css/all.min.css">
+      
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+      <!-- Include Owl Carousel CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+      
+      <!-- Include Owl Carousel JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
    </head>
    <body>
       <div class="mobile">
@@ -29,6 +37,9 @@
                         <div id="charging-icon">⚡</div>
                      </div>
                   </div>
+               </div>
+               <div class="globalAlert" style="right:-300px;">
+                  <div class="alert-content"></div>
                </div>
                <div class="startup-screen" id="startup-screen">
                   <div class="apple-logo">
@@ -55,6 +66,8 @@
                </div>
                <div class="apps">
                   <div class="apps-wrapper">
+               <div class="owl-carousel owl-theme">
+                  <div class="item">
                      <div class="app-screen">
                         <div class="app-ic" draggable="true" data-app="phone">
                            <span class="delete-icon">×</span>
@@ -118,14 +131,21 @@
                            <p>App Store</p>
                         </div>
                      </div>
+                  </div>
+                  <div class="item">
                      <div class="app-screen">
+                          
                         <!-- Second screen for dragged apps -->
                      </div>
                   </div>
-                  <div class="screen-indicators">
+
+               </div>
+
+                  </div>
+                  <!-- <div class="screen-indicators">
                      <div class="screen-indicator active"></div>
                      <div class="screen-indicator"></div>
-                  </div>
+                  </div> -->
                </div>
                <div class="call-cotainer" id="callUI">
                   <div class="caller-info">
@@ -958,14 +978,29 @@
                            <div class="facebook-login-form">
                               <h1>Login</h1>
                              <form action="">
-                              <input type="text" name="" id="">
-                              <input type="password" name="" id="">
-                              <button>Login</button>
+                              <input type="email" name="" id="email-facebook-signin" placeholder="Email">
+                              <input type="password" name="" id="password-facebook-signin" placeholder="Password">
+                              <button onclick="facebookLogin(event)">Login</button>
                              </form>
-                             <p>Dont have a account? <span>Signup</span></p>
+                             <p>Dont have a account? <span id="signup-btn-facebook">Signup</span></p>
                            </div>
                         </div>
-                        <div class="signup-page-facebook" id="signup-facebook"></div>
+                        <div class="signup-page-facebook" id="signup-facebook" style="display: none;">
+                           <div class="facebook-login-form">
+                              <h1>Login</h1>
+                             <form action="">
+                              <input type="text" name="" id="username-facebook" placeholder="Username">
+                              <input type="email" name="" id="email-facebook" placeholder="Email">
+                              <input type="password" name="" id="password-facebook" placeholder="Password">
+                              <input type="password" name="" id="confirm-password-facebook" placeholder="Confirm Password">
+                              <button onclick="facebookSignup(event)">Signup</button>
+                             </form>
+                             <p>Already have a account? <span id="login-btn-facebook">Login</span></p>
+                           </div>
+                        </div>
+                        <div class="facebook-feed-page" id="facebook-feed-page" style="display: none;">
+<h1>hi guys !!!</h1>
+                        </div>
                      </div>
                      <div style="display: none;" class="spotify">
                         <h1>spotify</h1>
@@ -1134,5 +1169,7 @@
       </div>
       </div>
       <script  src="app.js"></script>
+      
+   
    </body>
 </html>
