@@ -1066,9 +1066,9 @@ AddEventHandler("facebook:signup", function(data)
     end)
 end)
 
-
 RegisterServerEvent("facebook:getUserDetails")
 AddEventHandler("facebook:getUserDetails", function(data)
+
     local src = source
     MySQL.Async.fetchAll("SELECT * FROM facebook_users WHERE id = @id", {
         ["@id"] = data.userId
@@ -1078,4 +1078,100 @@ AddEventHandler("facebook:getUserDetails", function(data)
         end
     end)
 end)
+
+RegisterServerEvent("facebook:uploadpfpImage")
+AddEventHandler("facebook:uploadpfpImage", function(data)
+    local src = source
+    local userId = data.id -- Or use your actual user ID logic
+    local imageUrl = data.profilePicture
+    MySQL.Async.execute("UPDATE facebook_users SET image = @image WHERE id = @id", {
+        ["@image"] = imageUrl,
+        ["@id"] = userId
+    }, function(rowsChanged)
+        print(("User %s updated their profile image. Rows changed: %s"):format(userId, rowsChanged))
+    end)
+end)
+
+RegisterServerEvent("facebook:UploadTextContent")
+AddEventHandler("facebook:UploadTextContent", function(data)
+    local src = source
+
+    local time = os.date("%Y-%m-%d %H:%M:%S")
+    MySQL.Async.execute(
+        "INSERT INTO facebook_posts (user_id, content, type, created_at) VALUES (@user_id, @content, @type, @time)", {
+            ["@user_id"] = data.id,
+            ["@content"] = data.content,
+            ["@type"] = data.type,
+            ["@time"] = time
+        }, function(rowChanged)
+            print(json.encode(rowChanged))
+        end)
+end)
+
+RegisterServerEvent("facebook:FetchAllFacebookPost")
+AddEventHandler("facebook:FetchAllFacebookPost", function(data)
+    local src = source
+    MySQL.Async.fetchAll("SELECT * FROM facebook_posts WHERE user_id = @id", {
+        ["@id"] = data.userId
+    }, function(posts)
+        local updatedPosts = {}
+        for _, posts in ipairs(posts) do
+            print(json.encode(posts))
+            local postId = posts.id
+            local likes = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM facebook_likes WHERE post_id = @post_id", {
+                ["@post_id"] = postId
+            }) or 0
+
+            posts.likeCount = likes
+            -- post.commentCount = comments
+            table.insert(updatedPosts, posts)
+        end
+        TriggerClientEvent("facebook:postsFetched", src, updatedPosts)
+    end)
+end)
+-- Server-side event handlers
+RegisterServerEvent("facebook:postLike")
+AddEventHandler("facebook:postLike", function(data)
+    local source = source
+    local post_id = data.post_id
+    local user_id = data.user_id
+    
+    -- Here you would add database code to handle likes
+    -- For example, toggle like status in your database
+end)
+
+RegisterServerEvent("facebook:comments")
+AddEventHandler("facebook:comments", function(data)
+    local source = source
+    local post_id = data.postId
+    local user_id = data.user_id
+    local comment = data.comment
+    
+    if post_id and user_id and comment then
+        MySQL.Async.execute('INSERT INTO facebook_comments (post_id, user_id, comment) VALUES (?, ?, ?)',
+            {post_id, user_id, comment},
+            function(rowsChanged)
+                if rowsChanged > 0 then
+                    -- After adding comment, fetch all comments for the post
+                    FetchComments(source, post_id)
+                end
+            end
+        )
+    end
+end)
+
+RegisterServerEvent("facebook:fetch_comments")
+AddEventHandler("facebook:fetch_comments", function(postId)
+    local source = source
+    FetchComments(source, postId)
+end)
+
+function FetchComments(source, postId)
+    MySQL.Async.fetchAll('SELECT c.*, u.username as username FROM facebook_comments c LEFT JOIN facebook_users u ON c.user_id = u.id WHERE c.post_id = ? ORDER BY c.created_at ASC',
+        {postId},
+        function(results)
+            TriggerClientEvent("facebook:receiveComments", source, postId, results)
+        end
+    )
+end
 -----facebook

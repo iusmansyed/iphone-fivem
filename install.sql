@@ -128,3 +128,28 @@ CREATE TABLE
         `image` TEXT,
         PRIMARY KEY (`id`)
     );
+
+
+CREATE TABLE IF NOT EXISTS facebook_posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50),
+    content TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE
+    IF NOT EXISTS `facebook_likes` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL
+    );
+
+CREATE TABLE
+    IF NOT EXISTS `facebook_comments` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        comment TEXT ,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP        
+    );

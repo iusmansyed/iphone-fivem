@@ -77,7 +77,7 @@ button {
 }
 .frame::before {
   content: "";
-  background-image: url("./images/iphone16pro.png");
+  background-image: url("../images/iphone16pro.png");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -254,11 +254,11 @@ button {
   font-family: "p-b", sans-serif; /* Ensure the font is properly defined */
   font-weight: 800;
   font-size: 12px;
-  mix-blend-mode: difference;
+  /* mix-blend-mode: difference; */
   position: relative;
   top: 0;
   cursor: pointer;
-  color: var(--text-color);
+  color: #ccc !important;
 }
 .notch {
   padding: 5px 19px;
@@ -272,6 +272,7 @@ button {
   transform: translateX(-50%);
   z-index: 11111111;
   color: #fff;
+  /* mix-blend-mode: difference; */
 }
 
 .notch-imag {
@@ -354,7 +355,6 @@ button {
   transition: width 0.5s;
 }
 
-/* Charging Icon ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ (Blinking Animation) */
 #charging-icon {
   display: none;
   color: yellow;
@@ -567,7 +567,7 @@ button {
 }
 
 .drop-target::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -5px;
   left: -5px;
@@ -972,7 +972,9 @@ button {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-#favSection .contact-item ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {
+#favSection
+  .contact-item
+  ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {
   margin-right: 10px;
   color: #ffd700;
 }
@@ -2280,7 +2282,7 @@ button {
 }
 
 .music-btn-play.is-playing::before {
-  content: "â–â– ";
+  content: "Ã¢â€“ÂÃ¢â€“Â ";
   color: white;
   font-size: 24px;
   margin-left: -9px;
@@ -5105,7 +5107,7 @@ input:checked + .slider-th:before {
   background-color: var(--bg-color);
   padding: 10px;
   border-radius: 10px;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -5119,7 +5121,7 @@ input:checked + .slider-th:before {
 .store-app-info {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .store-app-info h3 {
@@ -5131,11 +5133,11 @@ input:checked + .slider-th:before {
 
 .store-app-info button {
   margin-top: 5px;
-  padding: 5px 10px;
+  padding: 6px 15px;
   background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
 }
 
@@ -5215,6 +5217,7 @@ input:checked + .slider-th:before {
   color: white;
   cursor: pointer;
   border-radius: 5px;
+  border-radius: 15px;
 }
 
 .close-btn-pre {
@@ -5236,153 +5239,7 @@ input:checked + .slider-th:before {
   height: 100%;
   background-color: var(--setting-bg);
 }
-.login-page-facebook {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 50px;
-}
-.signup-page-facebook {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 50px;
-}
 
-.facebook-login-form {
-  display: flex;
-  flex-direction: column;
-  width: 85%;
-  background-color: var(--bg-color);
-  padding: 20px 10px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.facebook-login-form h1 {
-  padding-bottom: 10px;
-  text-align: center;
-  color: var(--text-color);
-  font-size: 25px;
-  font-family: "p-r";
-}
-
-.facebook-login-form form {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.facebook-login-form form input {
-  padding: 5px;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  outline: none;
-}
-
-.facebook-login-form form button {
-  padding: 9px;
-  margin-top: 15px;
-}
-
-.owl-theme .owl-dots .owl-dot.active span{
-  background-color: #fff !important;
-}
-.owl-theme .owl-dots .owl-dot.active span {
-  background-color: #fff !important;
-width: 19px;
-}
-
-.owl-theme .owl-dots .owl-dot.active:hover span {
-  background-color: #fff !important;
-}
-
-.owl-theme .owl-dots .owl-dot span{
-  background: #808080 !important;
-  margin: 5px 3px !important;
-
-}
-.owl-theme .owl-dots .owl-dot:hover span{
-  background: #808080 !important;
-}
-.facebook {
-  background-color: var(--setting-bg);
-  color: #1a1a1a;
-  padding: 0px 0px;
-  box-sizing: border-box;
-  border-radius: 10px;
-  /* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
-}
-
-.facebook h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.facebook input[type="text"],
-.facebook input[type="password"],
-.facebook input[type="number"],
-.facebook input[type="email"] {
-  width: 100%;
-  padding: 10px;
-  margin: 2px 0 0px 0px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  color: var(--text-color);
-  box-sizing: border-box;
-  font-family: "p-r";
-}
-
-.facebook button {
-  width: 100%;
-  padding: 10px;
-  background-color: #1877f2;
-  border: none;
-  color: #fff;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.facebook .toggle-link {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
-  color: #1877f2;
-  cursor: pointer;
-}
-
-.signup-form {
-  display: none;
-}
-.noch-btns {
-  position: absolute;
-  right: 25px;
-  top: 7px;
-  z-index: 1111111111;
-}
-
-.noch-btns button {
-  width: 50px;
-  font-family: "p-r";
-  border-radius: 50px;
-  padding: 2px 5px;
-  border: none;
-}
-
-.facebook-login-form p {
-  color: var(--text-color);
-  font-family: "p-r";
-  padding-top: 10px;
-  font-size: 14px;
-}
-
-.facebook-login-form p span {
-  color: #1773EA;
-  cursor: pointer;
-}
 .globalAlert {
   width: auto;
   padding: 10px;
@@ -5395,36 +5252,4 @@ width: 19px;
   top: 60px;
   z-index: 99999999999999999999999999;
   transition: all 1s ease-in-out;
-}
-.bottom-nav-facebook {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: var(--bg-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-}
-
-.bottom-nav-facebook button{
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin: 0;
-  padding: 5px;
-  width: 40px;
-  border-radius: 50%;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #1877f259;
-  color: #fff !important;
-}
-.bottom-nav-facebook button svg{
-  width: 20px;
-  height: 20px;
-  fill: #fff !important;
 }

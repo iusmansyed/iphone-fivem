@@ -746,7 +746,23 @@ function initializeAppOpening() {
         },
         body: JSON.stringify("music"),
       });
-      console.log("hellow rodllask");
+    }
+    if (appName === "facebook") {
+      header.style.position = "abosolute";
+      header.style.top = "-300px";
+      const userId = localStorage.getItem("facebookUserId");
+      fetch(`https://${GetParentResourceName()}/fetchingFbPosts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({ userId }),
+      });
+    } else {
+      header.style.display = "flex";
+    }
+    if (appName != "facebook") {
+      facebook.style.display = "none";
     }
     if (appName === "safari") {
       fetch(`https://${GetParentResourceName()}/safari`, {
@@ -1327,180 +1343,6 @@ toggleThemeBtn.addEventListener("click", () => {
 if (localStorage.getItem("theme") === "dark") {
   document.documentElement.setAttribute("data-theme", "dark");
 }
-const contacts = [
-  {
-    name: "John Doe",
-    time: "5 mins ago",
-    img: "https://randomuser.me/api/portraits/men/1.jpg",
-  },
-  {
-    name: "Jane Smith",
-    time: "Yesterday",
-    img: "https://randomuser.me/api/portraits/women/2.jpg",
-  },
-  {
-    name: "Michael Brown",
-    time: "2 days ago",
-    img: "https://randomuser.me/api/portraits/men/3.jpg",
-  },
-  {
-    name: "Emily Davis",
-    time: "Last seen at 11:45 AM",
-    img: "https://randomuser.me/api/portraits/women/4.jpg",
-  },
-];
-
-// ❌ Incorrect: document.getElementById("whatapp-contactList") ❌
-// ✅ Correct:
-const contactList = document.getElementById("contactList"); // Fixed ID
-const chatPage = document.getElementById("chatPage");
-const chatBox = document.getElementById("chatBox");
-const chatName = document.getElementById("chatNameWhatsapp"); // Fixed ID
-const chatImg = document.getElementById("chatImg");
-const messageInput = document.getElementById("messageInput");
-const whatappBottom = document.getElementById("whatappBottom");
-const hder = document.getElementById("hder");
-
-// ✅ Check if contactList exists before appending elements
-if (contactList) {
-  contacts.forEach((contact) => {
-    const contactDiv = document.createElement("div");
-    contactDiv.classList.add("whatapp-contact");
-    contactDiv.innerHTML = `
-        <img src="${contact.img}" alt="${contact.name}">
-        <div class="whatapp-contact-info">
-            <div class="whatapp-contact-name">${contact.name}</div>
-            <div class="whatapp-contact-time">${contact.time}</div>
-        </div>
-    `;
-
-    contactDiv.addEventListener("click", () => openWhatsAppChat(contact));
-    contactList?.appendChild(contactDiv);
-  });
-} else {
-}
-function loadNavigate(page) {
-  const pages = ["contactList", "statusPage"];
-  const chatButton = document.querySelector(
-    "#whatappBottom button:nth-child(1)"
-  );
-  const statusButton = document.querySelector(
-    "#whatappBottom button:nth-child(2)"
-  );
-
-  // Hide all pages
-  pages.forEach((id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.classList.add("whatapp-hidden");
-    }
-  });
-
-  // Show selected page
-  const targetPage = document.getElementById(page);
-  if (targetPage) {
-    targetPage.classList.remove("whatapp-hidden");
-  }
-
-  // Change button colors based on selection
-  if (page === "contactList") {
-    chatButton.style.color = "white";
-    statusButton.style.color = "#ccc";
-  } else if (page === "statusPage") {
-    chatButton.style.color = "#ccc";
-    statusButton.style.color = "white";
-  }
-}
-
-// ✅ Open Chat Function
-function openWhatsAppChat(contact) {
-  console.log("Opening chat with:", contact.name);
-  whatappBottom.style.display = "none"; // Show chat input
-  hder.style.display = "none"; // Show chat input
-  contactList.classList.add("whatapp-hidden");
-  chatPage.classList.remove("whatapp-hidden");
-
-  chatName.innerText = contact.name;
-  chatImg.src = contact.img;
-
-  chatBox.innerHTML = ""; // Clear previous messages
-  addMessage("Hello! How are you?", "whatapp-received");
-}
-
-// ✅ Send Message Function
-function sendMessage() {
-  const message = messageInput.value.trim();
-  if (message) {
-    addMessage(message, "whatapp-sent");
-    messageInput.value = "";
-  }
-}
-
-// ✅ Add Message to Chat
-function addMessage(text, type) {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("whatapp-message", type);
-  messageDiv.innerText = text;
-  chatBox.appendChild(messageDiv);
-
-  chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
-}
-
-// ✅ Go Back to Contact List
-function goBackWhatsapp() {
-  chatPage.classList.add("whatapp-hidden");
-  contactList.classList.remove("whatapp-hidden");
-  whatappBottom.style.display = "flex"; // Show chat input
-  hder.style.display = "block"; // Show chat input
-}
-// Instagram App Functionality
-
-// Story and Feed Data (from your existing code)
-const storyData = [
-  {
-    id: 1,
-    username: "User 1",
-    image: "https://randomuser.me/api/portraits/men/1.jpg",
-    stories: [
-      {
-        type: "image",
-        content: "https://randomuser.me/api/portraits/men/10.jpg",
-        duration: 15000,
-      },
-      {
-        type: "image",
-        content: "https://randomuser.me/api/portraits/men/11.jpg",
-        duration: 15000,
-      },
-    ],
-  },
-  {
-    id: 2,
-    username: "User 2",
-    image: "https://randomuser.me/api/portraits/women/2.jpg",
-    stories: [
-      {
-        type: "image",
-        content: "https://randomuser.me/api/portraits/women/10.jpg",
-        duration: 15000,
-      },
-      {
-        type: "image",
-        content: "https://randomuser.me/api/portraits/women/11.jpg",
-        duration: 15000,
-      },
-    ],
-  },
-  // ... other existing story entries
-];
-
-// Function to render stories
-
-// Function to handle story viewing
-
-// Toggle like function
-
-// Switch Instagram Tab Function
 
 // Open Chat User Function
 function openChatUser(username) {
@@ -4249,99 +4091,3 @@ function closePreviewModal() {
 }
 ///installing app
 
-//facebook login
-document
-  .getElementById("signup-btn-facebook")
-  .addEventListener("click", function () {
-    document.getElementById("login-facebook").style.display = "none";
-    document.getElementById("signup-facebook").style.display = "flex";
-  });
-document
-  .getElementById("login-btn-facebook")
-  .addEventListener("click", function () {
-    document.getElementById("login-facebook").style.display = "flex";
-    document.getElementById("signup-facebook").style.display = "none";
-  });
-
-function facebookLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById("email-facebook-signin").value;
-  const password = document.getElementById("password-facebook-signin").value;
-
-  fetch(`https://${GetParentResourceName()}/facebookLogin`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-}
-function facebookSignup(e) {
-  e.preventDefault();
-  const email = document.getElementById("email-facebook").value;
-  const password = document.getElementById("password-facebook").value;
-  const username = document.getElementById("username-facebook").value;
-  const confirmPassword = document.getElementById(
-    "confirm-password-facebook"
-  ).value;
-
-  if (password !== confirmPassword) {
-    showGlobalAlert("Passwords do not match");
-    return;
-  }
-
-  fetch(`https://${GetParentResourceName()}/facebookSignup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({ email, password, username }),
-  });
-}
-
-window.addEventListener("message", function (event) {
-  if (event.data.type === "facebookSignupResult") {
-    showGlobalAlert(event.data.message);
-  }
-});
-window.addEventListener("message", function (event) {
-  if (event.data.type === "facebookLoginResult") {
-    showGlobalAlert(event.data.message);
-    const data = event.data;
-    if (data.status === true) {
-      localStorage.setItem("facebookUserId", JSON.stringify(data.userId));
-     
-    } else {
-      showGlobalAlert(event.data.message);
-    }
-  }
-});
-
-function getUserDetails() {
-  const userId = localStorage.getItem("facebookUserId");
-  fetch(`https://${GetParentResourceName()}/facebookGetUserDetails`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({ userId }),
-  });
-  window.addEventListener("message", function (event) {
-    if (event.data.type === "facebookUserDetails") {
-      console.log(JSON.stringify(event.data.data));
-    }
-  });
-}
-
-window.addEventListener("DOMContentLoaded", function () {
-  var userId = localStorage.getItem("facebookUserId");
-  if (userId) {
-    getUserDetails();
-  }
-  if (userId) {
-    document.getElementById("login-facebook").style.display = "none";
-    document.getElementById("facebook-feed-page").style.display = "flex";
-  }
-
-});
-//facebook login

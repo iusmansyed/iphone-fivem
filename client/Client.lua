@@ -1050,17 +1050,68 @@ AddEventHandler("facebook:loginResult", function(message, userId, status)
     })
 end)
 RegisterNUICallback("facebookGetUserDetails", function(data, cb)
-    print(json.encode(data))
     TriggerServerEvent("facebook:getUserDetails", data)
     cb({})
 end)
 
 RegisterNetEvent("facebook:getUserDetailsResult")
 AddEventHandler("facebook:getUserDetailsResult", function(data)
-    print(json.encode(data))
     SendNUIMessage({
         type = "facebookUserDetails",
         data = data
+    })
+end)
+
+RegisterNUICallback("uploadPfpFb", function(data, cb)
+    TriggerServerEvent("facebook:uploadpfpImage", data)
+    TriggerServerEvent("facebook:getUserDetails", data.id)
+    cb({})
+end)
+RegisterNUICallback("uploadTxtContent", function(data, cb)
+    TriggerServerEvent("facebook:UploadTextContent", data)
+    cb({})
+end)
+RegisterNUICallback("fetchingFbPosts", function(data, cb)
+    TriggerServerEvent("facebook:FetchAllFacebookPost", data)
+    cb({})
+end)
+
+RegisterNetEvent("facebook:postsFetched")
+AddEventHandler("facebook:postsFetched",function(data)
+    SendNUIMessage({
+        type="facebookposts",
+        posts = data
+    })
+end)
+-- Client-side callbacks
+RegisterNUICallback("facebook_likes", function(data, cb)
+    TriggerServerEvent("facebook:postLike", data)
+    cb('ok')
+end)
+
+RegisterNUICallback("facebook_comments", function(data, cb)
+    TriggerServerEvent("facebook:comments", data)
+    cb('ok')
+end)
+
+RegisterNUICallback("fb_fetch_comments", function(data, cb)
+    TriggerServerEvent("facebook:fetch_comments", data.postId, function(comments)
+        SendNUIMessage({
+            type = "facebookcomments",
+            postId = data.postId,
+            comments = comments
+        })
+    end)
+    cb('ok')
+end)
+
+-- Register event handler to receive comments from server
+RegisterNetEvent("facebook:receiveComments")
+AddEventHandler("facebook:receiveComments", function(postId, comments)
+    SendNUIMessage({
+        type = "facebookcomments",
+        postId = postId,
+        comments = comments
     })
 end)
 -----facebook
