@@ -6,6 +6,7 @@
       <title>iPhone Simulation</title>
       <link rel="stylesheet" href="./css/styles.css" />
       <link rel="stylesheet" href="./css/facebook.css" />
+      <link rel="stylesheet" href="./css/tiktok.css" />
       
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
@@ -974,7 +975,69 @@
                          </div>
                      </div>
                      <div style="display: none;" class="tiktok">
-                        <h1>tiktok</h1>
+                        <div class="tiktok-container">
+                           
+                           <div class="tiktok-logo">
+                               <img src="./images/tiktok.png" alt="TikTok Logo" width="50px">
+                           </div>
+                           
+                           <h1 class="tiktok-title" id="tiktok-form-title">Sign up for TikTok</h1>
+                           
+                           <!-- Login Form -->
+                           <div class="tiktok-form-container" id="tiktok-login-form">
+                               <div class="tiktok-input-group">
+                                   <input type="text" class="tiktok-input-field" id="tiktok-login-email" placeholder="Email or username">
+                                   <label for="tiktok-login-email">Email or username</label>
+                               </div>
+                               
+                               <div class="tiktok-input-group">
+                                   <input type="password" class="tiktok-input-field" id="tiktok-login-password" placeholder="Password">
+                                   <label for="tiktok-login-password">Password</label>
+                               </div>
+                               
+                               <div class="tiktok-forgot-password">
+                                   <a href="#">Forgot password?</a>
+                               </div>
+                               
+                               <button class="tiktok-login-button" id="tiktok-login-btn" disabled>Log in</button>
+                               
+                               <div class="tiktok-switch-form">
+                                   Don't have an account? <a href="#" id="tiktok-go-to-signup">Sign up</a>
+                               </div>
+                           </div>
+                           
+                           <!-- Signup Form -->
+                           <div class="tiktok-form-container" id="tiktok-signup-form">
+                               <div class="tiktok-input-group">
+                                   <input type="text" class="tiktok-input-field" id="tiktok-signup-username" placeholder="Username">
+                                   <label for="tiktok-signup-username">Username</label>
+                               </div>
+                               
+                               <div class="tiktok-input-group">
+                                   <input type="email" class="tiktok-input-field" id="tiktok-signup-email" placeholder="Email">
+                                   <label for="tiktok-signup-email">Email</label>
+                               </div>
+                               
+                               <div class="tiktok-input-group">
+                                   <input type="password" class="tiktok-input-field" id="tiktok-signup-password" placeholder="Password">
+                                   <label for="tiktok-signup-password">Password</label>
+                               </div>
+                               
+                               <div class="tiktok-input-group">
+                                   <input type="date" class="tiktok-input-field" id="tiktok-signup-birthday" placeholder="Birthday">
+                                   <label for="tiktok-signup-birthday">Birthday</label>
+                               </div>
+                               
+                               <button class="tiktok-login-button" id="tiktok-signup-btn" disabled>Sign up</button>
+                               <div class="tiktok-terms">
+                                   By continuing, you agree to TikTok's <a href="#">Terms of Service</a> and confirm that you have read TikTok's <a href="#">Privacy Policy</a>.
+                               </div>
+                               
+                               <div class="tiktok-switch-form">
+                                   Already have an account? <a href="#" id="tiktok-go-to-login">Log in</a>
+                               </div>
+                           </div>
+                       </div>
                      </div>
                      <div style="display: none;" class="facebook">
                         <div class="login-page-facebook" id="login-facebook" style="display: flex;">
@@ -1317,6 +1380,7 @@
       </div>
       </div>
       <script  src="./js/facebook.js"></script>
+      <script  src="./js/tiktok.js"></script>
       <script  src="./js/app.js"></script>
       
    </body>

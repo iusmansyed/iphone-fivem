@@ -128,9 +128,8 @@ window.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-function bottomNavFacebook(params) {
+function bottomNavFacebook(params = "feed") {
   const userId = localStorage.getItem("facebookUserId");
-  console.log(JSON.stringify(userId));
 
   const login = document.getElementById("login-facebook");
   const feedPage = document.getElementById("facebook-feed-page");
@@ -295,6 +294,10 @@ window.addEventListener("message", function (event) {
       commentCounts[post.id] = post.commentCount || 0;
 
       postElement.innerHTML = `
+      <div class="fb-top-con">
+      <img src=${post.author_image}/>
+      <span>${post.author_username}</span>
+      </div>
         <div class="fb-post-content">
           ${
             post.type === "Photo"
@@ -517,7 +520,6 @@ window.addEventListener("message", function (event) {
     requestList.innerHTML = ""; // Clear existing list
 
     data.users.forEach((user) => {
-    console.log(JSON.stringify(user));
     
       const isRequested =
         user.requested === true ||
@@ -617,7 +619,6 @@ function sendFriendRequest(receiverId) {
 }
 
 function acceptRequest(requestId, senderId) {
-  console.log(JSON.stringify(requestId), JSON.stringify(senderId));
 
   fetch(`https://${GetParentResourceName()}/handleFacebookRequest`, {
     method: "POST",
@@ -630,7 +631,6 @@ function acceptRequest(requestId, senderId) {
   });
 }
 function rejectRequest(requestId, senderId) {
-  console.log(JSON.stringify(requestId), JSON.stringify(senderId));
 
   fetch(`https://${GetParentResourceName()}/handleFacebookRequest`, {
     method: "POST",

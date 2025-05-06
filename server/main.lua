@@ -1111,24 +1111,41 @@ end)
 RegisterServerEvent("facebook:FetchAllFacebookPost")
 AddEventHandler("facebook:FetchAllFacebookPost", function(data)
     local src = source
-    MySQL.Async.fetchAll("SELECT * FROM facebook_posts WHERE user_id = @id", {
-        ["@id"] = data.userId
+    local userId = data.userId
+
+    -- Fetch posts with user details
+    MySQL.Async.fetchAll([[
+        SELECT 
+            p.*,
+            u.username AS author_username,
+            u.image AS author_image
+        FROM facebook_posts p
+        JOIN facebook_users u ON p.user_id = u.id
+        WHERE p.user_id = @userId
+           OR p.user_id IN (
+               SELECT friend_id FROM facebook_friends WHERE user_id = @userId
+               UNION
+               SELECT user_id FROM facebook_friends WHERE friend_id = @userId
+           )
+        ORDER BY p.created_at DESC
+    ]], {
+        ["@userId"] = userId
     }, function(posts)
         local updatedPosts = {}
-        for _, posts in ipairs(posts) do
-            print(json.encode(posts))
-            local postId = posts.id
+        for _, post in ipairs(posts) do
+            local postId = post.id
             local likes = MySQL.Sync.fetchScalar("SELECT COUNT(*) FROM facebook_likes WHERE post_id = @post_id", {
                 ["@post_id"] = postId
             }) or 0
 
-            posts.likeCount = likes
-            -- post.commentCount = comments
-            table.insert(updatedPosts, posts)
+            post.likeCount = likes
+            table.insert(updatedPosts, post)
         end
+
         TriggerClientEvent("facebook:postsFetched", src, updatedPosts)
     end)
 end)
+
 -- Server-side event handlers
 RegisterServerEvent("facebook:postLike")
 AddEventHandler("facebook:postLike", function(data)

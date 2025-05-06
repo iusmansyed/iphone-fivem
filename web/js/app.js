@@ -748,17 +748,28 @@ function initializeAppOpening() {
         body: JSON.stringify("music"),
       });
     }
-    if (appName === "facebook") {   
-      let userId = localStorage.getItem("facebookUserId");
+    if (appName != "facebook"){
+      facebook.style.display = "none"
+    }
+
+    if (appName === "facebook") {
       if (headerCon) {
         headerCon.style.display = "none";
       }
+      let userId = localStorage.getItem("facebookUserId");
       fetch(`https://${GetParentResourceName()}/facebookGetUserDetails`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({userId:userId}),
+        body: JSON.stringify({ userId: userId }),
+      });
+      fetch(`https://${GetParentResourceName()}/fetchingFbPosts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({ userId }),
       });
     } else if (appName === "settings") {
       fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
@@ -768,6 +779,10 @@ function initializeAppOpening() {
         },
         body: JSON.stringify(),
       });
+      if (headerCon) {
+        headerCon.style.display = "none";
+      }
+    } else if (appName === "tiktok") {
       if (headerCon) {
         headerCon.style.display = "none";
       }
@@ -799,10 +814,6 @@ function initializeAppOpening() {
     } else {
       header.style.display = "flex";
     }
-    // if (appName === "maps") {
-    //   header.style.display = "none";
-    // }else{
-    // }
     // Show app container with animation
     appContainer.classList.remove("closing");
     appContainer.style.display = "flex";
@@ -887,7 +898,6 @@ function setupSlider(sliderId, fillId, cssProperty, minValue, maxValue) {
     if (cssProperty === "brightness") {
       container.style.filter = `brightness(${value}%)`;
     } else if (cssProperty === "volume") {
-      console.log("Volume set to:", value);
     }
 
     // Save to localStorage
@@ -4104,4 +4114,3 @@ function closePreviewModal() {
     "translateX(-300px)";
 }
 ///installing app
-

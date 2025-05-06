@@ -1,0 +1,192 @@
+.tiktok-container {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tiktok-logo {
+    text-align: center;
+    margin: 30px 0 10px;
+}
+
+.tiktok-logo img {
+    width: 80px;
+    height: auto;
+}
+
+.tiktok-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: var(--text-color);
+    font-family: "p-s";
+}
+
+.tiktok-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tiktok-input-group {
+    position: relative;
+}
+
+.tiktok-input-field {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 2px;
+    color: #fff;
+    font-size: 16px;
+    font-family: "p-r";
+    margin-bottom: 7px;
+}
+
+.tiktok-input-group label {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    color: #8a8a8a;
+    pointer-events: none;
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+.tiktok-input-field:focus + label,
+.tiktok-input-field:not(:placeholder-shown) + label {
+    top: -8px;
+    left: 10px;
+    font-size: 12px;
+    background-color: #1f1f1f;
+    padding: 0 5px;
+}
+
+.tiktok-input-field::placeholder {
+    color: transparent;
+}
+
+.tiktok-login-button {
+    background-color: #FE2C55;
+    color: #fff;
+    padding: 15px;
+    border: none;
+    border-radius: 2px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.tiktok-login-button:disabled {
+    background-color: #7d2435;
+    cursor: not-allowed;
+}
+
+.tiktok-divider {
+    display: flex;
+    align-items: center;
+    margin: 25px 0;
+    color: #8a8a8a;
+}
+
+.tiktok-divider::before,
+.tiktok-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.tiktok-divider span {
+    margin: 0 10px;
+    font-size: 14px;
+}
+
+.tiktok-social-login {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tiktok-social-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background-color: transparent;
+    border: 1px solid #3a3a3a;
+    border-radius: 2px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.tiktok-social-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.tiktok-switch-form {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-color);
+    font-size: 14px;
+    font-family: "p-r";
+    opacity: 0.5;
+}
+
+.tiktok-switch-form a {
+    color: #FE2C55;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.tiktok-forgot-password {
+    text-align: right;
+    margin-top: 5px;
+}
+
+.tiktok-forgot-password a {
+    color: #FE2C55;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.tiktok-terms {
+    font-size: 12px;
+    color: var(--text-color);
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.5;
+    opacity: 0.5;
+}
+
+.tiktok-terms a {
+    color: #FE2C55;
+    text-decoration: none;
+}
+
+.tiktok-back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Hide forms initially */
+#tiktok-login-form, #tiktok-signup-form {
+    display: none;
+}
+
+/* Show active form */
+.tiktok-active-form {
+    display: block !important;
+}

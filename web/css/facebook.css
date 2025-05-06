@@ -621,10 +621,23 @@
   font-size: 14px;
   font-family: "p-r";
 }
-#request-list p{
+#request-list p {
   color: var(--text-color);
   opacity: 0.7;
   font-family: "p-r";
   font-size: 12px;
   padding: 5px 0;
+}
+.fb-top-con {
+  display: flex;
+  color: var(--text-color);
+  font-family: "p-r";
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 7px;
+}
+.fb-top-con img {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
 }
