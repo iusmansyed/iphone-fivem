@@ -1077,9 +1077,9 @@ RegisterNUICallback("fetchingFbPosts", function(data, cb)
 end)
 
 RegisterNetEvent("facebook:postsFetched")
-AddEventHandler("facebook:postsFetched",function(data)
+AddEventHandler("facebook:postsFetched", function(data)
     SendNUIMessage({
-        type="facebookposts",
+        type = "facebookposts",
         posts = data
     })
 end)
@@ -1113,5 +1113,38 @@ AddEventHandler("facebook:receiveComments", function(postId, comments)
         postId = postId,
         comments = comments
     })
+end)
+RegisterNUICallback("facebook_users_fetch", function(data)
+    TriggerServerEvent("facebook:GetAllUsers", data)
+end)
+RegisterNetEvent("facebook:ReceiveAllUsers")
+AddEventHandler("facebook:ReceiveAllUsers", function(data)
+    SendNUIMessage({
+        type = "AllUserRecieved",
+        users = data
+    })
+end)
+
+RegisterNUICallback("SendFbRequest",function(data)
+    print(json.encode(data))
+    TriggerServerEvent("facebook:SendFriendRequest",data.senderId , data.recieverId)
+end)
+RegisterNUICallback("FetchIncomingRequests", function(data, cb)
+    TriggerServerEvent("facebook:GetIncomingRequests", data)
+end)
+
+
+RegisterNetEvent("facebook:ReceiveIncomingRequests")
+AddEventHandler("facebook:ReceiveIncomingRequests",function(requestArray)
+    SendNUIMessage({
+        type= "IncomingRequestsReceived",
+        requests= requestArray
+      });
+      
+end)
+
+
+RegisterNUICallback("handleFacebookRequest",function(data)
+    TriggerServerEvent("facebook:HandleFriendRequest",data)
 end)
 -----facebook

@@ -1,3 +1,11 @@
+function showGlobalAlert(message) {
+  const alertContent = document.querySelector(".globalAlert");
+  alertContent.innerText = message;
+  alertContent.style.right = "0px";
+  setTimeout(() => {
+    alertContent.style.right = "-300px";
+  }, 3000);
+}
 //facebook login
 document
   .getElementById("signup-btn-facebook")
@@ -122,6 +130,8 @@ window.addEventListener("DOMContentLoaded", function () {
 
 function bottomNavFacebook(params) {
   const userId = localStorage.getItem("facebookUserId");
+  console.log(JSON.stringify(userId));
+
   const login = document.getElementById("login-facebook");
   const feedPage = document.getElementById("facebook-feed-page");
   const bottomNavbar = document.getElementById("bottom-nav-facebook");
@@ -134,6 +144,18 @@ function bottomNavFacebook(params) {
     document.getElementById("facebook-feed-page").style.display = "none";
     document.getElementById("facebook-request-page").style.display = "block";
     document.getElementById("facebook-profile-page").style.display = "none";
+  const userId = localStorage.getItem("facebookUserId");
+
+    fetch(`https://${GetParentResourceName()}/facebook_users_fetch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: JSON.stringify({ id: userId }),
+    });
+    fetch(`https://${GetParentResourceName()}/FetchIncomingRequests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: JSON.stringify({ id: userId }),
+    });
   } else if (params === "Feed") {
     document.getElementById("request-facebook-btn").classList.remove("active");
     document.getElementById("feed-facebook-btn").classList.add("active");
@@ -486,4 +508,137 @@ function submitComment() {
       body: JSON.stringify({ postId: activeCommentPostId }),
     });
   }, 500);
+}
+
+window.addEventListener("message", function (event) {
+  let data = event.data;
+  if (data.type === "AllUserRecieved") {
+    const requestList = document.getElementById("suggested-list");
+    requestList.innerHTML = ""; // Clear existing list
+
+    data.users.forEach((user) => {
+    console.log(JSON.stringify(user));
+    
+      const isRequested =
+        user.requested === true ||
+        user.requested === "true" ||
+        user.requested === 1;
+    
+      const userDiv = document.createElement("div");
+      userDiv.className = "suggest-user";
+    
+      userDiv.innerHTML = `
+        <div class="sug-det">
+          <img src="${user.image}" alt="" />
+          <span>${user.username}</span>
+        </div>
+        <button 
+          id="add-friend-${user.id}" 
+          ${isRequested ? "disabled" : ""}
+          style="
+            background-color: ${isRequested ? "grey" : "#007bff"};
+            cursor: ${isRequested ? "not-allowed" : "pointer"};
+          "
+        >
+          ${isRequested ? "Requested" : "Add Friend"}
+        </button>
+      `;
+    
+      requestList.appendChild(userDiv);
+    
+      // Attach event listener if not requested
+      if (!isRequested) {
+        const button = document.getElementById(`add-friend-${user.id}`);
+        button.addEventListener("click", () => sendFriendRequest(user.id));
+      }
+    });
+    
+  }
+});
+window.addEventListener("message", function (event) {
+  let data = event.data;
+  if (data.type === "IncomingRequestsReceived") {
+    const requestList = document.getElementById("request-list");
+    requestList.innerHTML = "";
+    let notFound = document.createElement("p");
+    requestList.appendChild(notFound);
+
+    const userId = localStorage.getItem("facebookUserId");
+
+    if (data.requests && data.requests.length > 0) {
+      data.requests.forEach((request) => {
+        requestList.innerHTML += `
+          <div class="suggest-user">
+            <div class="sug-det">
+              <img src="${request.image}" alt="" />
+              <span>${request.username}</span>
+            </div>
+            <div style="display:flex;gap:2px">
+              <button style="width:45px" onclick="acceptRequest(${userId}, ${request.sender_id})">Accept</button>
+              <button style="width:45px" onclick="rejectRequest(${userId}, ${request.sender_id})">Reject</button>
+            </div>
+          </div>`;
+      });
+    } else {
+      notFound.innerText = "No Requests";
+    }
+  }
+});
+
+
+function sendFriendRequest(receiverId) {
+  const userId = localStorage.getItem("facebookUserId");
+  fetch(`https://${GetParentResourceName()}/facebook_users_fetch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=UTF-8" },
+    body: JSON.stringify({ id: userId }),
+  });
+  fetch(`https://${GetParentResourceName()}/SendFbRequest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      senderId: userId,
+      recieverId: receiverId,
+    }),
+  }).then(() => {
+    showGlobalAlert("Friend Request Sent");
+
+    // Disable the button and change its color
+    const button = document.querySelector(
+      `button[onclick="sendFriendRequest(${receiverId})"]`
+    );
+    if (button) {
+      button.innerText = "Requested";
+      button.disabled = true;
+      button.style.backgroundColor = "grey";
+      button.style.cursor = "not-allowed";
+    }
+  });
+}
+
+function acceptRequest(requestId, senderId) {
+  console.log(JSON.stringify(requestId), JSON.stringify(senderId));
+
+  fetch(`https://${GetParentResourceName()}/handleFacebookRequest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      myId: requestId,
+      senderId: senderId,
+      action: "accepted",
+    }),
+  });
+}
+function rejectRequest(requestId, senderId) {
+  console.log(JSON.stringify(requestId), JSON.stringify(senderId));
+
+  fetch(`https://${GetParentResourceName()}/handleFacebookRequest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      myId: requestId,
+      senderId: senderId,
+      action: "declined",
+    }),
+  });
 }

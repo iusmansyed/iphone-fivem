@@ -110,14 +110,14 @@ CREATE TABLE
         status VARCHAR(20)
     );
 
-CREATE TABLE IF NOT EXISTS `youtube_videos` (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  citizenid VARCHAR(50),
-  youtube_link TEXT,
-  caption_link TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
+CREATE TABLE
+    IF NOT EXISTS `youtube_videos` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        citizenid VARCHAR(50),
+        youtube_link TEXT,
+        caption_link TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 
 CREATE TABLE
     IF NOT EXISTS `facebook_users` (
@@ -129,14 +129,14 @@ CREATE TABLE
         PRIMARY KEY (`id`)
     );
 
-
-CREATE TABLE IF NOT EXISTS facebook_posts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id VARCHAR(50),
-    content TEXT NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE
+    IF NOT EXISTS facebook_posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id VARCHAR(50),
+        content TEXT NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 
 CREATE TABLE
     IF NOT EXISTS `facebook_likes` (
@@ -150,6 +150,27 @@ CREATE TABLE
         id INT AUTO_INCREMENT PRIMARY KEY,
         post_id INT NOT NULL,
         user_id INT NOT NULL,
-        comment TEXT ,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP        
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE
+    IF NOT EXISTS `facebook_friend_requests` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        sender_id INT NOT NULL,
+        receiver_id INT NOT NULL,
+        status ENUM ('pending', 'accepted', 'declined') DEFAULT 'pending',
+        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sender_id) REFERENCES facebook_users (id),
+        FOREIGN KEY (receiver_id) REFERENCES facebook_users (id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS `facebook_friends` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        friend_id INT NOT NULL,
+        since TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES facebook_users (id),
+        FOREIGN KEY (friend_id) REFERENCES facebook_users (id)
     );

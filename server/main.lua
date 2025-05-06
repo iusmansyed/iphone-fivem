@@ -1135,7 +1135,7 @@ AddEventHandler("facebook:postLike", function(data)
     local source = source
     local post_id = data.post_id
     local user_id = data.user_id
-    
+
     -- Here you would add database code to handle likes
     -- For example, toggle like status in your database
 end)
@@ -1146,17 +1146,15 @@ AddEventHandler("facebook:comments", function(data)
     local post_id = data.postId
     local user_id = data.user_id
     local comment = data.comment
-    
+
     if post_id and user_id and comment then
         MySQL.Async.execute('INSERT INTO facebook_comments (post_id, user_id, comment) VALUES (?, ?, ?)',
-            {post_id, user_id, comment},
-            function(rowsChanged)
+            {post_id, user_id, comment}, function(rowsChanged)
                 if rowsChanged > 0 then
                     -- After adding comment, fetch all comments for the post
                     FetchComments(source, post_id)
                 end
-            end
-        )
+            end)
     end
 end)
 
@@ -1167,11 +1165,142 @@ AddEventHandler("facebook:fetch_comments", function(postId)
 end)
 
 function FetchComments(source, postId)
-    MySQL.Async.fetchAll('SELECT c.*, u.username as username FROM facebook_comments c LEFT JOIN facebook_users u ON c.user_id = u.id WHERE c.post_id = ? ORDER BY c.created_at ASC',
-        {postId},
-        function(results)
+    MySQL.Async.fetchAll(
+        'SELECT c.*, u.username as username FROM facebook_comments c LEFT JOIN facebook_users u ON c.user_id = u.id WHERE c.post_id = ? ORDER BY c.created_at ASC',
+        {postId}, function(results)
             TriggerClientEvent("facebook:receiveComments", source, postId, results)
-        end
-    )
+        end)
 end
+
+RegisterServerEvent("facebook:GetAllUsers")
+AddEventHandler("facebook:GetAllUsers", function(data)
+    local src = source
+    local myId = data.id
+
+    local query = [[
+    SELECT u.*,
+    CASE
+        WHEN fr.status = 'pending' AND fr.sender_id = @myId THEN true
+        ELSE false
+    END AS requested
+    FROM facebook_users u
+    LEFT JOIN facebook_friend_requests fr
+        ON fr.receiver_id = u.id AND fr.sender_id = @myId AND fr.status = 'pending'
+    WHERE u.id != @myId
+    AND u.id NOT IN (
+        SELECT sender_id 
+        FROM facebook_friend_requests 
+        WHERE receiver_id = @myId
+    )
+]]
+    MySQL.Async.fetchAll(query, {
+        ['@myId'] = myId
+    }, function(users)
+        TriggerClientEvent("facebook:ReceiveAllUsers", src, users)
+    end)
+end)
+
+RegisterServerEvent("facebook:SendFriendRequest")
+AddEventHandler("facebook:SendFriendRequest", function(senderId, receiverId)
+    MySQL.Async.execute("INSERT INTO facebook_friend_requests (sender_id, receiver_id) VALUES (@sender, @receiver)", {
+        ["@sender"] = senderId,
+        ["@receiver"] = receiverId
+    })
+end)
+
+RegisterServerEvent("facebook:GetIncomingRequests")
+AddEventHandler("facebook:GetIncomingRequests", function(data)
+    local src = source
+    local myId = data.id
+
+    local query = [[
+        SELECT r.id AS request_id, u.id AS sender_id, u.username, u.image
+        FROM facebook_friend_requests r
+        JOIN facebook_users u ON u.id = r.sender_id
+        WHERE r.receiver_id = @myId AND r.status = 'pending'
+    ]]
+
+    MySQL.Async.fetchAll(query, {
+        ['@myId'] = myId
+    }, function(requests)
+        TriggerClientEvent("facebook:ReceiveIncomingRequests", src, requests)
+    end)
+end)
+
+RegisterServerEvent("facebook:HandleFriendRequest")
+AddEventHandler("facebook:HandleFriendRequest", function(data)
+    local src = source
+    local myId = data.myId
+    local senderId = data.senderId
+    local action = data.action -- 'accepted' or 'declined'
+
+    if action == "accepted" then
+        -- Update request status to 'accepted'
+        local query = [[
+            UPDATE facebook_friend_requests
+            SET status = 'accepted'
+            WHERE sender_id = @senderId AND receiver_id = @myId AND status = 'pending'
+        ]]
+        MySQL.Async.execute(query, {
+            ['@senderId'] = senderId,
+            ['@myId'] = myId
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                -- Insert into facebook_friends both directions
+                local insertQuery = [[
+                    INSERT INTO facebook_friends (user_id, friend_id)
+                    VALUES 
+                        (@myId, @senderId),
+                        (@senderId, @myId)
+                ]]
+                MySQL.Async.execute(insertQuery, {
+                    ['@myId'] = myId,
+                    ['@senderId'] = senderId
+                }, function()
+                    TriggerClientEvent("facebook:Notify", src, "Friend request accepted.")
+                end)
+            else
+                TriggerClientEvent("facebook:Notify", src, "No pending request found.")
+            end
+        end)
+        -- Update status to 'accepted'
+        local query = [[
+            UPDATE facebook_friend_requests
+            SET status = 'accepted'
+            WHERE sender_id = @senderId AND receiver_id = @myId AND status = 'pending'
+        ]]
+        MySQL.Async.execute(query, {
+            ['@senderId'] = senderId,
+            ['@myId'] = myId
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                TriggerClientEvent("facebook:Notify", src, "Friend request accepted.")
+                -- Optional: Add to friends table here
+            else
+                TriggerClientEvent("facebook:Notify", src, "No pending request found.")
+            end
+        end)
+
+    elseif action == "declined" then
+        -- Delete the request entirely
+        local query = [[
+            DELETE FROM facebook_friend_requests
+            WHERE sender_id = @senderId AND receiver_id = @myId AND status = 'pending'
+        ]]
+        MySQL.Async.execute(query, {
+            ['@senderId'] = senderId,
+            ['@myId'] = myId
+        }, function(rowsChanged)
+            if rowsChanged > 0 then
+                TriggerClientEvent("facebook:Notify", src, "Friend request declined and removed.")
+            else
+                TriggerClientEvent("facebook:Notify", src, "No pending request found.")
+            end
+        end)
+
+    else
+        TriggerClientEvent("facebook:Notify", src, "Invalid action.")
+    end
+end)
+
 -----facebook

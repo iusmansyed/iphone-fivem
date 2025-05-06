@@ -621,6 +621,7 @@ function initializeAppOpening() {
   const backButton = appContainer.querySelector(".app-back-button");
   const instabackButton = appContainer.querySelector(".insta-back-button");
   const header = document.getElementById("hder");
+  const headerCon = document.getElementById("hder-contain");
   // Get all app content divs
   const phoneApp = document.querySelector(".phones");
   const safariApp = document.querySelector(".safari");
@@ -747,23 +748,36 @@ function initializeAppOpening() {
         body: JSON.stringify("music"),
       });
     }
-    if (appName === "facebook") {
-      header.style.position = "abosolute";
-      header.style.top = "-300px";
-      const userId = localStorage.getItem("facebookUserId");
-      fetch(`https://${GetParentResourceName()}/fetchingFbPosts`, {
+    if (appName === "facebook") {   
+      let userId = localStorage.getItem("facebookUserId");
+      if (headerCon) {
+        headerCon.style.display = "none";
+      }
+      fetch(`https://${GetParentResourceName()}/facebookGetUserDetails`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json; charset=UTF-8",
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({userId:userId}),
       });
+    } else if (appName === "settings") {
+      fetch(`https://${GetParentResourceName()}/Client:MyDetails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(),
+      });
+      if (headerCon) {
+        headerCon.style.display = "none";
+      }
     } else {
-      header.style.display = "flex";
+      // For all other apps except Facebook and settings
+      if (headerCon) {
+        headerCon.style.display = "flex";
+      }
     }
-    if (appName != "facebook") {
-      facebook.style.display = "none";
-    }
+
     if (appName === "safari") {
       fetch(`https://${GetParentResourceName()}/safari`, {
         method: "POST",
