@@ -174,3 +174,26 @@ CREATE TABLE
         FOREIGN KEY (user_id) REFERENCES facebook_users (id),
         FOREIGN KEY (friend_id) REFERENCES facebook_users (id)
     );
+
+-- Users Table
+CREATE TABLE
+    IF NOT EXISTS `tiktok_users` (
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `username` VARCHAR(100) NOT NULL UNIQUE,
+        `email` VARCHAR(100) NOT NULL UNIQUE,
+        `password` VARCHAR(100) NOT NULL,
+        `image` TEXT,
+        `birthdate` DATE,
+        PRIMARY KEY (`id`)
+    );
+
+-- Videos Table
+CREATE TABLE
+    IF NOT EXISTS `tiktok_videos` (
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `user_id` INT NOT NULL,
+        `video` TEXT NOT NULL,
+        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`user_id`) REFERENCES `tiktok_users` (`id`) ON DELETE CASCADE
+);

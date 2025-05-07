@@ -975,7 +975,7 @@
                          </div>
                      </div>
                      <div style="display: none;" class="tiktok">
-                        <div class="tiktok-container">
+                        <div class="tiktok-container" style="display: block;">
                            
                            <div class="tiktok-logo">
                                <img src="./images/tiktok.png" alt="TikTok Logo" width="50px">
@@ -995,9 +995,6 @@
                                    <label for="tiktok-login-password">Password</label>
                                </div>
                                
-                               <div class="tiktok-forgot-password">
-                                   <a href="#">Forgot password?</a>
-                               </div>
                                
                                <button class="tiktok-login-button" id="tiktok-login-btn" disabled>Log in</button>
                                
@@ -1038,6 +1035,88 @@
                                </div>
                            </div>
                        </div>
+                       <div class="tiktok-video-feed" id="tiktok-video-feed" style="display: block;">     
+                      </div>
+                       <div class="tiktok-discover" id="tiktok-discover" style="display: none;">   
+                        <h1 style="color: #fff;">discover</h1>                 
+                     </div>
+                        <div class="tiktok-profile" id="tiktok-profile" style="display: none;">  
+                          <div class="profile-header">
+                           <div class="profile-header-image">
+                              <img src="./images/user.png" alt="">
+                           </div>
+                           <p class="username-tiktok">User name</p>
+                           <ul>
+                              <li>
+                                 <p>20</p>
+                                 <p>Posts</p>
+                              </li>
+                              <li>
+                                 <p>2k</p>
+                                 <p>followers</p>
+                              </li>
+                              <li>
+                                 <p>3</p>
+                                 <p>Following</p>
+                              </li>
+                           </ul>
+                           <button onclick="openProfileupdateTiktok()">Update Profile</button>
+                          </div>                 
+                        </div>
+                        <div class="profileupdate-tiktok" style="display: none;">
+                           <div class="inner-profileupdate-tiktok">
+                              <p>Upload New Profile</p>
+                              <input type="text" name="" id="prfTiktok" placeholder="Upload a new profile ...">
+                              <button class="tiktokupldbtn" onclick="uploadProfileImageTiktok()">Upload</button>
+                              <button class="tiktokcancelbtn" onclick="closeTiktokUploadVideoModal()">Cancel</button>
+                           </div>
+                        </div>
+                      <!-- Bottom Bar -->
+                      <div class="tiktok-bottom-bar" style="display: none;">
+                        <div class="tiktok-bottom-icon" onclick="tiktokBottomTab('home')">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#ffffff" viewBox="0 0 24 24">
+                           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                         </svg>
+                         <br/>Home</div>
+                        <div class="tiktok-bottom-icon" onclick="tiktokBottomTab('home')">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#ffffff" viewBox="0 0 24 24">
+                           <path d="M21 20l-5.6-5.6a7 7 0 1 0-1.4 1.4L20 21zM10 16a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/>
+                         </svg>
+                         <br/>Discover</div>
+                        
+                        <div class="tiktok-bottom-icon" onclick="uploadAVideo()" >
+                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#ffffff" viewBox="0 0 24 24">
+                           <path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6z"/>
+                         </svg>
+                         <br/>Upload</div>
+                        <div class="tiktok-bottom-icon" onclick="tiktokBottomTab('profile')">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#ffffff" viewBox="0 0 24 24">
+                           <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                         </svg>
+                         <br/>Profile</div>
+                        <div class="tiktok-bottom-icon" onclick="logoutTiktok()">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffff" viewBox="0 0 24 24">
+                              <path d="M16 13v-2H7V8l-5 4 5 4v-3h9zm3-10H5c-1.1 0-2 .9-2 2v6h2V5h14v14H5v-6H3v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                         <br/>Logout</div>
+                      </div>
+                    
+                     <div class="tiktok-video-upload-modal" style="display: none;">
+                           <div class="inner-tiktok-modal">
+                              <p>Upload a Video</p>
+                              <input type="text" name="" id="upldTkVid" placeholder="Upload a Video Link">
+                              <button class="tiktokupldbtn" onclick="uploadTiktokVideo()">Upload</button>
+                              <button class="tiktokcancelbtn" onclick="closeTiktokUploadVideoModal()">Cancel</button>
+                           </div>
+
+                     </div>
+
+                      <!-- Comment Popup -->
+                      <div class="tiktok-comment-popup" id="tiktok-comment-popup">
+                        <span class="tiktok-close-comment" id="tiktok-close-comment">✖</span>
+                        <h3>Comments</h3>
+                        <p>No comments yet. Be the first to comment!</p>
+                      </div>
                      </div>
                      <div style="display: none;" class="facebook">
                         <div class="login-page-facebook" id="login-facebook" style="display: flex;">

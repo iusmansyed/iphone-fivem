@@ -1125,26 +1125,98 @@ AddEventHandler("facebook:ReceiveAllUsers", function(data)
     })
 end)
 
-RegisterNUICallback("SendFbRequest",function(data)
+RegisterNUICallback("SendFbRequest", function(data)
     print(json.encode(data))
-    TriggerServerEvent("facebook:SendFriendRequest",data.senderId , data.recieverId)
+    TriggerServerEvent("facebook:SendFriendRequest", data.senderId, data.recieverId)
 end)
 RegisterNUICallback("FetchIncomingRequests", function(data, cb)
     TriggerServerEvent("facebook:GetIncomingRequests", data)
 end)
 
-
 RegisterNetEvent("facebook:ReceiveIncomingRequests")
-AddEventHandler("facebook:ReceiveIncomingRequests",function(requestArray)
+AddEventHandler("facebook:ReceiveIncomingRequests", function(requestArray)
     SendNUIMessage({
-        type= "IncomingRequestsReceived",
-        requests= requestArray
-      });
-      
+        type = "IncomingRequestsReceived",
+        requests = requestArray
+    });
+
 end)
 
-
-RegisterNUICallback("handleFacebookRequest",function(data)
-    TriggerServerEvent("facebook:HandleFriendRequest",data)
+RegisterNUICallback("handleFacebookRequest", function(data)
+    TriggerServerEvent("facebook:HandleFriendRequest", data)
 end)
 -----facebook
+
+-----tiktok
+RegisterNUICallback("tiktokSignUp", function(data, cb)
+    TriggerServerEvent("tiktok:registerUser", data)
+    cb({
+        status = "ok",
+        message = "Signup received!"
+    })
+end)
+RegisterNUICallback("tiktokLogin", function(data, cb)
+    TriggerServerEvent("tiktok:loginUser", data)
+    cb({
+        status = "ok",
+        message = "Signup received!"
+    })
+end)
+
+RegisterNetEvent("tiktok:signupAlert")
+AddEventHandler("tiktok:signupAlert", function(data)
+    SendNUIMessage({
+        type = "TiktokSignUp",
+        message = data
+    })
+end)
+
+RegisterNetEvent("tiktok:loginAlert")
+AddEventHandler("tiktok:loginAlert", function(data)
+    SendNUIMessage({
+        type = "TiktokLogin",
+        status = data.status,
+        message = data.message,
+        userId = data.userId or nil
+    })
+end)
+RegisterNUICallback("GetTiktokUserDetails", function(data)
+    TriggerServerEvent("tiktok:GetUserDetail", data)
+end)
+RegisterNetEvent("tiktok:TiktokerData")
+AddEventHandler("tiktok:TiktokerData", function(data)
+    SendNUIMessage({
+        type = "TiktokerDetail",
+        data = data
+    })
+end)
+
+RegisterNUICallback("uploadTiktokVideo", function(data)
+    TriggerServerEvent("tiktok:uploadVideo", data)
+end)
+
+
+RegisterNUICallback("getTiktokVideos",function()
+    TriggerServerEvent("tiktok:getAllVideos")
+end)
+
+RegisterNetEvent("tiktok:receiveVideos")
+AddEventHandler("tiktok:receiveVideos", function(videos)
+    SendNUIMessage({
+        type = "TiktokFeedVideos",
+        data = videos
+    })
+end)
+RegisterNetEvent("tiktok:profileUpdated")
+AddEventHandler("tiktok:profileUpdated", function(message)
+    SendNUIMessage({
+        type = "TiktokProfileUpdate",
+        message = message
+    })
+end)
+
+RegisterNUICallback("uploadProfiletiktok",function(data)
+    TriggerServerEvent("tiktok:updateTiktokProfile",data)
+end)
+
+-----tiktok

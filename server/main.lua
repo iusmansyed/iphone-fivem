@@ -1321,3 +1321,140 @@ AddEventHandler("facebook:HandleFriendRequest", function(data)
 end)
 
 -----facebook
+
+---tiktok
+RegisterServerEvent("tiktok:registerUser")
+AddEventHandler("tiktok:registerUser", function(data)
+    local src = source
+    local username = data.username
+    local email = data.email
+    local password = data.password
+    local birthdate = data.birthday
+    local image = data.image or ""
+
+    -- Check if email already exists
+    MySQL.Async.fetchScalar("SELECT COUNT(*) FROM tiktok_users WHERE email = @email", {
+        ['@email'] = email
+    }, function(count)
+        if count > 0 then
+            TriggerClientEvent("tiktok:signupAlert", src, "Email is already in use.")
+        else
+            -- Proceed to insert
+            MySQL.Async.execute([[
+                INSERT INTO tiktok_users (username, email, password, image, birthdate)
+                VALUES (@username, @email, @password, @image, @birthdate)
+            ]], {
+                ['@username'] = username,
+                ['@email'] = email,
+                ['@password'] = password,
+                ['@image'] = image,
+                ['@birthdate'] = birthdate
+            }, function(rowsChanged)
+                if rowsChanged > 0 then
+                    print("User registered: " .. username)
+                    TriggerClientEvent("tiktok:signupAlert", src)
+                else
+                    TriggerClientEvent("tiktok:signupAlert", src, "Registration failed.")
+                end
+            end)
+        end
+    end)
+end)
+
+RegisterServerEvent("tiktok:loginUser")
+AddEventHandler("tiktok:loginUser", function(data)
+    local src = source
+    local identifier = data.identifier -- can be email or username
+    local password = data.password
+
+    print("Received login data:", json.encode(data))
+
+    -- Query for user by email OR username
+    MySQL.Async.fetchAll("SELECT * FROM tiktok_users WHERE email = @identifier OR username = @identifier", {
+        ["@identifier"] = identifier
+    }, function(result)
+        if result and result[1] then
+            local user = result[1]
+
+            if user.password == password then -- Hash in production!
+                TriggerClientEvent("tiktok:loginAlert", src, {
+                    status = true,
+                    message = "Login successful",
+                    userId = user.id
+                })
+                print("Login success:", user.id)
+            else
+                TriggerClientEvent("tiktok:loginAlert", src, {
+                    status = false,
+                    message = "Invalid password"
+                })
+                print("Login failed: Invalid password")
+            end
+        else
+            TriggerClientEvent("tiktok:loginAlert", src, {
+                status = false,
+                message = "User not found"
+            })
+            print("Login failed: User not found")
+        end
+    end)
+end)
+RegisterServerEvent("tiktok:GetUserDetail")
+AddEventHandler("tiktok:GetUserDetail", function(data)
+    local src = source
+    MySQL.Async.fetchAll("SELECT * FROM tiktok_users WHERE id = @id", {
+        ["@id"] = data.tiktokuserToken
+    }, function(dataFetched)
+        TriggerClientEvent("tiktok:TiktokerData", src, dataFetched[1])
+    end)
+end)
+
+RegisterServerEvent("tiktok:uploadVideo")
+AddEventHandler("tiktok:uploadVideo", function(data)
+    local src = source
+    local created_at = os.date("%Y-%m-%d %H:%M:%S")
+    local user_id = data.userId
+    local video = data.videoLink
+    MySQL.Async.execute("INSERT INTO tiktok_videos (user_id, video, created_at) VALUES (?, ?, ?)",
+        {user_id, video, created_at}, function(rowChanged)
+            print(json.encode(rowChanged))
+        end)
+end)
+
+RegisterServerEvent("tiktok:getAllVideos")
+AddEventHandler("tiktok:getAllVideos", function()
+    local src = source
+
+    MySQL.Async.fetchAll([[
+        SELECT 
+            v.id AS video_id,
+            v.video,
+            v.created_at,
+            u.id AS user_id,
+            u.username,
+            u.image AS profile_image
+        FROM 
+            tiktok_videos v
+        JOIN 
+            tiktok_users u ON v.user_id = u.id
+        ORDER BY 
+            v.created_at DESC
+    ]], {}, function(result)
+        -- Send the combined video + user data to client
+        TriggerClientEvent("tiktok:receiveVideos", src, result)
+    end)
+end)
+
+RegisterServerEvent("tiktok:updateTiktokProfile")
+AddEventHandler("tiktok:updateTiktokProfile", function(data)
+    local src = source
+    print(json.encode(data))
+    MySQL.Async.execute("UPDATE tiktok_users SET image = @image WHERE id = @id", {
+        ['@image'] = data.profile,
+        ['@id'] = data.id
+    },function (rowChanged)
+        TriggerClientEvent("tiktok:profileUpdated",src ,"Profile Updated Successfully")
+    end)
+end)
+
+---tiktok

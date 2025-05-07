@@ -783,6 +783,14 @@ function initializeAppOpening() {
         headerCon.style.display = "none";
       }
     } else if (appName === "tiktok") {
+      let tiktokuserToken = localStorage.getItem("tiktokId")
+      fetch(`https://${GetParentResourceName()}/GetTiktokUserDetails`,{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({tiktokuserToken}),
+      })
       if (headerCon) {
         headerCon.style.display = "none";
       }
